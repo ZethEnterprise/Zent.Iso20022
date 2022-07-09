@@ -3,7 +3,8 @@
 void Main()
 {
 	var scriptPath = Path.GetDirectoryName (Util.CurrentQueryPath);
-	var content = System.IO.File.ReadAllText(scriptPath + @"/../3.Iso20022Files/1.SourceFiles/20220520_ISO20022_2013_eRepository.iso20022",Encoding.UTF8);
+	var fullRepo = "../3.Iso20022Files/1.SourceFiles/20220520_ISO20022_2013_eRepository.iso20022";
+	var content = System.IO.File.ReadAllText($"{scriptPath}/{fullRepo}",Encoding.UTF8);
 	var doc = XDocument.Parse(content);
 	
 	XNamespace iso20022 = "urn:iso:std:iso:20022:2013:ecore";
