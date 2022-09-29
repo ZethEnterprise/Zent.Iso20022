@@ -8,7 +8,7 @@ void Main()
 	var fullRepo = "../3.Iso20022Files/1.SourceFiles/20220520_ISO20022_2013_eRepository.iso20022";
 	var pain001Repo = "../3.Iso20022Files/1.SourceFiles/pain.001.001.03_version_eRepository.iso20022";
 	var pain001RepoEntended = "../3.Iso20022Files/1.SourceFiles/pain.001.001.03_version_eRepository_Extended.iso20022";
-	var repo = pain001RepoEntended;
+	var repo = fullRepo;
 	var content = System.IO.File.ReadAllText($"{scriptPath}/{repo}",Encoding.UTF8);
 	var doc = XDocument.Parse(content);
 	
@@ -26,14 +26,134 @@ void Main()
 				select c; //missing this part
 	//ou.Dump();
 	var objs = GetObject(ou);
-	
+	var msgs = AddObjects(bu, objs);
+	objs["_rUYN39cBEeq_l4BJLVUF2Q"].Dump();
 	LinkObjects(objs);
-	PrintObjects(objs);
+	//PrintObjects(objs);
 }
 
-public List<ExpandoObject> GetObject(IEnumerable<XElement> nodes)
+public List<ExpandoObject> AddMsgBuildBlock(XElement parent, Dictionary<string,ExpandoObject> objs)
+{
+	var nodes = from c in parent.Descendants("messageBuildingBlock")
+		select c;
+			
+	if(nodes is null)
+		return null;
+	
+	var nodeList = new List<ExpandoObject>();
+	foreach(XElement node in nodes)
+	{
+		dynamic obj = new ExpandoObject();
+		
+		IEnumerable<XAttribute> attList =  
+	    from at in ((XElement)node).Attributes()  
+	    select at; 
+		foreach(var prop in attList)
+			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
+		
+		nodeList.Add((ExpandoObject)obj);
+		
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objs.Add(key,((ExpandoObject)obj)/*.Dump()*/);
+	}
+	return nodeList;
+}
+
+public ExpandoObject AddMsgDefId(XElement parent, Dictionary<string,ExpandoObject> objs)
+{
+	var node = (from c in parent.Descendants("messageDefinitionIdentifier")
+			select c).FirstOrDefault();
+			
+	if(node is null)
+		return null;
+	
+	dynamic obj = new ExpandoObject();
+	IEnumerable<XAttribute> attList =  
+    from at in node.Attributes()  
+    select at; 
+	foreach(var prop in attList)
+		((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
+	
+	return obj;
+}
+
+public List<ExpandoObject> AddMsgDef(XElement parent, Dictionary<string,ExpandoObject> objs)
+{
+	var nodes = (from c in parent.Descendants("messageDefinition")
+			select c);
+			
+	if(nodes is null)
+		return null;
+	
+	nodes.Dump();
+	var elements = new List<ExpandoObject>();	
+	foreach(XElement node in nodes)
+	{	
+		dynamic obj = new ExpandoObject();
+		IEnumerable<XAttribute> attList =  
+	    from at in node.Attributes()  
+	    select at; 
+		foreach(var prop in attList)
+			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
+			
+
+		dynamic blocks = AddMsgBuildBlock(node, objs)/*.Dump()*/;
+		if(!(blocks is null))
+			((IDictionary<String, Object>)obj).Add("messageBuildingBlock",blocks);	
+			
+		dynamic defId = AddMsgDefId(node, objs)/*.Dump()*/;
+		if(!(defId is null))
+			((IDictionary<String, Object>)obj).Add("messageDefinitionIdentifier",defId);	
+			
+			dynamic constraint = AddConstraint(node, objs)/*.Dump()*/;
+			if(!(constraint is null))
+				((IDictionary<String, Object>)obj).Add("constraint",constraint);	
+
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objs.Add(key,((ExpandoObject)obj)/*.Dump()*/);
+		
+		if(((string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value) == "_rUYN39cBEeq_l4BJLVUF2Q")
+		{
+			((ExpandoObject)obj).Dump();
+		}
+		
+		elements.Add(obj);
+	}
+	
+	return elements;
+}
+
+public List<ExpandoObject> AddObjects(IEnumerable<XElement> nodes, Dictionary<string,ExpandoObject> objs)
 {
 	var objects = new List<ExpandoObject>();
+	foreach(XElement node in nodes)
+	{
+		node.Dump();
+		dynamic obj = new ExpandoObject();
+		IEnumerable<XAttribute> attList =  
+	    from at in node.Attributes()  
+	    select at; 
+		foreach(var prop in attList)
+			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
+	
+		((ExpandoObject)obj).Dump();
+		var msgDef = AddMsgDef(node,objs);
+		msgDef.Dump();
+		if(!(msgDef is null))
+			((IDictionary<String, Object>)obj).Add("messageDefinition",msgDef);
+			
+			
+		var key = (string)((ExpandoObject)obj)/*.Dump()*/.FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objs.Add(key,((ExpandoObject)obj)/*.Dump()*/);
+		
+		objects.Add(((ExpandoObject)obj)/*.Dump()*/);
+	}
+	return objects;
+}
+
+public Dictionary<string,ExpandoObject> GetObject(IEnumerable<XElement> nodes)
+{
+	var objects = new Dictionary<string,ExpandoObject>();
 	foreach(XElement node in nodes)
 	{
 		dynamic obj = new ExpandoObject();
@@ -59,21 +179,22 @@ public List<ExpandoObject> GetObject(IEnumerable<XElement> nodes)
 		dynamic msgEl = AddMessageElement(node, objects)/*.Dump()*/;
 		if(!(msgEl is null))
 			((IDictionary<String, Object>)obj).Add("messageElement",msgEl);
-			
-		dynamic xors = AddMessageElement(node, objects)/*.Dump()*/;
+		
+		dynamic xors = AddXors(node, objects)/*.Dump()*/;
 		if(!(xors is null))
 			((IDictionary<String, Object>)obj).Add("xors",xors);
 			
-		dynamic constraint = AddMessageElement(node, objects)/*.Dump()*/;
+		dynamic constraint = AddConstraint(node, objects)/*.Dump()*/;
 		if(!(constraint is null))
 			((IDictionary<String, Object>)obj).Add("constraint",constraint);
 			
-		objects.Add(((ExpandoObject)obj)/*.Dump()*/);
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	}
 	return objects;
 }
 
-public List<ExpandoObject> AddElements(XElement parent, List<ExpandoObject> objects)
+public List<ExpandoObject> AddElements(XElement parent, Dictionary<string,ExpandoObject> objects)
 {
 	var el = from c in parent.Descendants("element")
 				select c;
@@ -96,14 +217,16 @@ public List<ExpandoObject> AddElements(XElement parent, List<ExpandoObject> obje
 			((IDictionary<String, Object>)obj).Add("semanticMarkup",sem);
 			
 		elements.Add(((ExpandoObject)obj)/*.Dump()*/);
-		objects.Add(((ExpandoObject)obj));
+		//objects.Add(((ExpandoObject)obj));
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	}
 	
 	//el.Dump();
 	return elements;//.Dump();
 }
 
-public ExpandoObject AddExample(XElement parent, List<ExpandoObject> objects)
+public ExpandoObject AddExample(XElement parent, Dictionary<string,ExpandoObject> objects)
 {
 	var ex = (from c in parent.Descendants("example")
 			select c).FirstOrDefault();
@@ -117,7 +240,7 @@ public ExpandoObject AddExample(XElement parent, List<ExpandoObject> objects)
 	return obj;
 }
 
-public List<ExpandoObject> AddXors(XElement parent, List<ExpandoObject> objects){
+public List<ExpandoObject> AddXors(XElement parent, Dictionary<string,ExpandoObject> objects){
 	var mels = from c in parent.Descendants("xors")
 		select c;
 			
@@ -136,12 +259,14 @@ public List<ExpandoObject> AddXors(XElement parent, List<ExpandoObject> objects)
 			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
 		
 		melList.Add((ExpandoObject)obj);
-		objects.Add(((ExpandoObject)obj));
+		//objects.Add(((ExpandoObject)obj));
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	}
 	return melList;
 }
 
-public List<ExpandoObject> AddConstraint(XElement parent, List<ExpandoObject> objects){
+public List<ExpandoObject> AddConstraint(XElement parent, Dictionary<string,ExpandoObject> objects){
 	var mels = from c in parent.Descendants("constraint")
 		select c;
 			
@@ -160,12 +285,14 @@ public List<ExpandoObject> AddConstraint(XElement parent, List<ExpandoObject> ob
 			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
 		
 		melList.Add((ExpandoObject)obj);
-		objects.Add(((ExpandoObject)obj));
+		//objects.Add(((ExpandoObject)obj));
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	}
 	return melList;
 }
 
-public List<ExpandoObject> AddMessageElement(XElement parent, List<ExpandoObject> objects){
+public List<ExpandoObject> AddMessageElement(XElement parent, Dictionary<string,ExpandoObject> objects){
 	var mels = from c in parent.Descendants("messageElement")
 		select c;
 			
@@ -184,12 +311,14 @@ public List<ExpandoObject> AddMessageElement(XElement parent, List<ExpandoObject
 			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
 		
 		melList.Add((ExpandoObject)obj);
-		objects.Add(((ExpandoObject)obj));
+		
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	}
 	return melList;
 }
 
-public List<ExpandoObject> AddCode(XElement parent, List<ExpandoObject> objects)
+public List<ExpandoObject> AddCode(XElement parent, Dictionary<string,ExpandoObject> objects)
 {
 	var codes = from c in parent.Descendants("code")
 		select c;
@@ -213,12 +342,14 @@ public List<ExpandoObject> AddCode(XElement parent, List<ExpandoObject> objects)
 			((IDictionary<String, Object>)obj).Add("semanticMarkup",sem);
 	
 		codeList.Add((ExpandoObject)obj);
-		objects.Add(((ExpandoObject)obj));
+		//objects.Add(((ExpandoObject)obj));
+		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	}
 	return codeList;
 }
 
-public ExpandoObject AddSemanticMarkup(XElement parent, List<ExpandoObject> objects)
+public ExpandoObject AddSemanticMarkup(XElement parent, Dictionary<string,ExpandoObject> objects)
 {
 	var sem = (from c in parent.Descendants("semanticMarkup")
 			select c).FirstOrDefault();
@@ -251,17 +382,21 @@ public ExpandoObject AddSemanticMarkup(XElement parent, List<ExpandoObject> obje
 			((IDictionary<String, Object>)selObj).Add(prop.Name.ToString(),prop.Value);
 		
 		selList.Add((ExpandoObject)selObj);
-		objects.Add(((ExpandoObject)selObj));
+		//objects.Add(((ExpandoObject)selObj));
+		var selKey = (string)((ExpandoObject)selObj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+		objects.Add(selKey,((ExpandoObject)selObj)/*.Dump()*/);
 	}
 	((IDictionary<String, Object>)obj).Add("Elements",selList);
-	objects.Add(((ExpandoObject)obj));
+	//objects.Add(((ExpandoObject)obj));
+	var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+	objects.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 	
 	return obj;
 }
 
-public void PrintObjects(List<ExpandoObject> objs)
+public void PrintObjects(Dictionary<string,ExpandoObject> objs)
 {
-	foreach(dynamic obj in objs)
+	foreach(dynamic obj in objs.Values)
 	{
 		if
 			(
@@ -313,41 +448,72 @@ public void PrintObjects(List<ExpandoObject> objs)
 	}
 }
 
-public void LocateObjects(ExpandoObject obj, List<ExpandoObject> objs, string parameter)
+public void LocateObjects(ExpandoObject obj, Dictionary<string,ExpandoObject> objs, string parameter)
 {
 	if(((ExpandoObject)obj).FirstOrDefault(key => key.Key == parameter).Value is null)
 		return;
-		
-	var traces = ((string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == parameter).Value).Split(' ');
-	var tracesMissed = new List<string>(); 
 	
-	if(traces is null)
-		return;
-		
-	((IDictionary<String, Object>)obj).Remove(parameter);
-	foreach( var trace in traces)
+	var tracesMissed = new List<string>();
+	var tracesMissedObjects = new List<ExpandoObject>();
+	if(((ExpandoObject)obj).FirstOrDefault(key => key.Key == parameter).Value is string)
 	{
-		var found = false;
-		foreach(dynamic t in objs)
+		var traces = ((string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == parameter).Value).Split(' ');
+		
+		if(traces is null)
+			return;
+			
+		((IDictionary<String, Object>)obj).Remove(parameter);
+		foreach( var trace in traces)
 		{
-			var id = (string)((ExpandoObject)t).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value == trace;
-			if(id)
+			ExpandoObject val = null;
+			if(objs.TryGetValue(trace, out val))
 			{
-				found = true;
-				if(((IDictionary<String, Object>)obj).ContainsKey(parameter))
+				object param = null;
+				if(((IDictionary<String, Object>)obj).TryGetValue(parameter, out param))
 				{
-					((List<ExpandoObject>)((IDictionary<String, Object>)obj)[parameter]).Add((ExpandoObject)t);
+					((List<ExpandoObject>)param).Add(val);
 				}
 				else
 				{
-					((IDictionary<String, Object>)obj).Add(parameter,new List<ExpandoObject>{(ExpandoObject)t});
+					((IDictionary<String, Object>)obj).Add(parameter,new List<ExpandoObject>{(ExpandoObject)val});
 				}
-				break;
+			}
+			else
+			{
+				tracesMissed.Add(trace);
 			}
 		}
+	}
+	else
+	{
+		var traces = ((List<ExpandoObject>)((ExpandoObject)obj)/*.Dump()*/.FirstOrDefault(key => key.Key == parameter).Value);
+		traces.Dump();
 		
-		if(!found)
-			tracesMissed.Add(trace);
+		if(traces is null)
+			return;
+			
+		((IDictionary<String, Object>)obj).Remove(parameter);
+		foreach( var trace in traces)
+		{
+			var key = (string)((ExpandoObject)trace).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
+			ExpandoObject val = null;
+			if(objs.TryGetValue(key, out val))
+			{
+				object param = null;
+				if(((IDictionary<String, Object>)obj).TryGetValue(parameter, out param))
+				{
+					((List<ExpandoObject>)param).Add(val);
+				}
+				else
+				{
+					((IDictionary<String, Object>)obj).Add(parameter,new List<ExpandoObject>{(ExpandoObject)val});
+				}
+			}
+			else
+			{
+				tracesMissedObjects.Add(trace);
+			}
+		}
 	}
 	
 	if(tracesMissed.Count != 0)
@@ -355,51 +521,69 @@ public void LocateObjects(ExpandoObject obj, List<ExpandoObject> objs, string pa
 		var missed = String.Join(" ", tracesMissed.ToArray());
 		((IDictionary<String, Object>)obj).Add(parameter+"Missing",missed);
 	}
+	if(tracesMissedObjects.Count != 0)
+	{
+		((IDictionary<String, Object>)obj).Add(parameter+"MissingObjects",tracesMissedObjects);
+	}
 }
 
-public void LocateObject(ExpandoObject obj, List<ExpandoObject> objs, string parameter)
+public void LocateObject(ExpandoObject obj, Dictionary<string,ExpandoObject> objs, string parameter)
 {
 	var trace = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == parameter).Value;
 	if(trace is null)
 		return;
 		
-	var found = false;
-	foreach(dynamic t in objs)
+	ExpandoObject val = null;
+	if(objs.TryGetValue(trace, out val))
 	{
-		var id = (string)((ExpandoObject)t).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value == trace;
-		if(id)
-		{
-			//((ExpandoObject)obj).Dump();
-			((IDictionary<String, Object>)obj).Remove(parameter);
-			((IDictionary<String, Object>)obj).Add(parameter,((ExpandoObject)t));
-			found = true;
-			break;
-		}
+		//((ExpandoObject)obj).Dump();
+		((IDictionary<String, Object>)obj).Remove(parameter);
+		((IDictionary<String, Object>)obj).Add(parameter,((ExpandoObject)val));
 	}
-	
-	if(!found)
+	else
 	{
 			((IDictionary<String, Object>)obj).Add(parameter+"Missing",((IDictionary<String, Object>)obj)[parameter]);
 			((IDictionary<String, Object>)obj).Remove(parameter);
 	}
+	//var found = false;
+	//foreach(dynamic t in objs)
+	//{
+	//	var id = (string)((ExpandoObject)t).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value == trace;
+	//	if(id)
+	//	{
+	//		//((ExpandoObject)obj).Dump();
+	//		((IDictionary<String, Object>)obj).Remove(parameter);
+	//		((IDictionary<String, Object>)obj).Add(parameter,((ExpandoObject)t));
+	//		found = true;
+	//		break;
+	//	}
+	//}
+	//
+	//if(!found)
+	//{
+	//		((IDictionary<String, Object>)obj).Add(parameter+"Missing",((IDictionary<String, Object>)obj)[parameter]);
+	//		((IDictionary<String, Object>)obj).Remove(parameter);
+	//}
 }
 
-public void LinkObjects(List<ExpandoObject> objs)
+public void LinkObjects(Dictionary<string,ExpandoObject> objs)
 {
-	foreach(dynamic obj in objs)
+	foreach(ExpandoObject obj in objs.Values)
 	{
 		//Single Object
-		LocateObject(obj, objs, "trace");
-		LocateObject(obj, objs, "superType");
+		//LocateObject(obj, objs, "trace");
+		//LocateObject(obj, objs, "superType");
 		
 		//List of Objects
-		LocateObjects(obj, objs, "derivation");
-		LocateObjects(obj, objs, "subType");
+		//LocateObjects(obj, objs, "derivation");
+		//LocateObjects(obj, objs, "subType");
+		LocateObjects(obj, objs, "nextVersions");
+		LocateObjects(obj, objs, "previousVersion");
 		
 		
-		LocateObjects(obj, objs, "derivationComponent");
-		LocateObjects(obj, objs, "associationDomain");
-		LocateObjects(obj, objs, "derivationElement");
+		//LocateObjects(obj, objs, "derivationComponent");
+		//LocateObjects(obj, objs, "associationDomain");
+		//LocateObjects(obj, objs, "derivationElement");
 		
 		//unknown size
 		LocateObjects(obj, objs, "simpleType");
@@ -407,8 +591,9 @@ public void LinkObjects(List<ExpandoObject> objs)
 		LocateObjects(obj, objs, "type");
 		LocateObjects(obj, objs, "complexType");
 		LocateObjects(obj, objs, "businessElementTrace");
-		LocateObjects(obj, objs, "nextVersions");
+		//LocateObjects(obj, objs, "nextVersions");
 		LocateObjects(obj, objs, "impactedElements");
 		LocateObjects(obj, objs, "messageBuildingBlock");
+		LocateObjects(obj, objs, "messageSet");
 	}
 }
