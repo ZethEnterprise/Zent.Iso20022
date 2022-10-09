@@ -9,11 +9,7 @@ void Main()
 	var repo = fullRepo;
 	var content = System.IO.File.ReadAllText($"{scriptPath}/{repo}",Encoding.UTF8);
 	var doc = XDocument.Parse(content);
-	
-	XNamespace iso20022 = "urn:iso:std:iso:20022:2013:ecore";
-	XNamespace xmi = "http://www.omg.org/XMI";
-	XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
-	
+		
 	var ou = from c in doc.Descendants(iso20022 + "Repository")
 						  .Descendants("dataDictionary")
 						  .Descendants("topLevelDictionaryEntry")
@@ -29,37 +25,79 @@ void Main()
 	elements.AddRange(ou);
 	elements.AddRange(bu);
 	//elements.Count.Dump();
-	elements.AddRange(GetChildren(elements));
+	var rawModels = GetChildren(elements);
+	//rawModels.Where(x => x.Id is null).Dump();
+	rawModels.Where(x => x.Id is not null).Dump();
+	//elements.AddRange(GetChildren(elements));
 	//elements.Count.Dump();
 	//elements.Count(x => x.HasAttributes).Dump();
 	//elements.Where(x => x.HasAttributes).Where(x => x.Attributes(xsi+"type").FirstOrDefault() is not null)
 	//		.Count(x => x.Attributes(xsi+"type").FirstOrDefault().Value == "iso20022:MessageAttribute").Dump();
 }
 
-public List<XElement> GetChildren(List<XElement> parents)
+
+static XNamespace iso20022 = "urn:iso:std:iso:20022:2013:ecore";
+static XNamespace xmi = "http://www.omg.org/XMI";
+static XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
+
+public class RawModel
 {
-	var childrenElements = new List<XElement>();
-	
-	foreach(XElement parent in parents)
-		childrenElements.AddRange(GetChildren(parent));
-	
-	return childrenElements;
+	public string Id {get; set;}
+	public string TypeBased {get; set;}
+	public string TagBased {get; set;}
+	public XElement XElement {get; set;}
+	public List<RawModel> RawChildren {get;set;}
 }
 
-public List<XElement> GetChildren(XElement parent)
+public List<RawModel> GetChildren(List<XElement> parents)
 {
-	var childrenElements = new List<XElement>();
+	var rawModels = new List<RawModel>();
+	
+	foreach(XElement parent in parents)
+	{
+		var raw = new RawModel
+			{
+				Id = parent?.Attributes(xmi+"id")?.FirstOrDefault()?.Value ?? null,
+				TypeBased = parent?.Attributes(xsi+"type")?.FirstOrDefault()?.Value ?? null,
+				TagBased = parent?.Name?.LocalName,
+				XElement = parent,
+				RawChildren = GetChildren(parent)
+			};
+		
+		rawModels.Add(raw);
+		if(raw.RawChildren is not null)
+			rawModels.AddRange(raw.RawChildren);
+	}
+	
+	return rawModels;
+}
+
+public List<RawModel> GetChildren(XElement parent)
+{
+	var rawModels = new List<RawModel>();
 	var children = parent.Descendants();
 	foreach(XElement child in children)
 	{
-		childrenElements.Add(child);
-		if(child.Descendants().Count() != 0)
-		{
-			childrenElements.AddRange(GetChildren(child));
-		}
+		var raw = new RawModel
+			{
+				Id = child?.Attributes(xmi+"id")?.FirstOrDefault()?.Value ?? null,
+				TypeBased = child?.Attributes(xsi+"type")?.FirstOrDefault()?.Value ?? null,
+				TagBased = child?.Name?.LocalName,
+				XElement = child,
+				RawChildren = child.Descendants().Count() != 0 ? GetChildren(child) : null
+			};
+		
+		rawModels.Add(raw);
+		if(raw.RawChildren is not null)
+			rawModels.AddRange(raw.RawChildren);
+		//childrenElements.Add(child);
+		//if(child.Descendants().Count() != 0)
+		//{
+		//	childrenElements.AddRange(GetChildren(child));
+		//}
 	}
 	
-	return childrenElements;
+	return rawModels;
 }
 
 
