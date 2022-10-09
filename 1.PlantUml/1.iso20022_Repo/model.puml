@@ -1,0 +1,178 @@
+@startuml ERepository.iso20022 Model
+class Constraint as "Constraint" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+}
+
+class iso20022_amount as "iso20022:Amount" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int minInclusive
+    int totalDigits
+    int fractionDigits
+    ID currencyIdentifierSet
+    double[] example
+    Constraint[] constraint
+}
+iso20022_amount --> Constraint
+
+class iso20022_IdentifierSet as "iso20022.IdentifierSet" {    
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    datetime removalDate
+    string pattern
+    string identificationScheme
+    string example
+    Constraint[] constraint
+}
+
+iso20022_IdentifierSet --> Constraint
+
+class elements as "Elements" {
+    ID id
+    string name
+    string value
+}
+
+class semanticMarkup as "SemanticMarkup" {
+    ID id
+    string type
+    Elements[] elements
+}
+
+semanticMarkup --> elements
+
+class code as "Code" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    string codeName
+    SemanticMarkup semanticMarkup
+}
+
+code --> semanticMarkup
+
+class iso20022_codeSet as "iso20022.CodeSet" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int minLength
+    int maxLength
+    iso20022.CodeSet[] derivation
+    string[] example
+    Code[] code
+}
+
+iso20022_codeSet --> iso20022_codeSet
+iso20022_codeSet --> code
+
+class iso20022_messageAssociationEnd as "iso20022.MessageAssociationEnd" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int maxOccurs
+    int minOccurs
+    string xmlTag
+    bool isDerived
+    bool isComposite
+    iso20022:MessageAssociationEnd derivation
+    iso20022:BusinessAttribute businessElementTrace
+    iso20022:BusinessAssociationEnd businessElementTrace
+    iso20022.MessageComponent type
+    iso20022.ChoiceComponent type
+}
+
+class iso20022_businessAssociationEnd as "iso20022.BusinessAssociationEnd" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int maxOccurs
+    int minOccurs
+    bool isDerived
+    iso20022:MessageAssociationEnd derivation
+    iso20022:BusinessAssociationEnd opposite
+    iso20022.BusinessComponent type
+}
+
+iso20022_businessAssociationEnd --> iso20022_businessComponent
+iso20022_businessAssociationEnd --> iso20022_messageAssociationEnd
+
+class iso20022_businessComponent as "iso20022.BusinessComponent" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    ID subType
+    ID superType
+    ID derivationComponent
+    ID associationDomain
+    ID derivationElement
+    iso20022:BusinessAssociationEnd[] Elements
+}
+
+iso20022_businessComponent --> iso20022_businessAssociationEnd
+
+class iso20022_quantity as "iso20022.Quantity" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int totalDigits
+    int fractionDigits
+    double[] example
+}
+
+class iso20022_rate as "iso20022.Rate" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int totalDigits
+    int fractionDigits
+    double baseValue
+    double[] example
+}
+
+class iso20022_date as "iso20022.Date" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+}
+
+class iso20022_datetime as "iso20022.DateTime" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+}
+
+class iso20022_text as "iso20022.Text" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    int minLength
+    int maxLength
+    string pattern
+}
+
+class iso20022_indicator as "iso20022.Indicator" {
+    ID id
+    string name
+    string definition
+    string registrationStatus
+    string meaningWhenTrue
+    string meaningWhenFalse
+}
+@enduml

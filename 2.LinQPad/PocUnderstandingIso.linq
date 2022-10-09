@@ -8,7 +8,7 @@ void Main()
 	var fullRepo = "../3.Iso20022Files/1.SourceFiles/20220520_ISO20022_2013_eRepository.iso20022";
 	var pain001Repo = "../3.Iso20022Files/1.SourceFiles/pain.001.001.03_version_eRepository.iso20022";
 	var pain001RepoEntended = "../3.Iso20022Files/1.SourceFiles/pain.001.001.03_version_eRepository_Extended.iso20022";
-	var repo = fullRepo;
+	var repo = pain001RepoEntended;
 	var content = System.IO.File.ReadAllText($"{scriptPath}/{repo}",Encoding.UTF8);
 	var doc = XDocument.Parse(content);
 	
@@ -27,9 +27,9 @@ void Main()
 	//ou.Dump();
 	var objs = GetObject(ou);
 	var msgs = AddObjects(bu, objs);
-	objs["_rUYN39cBEeq_l4BJLVUF2Q"].Dump();
+	//objs["_rUYN39cBEeq_l4BJLVUF2Q"].Dump();
 	LinkObjects(objs);
-	//PrintObjects(objs);
+	PrintObjects(objs);
 }
 
 public List<ExpandoObject> AddMsgBuildBlock(XElement parent, Dictionary<string,ExpandoObject> objs)
@@ -85,7 +85,7 @@ public List<ExpandoObject> AddMsgDef(XElement parent, Dictionary<string,ExpandoO
 	if(nodes is null)
 		return null;
 	
-	nodes.Dump();
+	//nodes.Dump();
 	var elements = new List<ExpandoObject>();	
 	foreach(XElement node in nodes)
 	{	
@@ -112,10 +112,10 @@ public List<ExpandoObject> AddMsgDef(XElement parent, Dictionary<string,ExpandoO
 		var key = (string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value;
 		objs.Add(key,((ExpandoObject)obj)/*.Dump()*/);
 		
-		if(((string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value) == "_rUYN39cBEeq_l4BJLVUF2Q")
-		{
-			((ExpandoObject)obj).Dump();
-		}
+		//if(((string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.omg.org/XMI}id").Value) == "_rUYN39cBEeq_l4BJLVUF2Q")
+		//{
+		//	((ExpandoObject)obj).Dump();
+		//}
 		
 		elements.Add(obj);
 	}
@@ -128,7 +128,7 @@ public List<ExpandoObject> AddObjects(IEnumerable<XElement> nodes, Dictionary<st
 	var objects = new List<ExpandoObject>();
 	foreach(XElement node in nodes)
 	{
-		node.Dump();
+		//node.Dump();
 		dynamic obj = new ExpandoObject();
 		IEnumerable<XAttribute> attList =  
 	    from at in node.Attributes()  
@@ -136,9 +136,9 @@ public List<ExpandoObject> AddObjects(IEnumerable<XElement> nodes, Dictionary<st
 		foreach(var prop in attList)
 			((IDictionary<String, Object>)obj).Add(prop.Name.ToString(),prop.Value);
 	
-		((ExpandoObject)obj).Dump();
+		//((ExpandoObject)obj).Dump();
 		var msgDef = AddMsgDef(node,objs);
-		msgDef.Dump();
+		//msgDef.Dump();
 		if(!(msgDef is null))
 			((IDictionary<String, Object>)obj).Add("messageDefinition",msgDef);
 			
@@ -407,7 +407,7 @@ public void PrintObjects(Dictionary<string,ExpandoObject> objs)
 				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value == "iso20022:ChoiceComponent"
 				
 				////MessageObjects
-				(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value == "iso20022:MessageComponent"
+				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value == "iso20022:MessageComponent"
 				//&&
 				//((ExpandoObject)obj).FirstOrDefault(key => key.Key == "trace").Key != null && ((ExpandoObject)obj).FirstOrDefault(key => key.Key == "traceObject").Key is null
 				
@@ -417,30 +417,42 @@ public void PrintObjects(Dictionary<string,ExpandoObject> objs)
 				//((ExpandoObject)obj).FirstOrDefault(key => key.Key == "superType").Key != null && ((ExpandoObject)obj).FirstOrDefault(key => key.Key == "superTypeObject").Key is null
 				
 				////Missing elements
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:CodeSet"
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:CodeSet"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:BusinessComponent"
+				&&	
+				(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:MessageComponent"
+				&&
+				(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:ChoiceComponent"
+				// simple type-ish
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Text"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:DateTime"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Date"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Quantity"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:IdentifierSet"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Rate"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Amount"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Indicator"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:BusinessAssociationEnd"
+				&&
+/* UML */		(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != null
+				&&
+				(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:BusinessAttribute"
+				&&
+				(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:MessageAttribute"
+				&&
+				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:MessageAssociationEnd"
 				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:BusinessComponent"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:MessageComponent"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:ChoiceComponent"
-				//// simple type-ish
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Text"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:DateTime"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Date"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Quantity"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:IdentifierSet"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Rate"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Amount"
-				//&&
-				//(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:Indicator"
+				(string)((ExpandoObject)obj).FirstOrDefault(key => key.Key == "{http://www.w3.org/2001/XMLSchema-instance}type").Value != "iso20022:BusinessArea"
 			)
 		{
 			((ExpandoObject)obj).Dump();
@@ -487,7 +499,7 @@ public void LocateObjects(ExpandoObject obj, Dictionary<string,ExpandoObject> ob
 	else
 	{
 		var traces = ((List<ExpandoObject>)((ExpandoObject)obj)/*.Dump()*/.FirstOrDefault(key => key.Key == parameter).Value);
-		traces.Dump();
+		//traces.Dump();
 		
 		if(traces is null)
 			return;
