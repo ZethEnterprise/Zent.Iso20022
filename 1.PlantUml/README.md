@@ -1,5 +1,7 @@
 This folder contains a PlantUml project of the source code.
 
-#2022-10-09
+# 2022-10-09
 There has been some writings on the model. Finally I figured: "It's time to submit what I have". After working in the LinQ department it seems a bit unimaginable to figure out this model of Iso20022 eRepository, which is why we are trying to draw it. I can say it is not an easy task, because of the sheer size of that file and eventhough I am proud owner of LinQ scripts, which can generate a dumpable and collapsable model.
 I finally managed to take some of the easy classes and draw them up, but when I moved over to the semi complex ones, it becomes even harder. That is due to the inheritance, which is invisible in the Xml model. I like abstractions just as much as the next, but looking through the data it is impossible to make sure that you get every needles in the haystack. Which is why I have decided to abandon this UML model until I can make a neat and queriable model in LinQ. That will help me locate all of the sweetspots, where I am missing some inheritance. That is also the key to find the correct way of making the abstractions in the generated model in the future. One further note - couldn't it be nice to actually be able to generate a PlantUml model alongside the actual classes?
+
+# 2022-10-16

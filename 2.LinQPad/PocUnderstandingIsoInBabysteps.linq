@@ -19,20 +19,20 @@ void Main()
 						  .Descendants("topLevelCatalogueEntry")
 				select c; //missing this part
 	
-	//ou.Count().Dump();
-	//bu.Count().Dump();
 	var elements = new List<XElement>();
 	elements.AddRange(ou);
 	elements.AddRange(bu);
-	//elements.Count.Dump();
 	var rawModels = GetChildren(elements);
-	//rawModels.Where(x => x.Id is null).Dump();
-	rawModels.Where(x => x.Id is not null).Dump();
-	//elements.AddRange(GetChildren(elements));
+	
 	//elements.Count.Dump();
-	//elements.Count(x => x.HasAttributes).Dump();
-	//elements.Where(x => x.HasAttributes).Where(x => x.Attributes(xsi+"type").FirstOrDefault() is not null)
-	//		.Count(x => x.Attributes(xsi+"type").FirstOrDefault().Value == "iso20022:MessageAttribute").Dump();
+	//(ou.Count() + bu.Count()).Dump();
+	//rawModels.Count().Dump();
+	
+	//rawModels.Where(x => x.Id is null).Dump();
+	//rawModels.Where(x => x.Id is not null).Dump();
+	var rawModelDictionary = rawModels.Where(x => x.Id is not null).ToDictionary(keySelector: m => m.Id, elementSelector: m => m);
+	//rawModelDictionary.Count.Dump();
+	//rawModels.Where(x => x.Id is not null).Count().Dump();
 }
 
 
@@ -47,6 +47,18 @@ public class RawModel
 	public string TagBased {get; set;}
 	public XElement XElement {get; set;}
 	public List<RawModel> RawChildren {get;set;}
+	public IDictionary<string,RawXmlProperty> XmlProperties {get;set;}
+}
+
+public enum IdTypes { none, associationDomain, complexType, derivation, derivationComponent, derivationElement, opposite, simpleType, subType, superType, type }
+
+public class RawXmlProperty
+{
+	public string Name {get;set;}
+	public string RawValue {get;set;}
+	public IdTypes IdType {get;set;}
+	public List<string> RawIds {get;set;}
+	public List<RawModel> RawChildren {get;set;}
 }
 
 public List<RawModel> GetChildren(List<XElement> parents)
@@ -55,49 +67,70 @@ public List<RawModel> GetChildren(List<XElement> parents)
 	
 	foreach(XElement parent in parents)
 	{
+		//if(parent?.Attributes(xmi+"id")?.FirstOrDefault()?.Value != "_FJCvc8TGEeChad0JzLk7QA_1372021101")
+		//	continue; //Used for debugging
+		//	
+		//if(rawModels.Where(x => x.Id == "_FkKlMcTGEeChad0JzLk7QA_-877295805_SemMup_-77474853_0_EL_0").Count() > 2)
+		//	break; //Used for debugging
+			
 		var raw = new RawModel
 			{
 				Id = parent?.Attributes(xmi+"id")?.FirstOrDefault()?.Value ?? null,
 				TypeBased = parent?.Attributes(xsi+"type")?.FirstOrDefault()?.Value ?? null,
 				TagBased = parent?.Name?.LocalName,
 				XElement = parent,
-				RawChildren = GetChildren(parent)
+				RawChildren = GetChildren(parent, rawModels),
+				XmlProperties = GetXmlProperties(parent)
 			};
 		
+		//raw.Dump();
+		
 		rawModels.Add(raw);
-		if(raw.RawChildren is not null)
-			rawModels.AddRange(raw.RawChildren);
 	}
 	
 	return rawModels;
 }
 
-public List<RawModel> GetChildren(XElement parent)
+public List<RawModel> GetChildren(XElement parent, List<RawModel> rawModels)
 {
-	var rawModels = new List<RawModel>();
-	var children = parent.Descendants();
+	var children = parent.Elements();
+	var rawChildModels = new List<RawModel>();
 	foreach(XElement child in children)
 	{
+		//if(rawModels.Where(x => x.Id == "_FkKlMcTGEeChad0JzLk7QA_-877295805_SemMup_-77474853_0_EL_0").Count() > 2)
+		//	break;
+		//(parent?.Attributes(xmi+"id")?.FirstOrDefault()?.Value ?? null).Dump();
 		var raw = new RawModel
 			{
 				Id = child?.Attributes(xmi+"id")?.FirstOrDefault()?.Value ?? null,
 				TypeBased = child?.Attributes(xsi+"type")?.FirstOrDefault()?.Value ?? null,
 				TagBased = child?.Name?.LocalName,
 				XElement = child,
-				RawChildren = child.Descendants().Count() != 0 ? GetChildren(child) : null
+				RawChildren = child.Elements().Count() != 0 ? GetChildren(child, rawModels) : null,
+				XmlProperties = GetXmlProperties(child)
 			};
 		
+		//raw.Dump();
+		
+		rawChildModels.Add(raw);
 		rawModels.Add(raw);
-		if(raw.RawChildren is not null)
-			rawModels.AddRange(raw.RawChildren);
-		//childrenElements.Add(child);
-		//if(child.Descendants().Count() != 0)
-		//{
-		//	childrenElements.AddRange(GetChildren(child));
-		//}
 	}
 	
-	return rawModels;
+	return rawChildModels;
+}
+
+public Dictionary<string,RawXmlProperty> GetXmlProperties(XElement element)
+{
+	var properties = new Dictionary<string,RawXmlProperty>();
+	
+	
+	IEnumerable<XAttribute> attList =  
+    from att in element.Attributes()  
+    select att; 
+	foreach(var prop in attList)
+		properties.Add(prop.Name.ToString(), new RawXmlProperty{Name = prop.Name.ToString(), RawValue = prop.Value});
+		
+	return properties.Count != 0 ? properties : null;
 }
 
 
