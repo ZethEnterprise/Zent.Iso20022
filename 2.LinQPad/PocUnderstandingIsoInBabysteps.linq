@@ -31,8 +31,14 @@ void Main()
 	//rawModels.Where(x => x.Id is null).Dump();
 	//rawModels.Where(x => x.Id is not null).Dump();
 	var rawModelDictionary = rawModels.Where(x => x.Id is not null).ToDictionary(keySelector: m => m.Id, elementSelector: m => m);
+	
 	//rawModelDictionary.Count.Dump();
 	//rawModels.Where(x => x.Id is not null).Count().Dump();
+	
+	var modelsToCorrect = rawModels.Where(x => x.XmlProperties is not null);
+	CorrectXmlProperties(modelsToCorrect, rawModelDictionary);
+	
+	modelsToCorrect.Dump();
 }
 
 
@@ -128,9 +134,59 @@ public Dictionary<string,RawXmlProperty> GetXmlProperties(XElement element)
     from att in element.Attributes()  
     select att; 
 	foreach(var prop in attList)
-		properties.Add(prop.Name.ToString(), new RawXmlProperty{Name = prop.Name.ToString(), RawValue = prop.Value});
+		properties.Add(prop.Name.ToString(), new RawXmlProperty{Name = prop.Name.ToString(), RawValue = prop.Value, IdType = prop.Name.ToString().ToIdTypes()});
 		
 	return properties.Count != 0 ? properties : null;
+}
+public static class Extensions
+{
+	public static IdTypes ToIdTypes(this string name)
+	{
+		IdTypes tryParseResult;
+	    if (Enum.TryParse<IdTypes>(name, out tryParseResult))
+	    	return tryParseResult;
+		else
+			return IdTypes.none;
+	}
+}
+public void CorrectXmlProperties(IEnumerable<RawModel> models, IDictionary<string,RawModel> modelDictionary)
+{
+	foreach(var model in models)
+	{
+		foreach(var property in model.XmlProperties.Values)
+		{
+			switch(property.IdType)
+			{
+				case IdTypes.none: case IdTypes.type:
+					//Do nothing
+					break;
+				case IdTypes.associationDomain: case IdTypes.opposite:
+				case IdTypes.complexType: case IdTypes.simpleType:
+				case IdTypes.derivation: case IdTypes.derivationComponent: case IdTypes.derivationElement:
+				case IdTypes.subType: case IdTypes.superType: 
+					property.RawIds = property.RawValue.Split(' ').ToList<string>();
+									
+					if(property.RawChildren is null)
+						property.RawChildren = new List<RawModel>();
+					
+					foreach(var id in property.RawIds)
+						if(modelDictionary.ContainsKey(id))
+							property.RawChildren.Add(modelDictionary[id]);
+						else
+						{
+							"Could not find key".Dump();
+							property.Dump();
+						}
+					
+					//Do something
+					break;
+				default:
+					"ups - defaulted to something missing".Dump();
+					property.Dump();
+					break;
+			}
+		}
+	}
 }
 
 
