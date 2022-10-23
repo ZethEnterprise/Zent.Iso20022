@@ -27,7 +27,7 @@ void Main()
 	var rawModels = GetChildren(elements);
 	
 	//Order the Id-based models in a dictionary for easily search for it
-	var rawModelDictionary = rawModels.Where(x => x.Id is not null).ToDictionary(keySelector: m => m.Id, elementSelector: m => m);
+	rawModelDictionary = rawModels.Where(x => x.Id is not null).ToDictionary(keySelector: m => m.Id, elementSelector: m => m);
 	
 	//Locate the models with properties, which links to other RawModels and connect them
 	var modelsToCorrect = rawModels.Where(x => x.XmlProperties is not null);
@@ -35,10 +35,12 @@ void Main()
 	
 	//This seems to be taking a toll on LinQPad. It can render it from time to time, but it might be that it is taking too much of it.
 	//rawModels.Dump();
+	Distinctable(rawModels);
 	
-	GeneratePlantUml(rawModels);
+	//GeneratePlantUml(rawModels);
 }
 
+public static Dictionary<string,RawModel> rawModelDictionary;
 public enum IdTypes { none, associationDomain, complexType, derivation, derivationComponent, derivationElement, opposite, simpleType, subType, superType, type }
 public static XNamespace iso20022 = "urn:iso:std:iso:20022:2013:ecore";
 public static XNamespace xmi = "http://www.omg.org/XMI";
@@ -78,6 +80,17 @@ public class RawXmlProperty
 }
 
 //Methods to generate the RawModel and its properties
+public List<RawModel> Distinctable(List<RawModel> rawModels)
+{
+	var list = new List<RawModel>();
+	
+	var listTypeBased = rawModels.Where(r => r.TypeBased is not null).GroupBy(r => r.TypeBased).ToDictionary(m => m.Key, g => g.ToList());
+	listTypeBased.Dump();
+	var listTagBased = rawModels.Where(r => r.TypeBased is null).GroupBy(r => r.TagBased);
+	
+	return list;
+}
+
 public List<RawModel> GetChildren(List<XElement> parents)
 {
 	var rawModels = new List<RawModel>();
@@ -233,5 +246,129 @@ public void CorrectXmlProperties(IEnumerable<RawModel> models, IDictionary<strin
 
 public void GeneratePlantUml(IList<RawModel> rawModels)
 {
+	var pmodels = new List<PlantUmlModel>();
 	
+	foreach(var rmodel in rawModels)
+		pmodels.Add(PlantUmlClass(rmodel));
+	
+	var plantUmlCode = PlantUmlStart() + PlantUmlClasses(pmodels) + PlantUmlEnd();
+	
+	var filepath = Path.GetDirectoryName (Util.CurrentQueryPath) + @"\..\1.PlantUml\1.iso20022_Repo\model_auto_generated.puml";
+	System.IO.File.WriteAllText(filepath,plantUmlCode, Encoding.UTF8);
+}
+
+public class PlantUmlModel
+{
+	public string ClassName { get;set; }
+	public string ReferenceName { get;set; }
+	public string PlantUmlCode { get;set; }
+	public Dictionary<string,IList<string>> Properties { get;set; }
+	public List<string> Associations { get;set; }
+}
+
+public string PlantUmlStart()
+{
+	return "@startuml ERepository.iso20022 Model (Auto-Generated)\r\n\r\n";
+}
+
+public string PlantUmlClasses(List<PlantUmlModel> pmodels)
+{
+	
+	return string.Join("\r\n",pmodels.Select(p => p.PlantUmlCode).Distinct().OrderBy(p => p));
+}
+
+public string PlantUmlEnd()
+{
+	return "\r\n\r\n@enduml";
+}
+
+public PlantUmlModel PlantUmlClass(RawModel rawModel)
+{
+	var properties = new Dictionary<string,IList<string>>();
+	
+	if(rawModel.XmlProperties is not null)
+		foreach(var property in rawModel.XmlProperties.OrderBy(p => p.Key))
+			if(properties.ContainsKey(property.Key))
+				properties[property.Key].Add(ParsePlantumlProperty(property));
+			else
+				properties.Add(property.Key, new List<string>{ParsePlantumlProperty(property)});
+	
+	
+	var model = new PlantUmlModel
+	{
+		ClassName = rawModel.TypeBased ?? rawModel.TagBased,
+		ReferenceName = rawModel.TypeBased is null ? rawModel.TagBased : rawModel.TypeBased.Replace(':','_'),
+		Properties = properties,
+		Associations = ParsePlantUmlAssociation(rawModel)
+	};
+	
+	model.PlantUmlCode = ParsePlantUmlModelToCode(model);
+	
+	return model;
+}
+
+public string ParsePlantumlProperty(KeyValuePair<string,RawXmlProperty> propertyPair)
+{
+	var key = propertyPair.Key;
+	var property = propertyPair.Value;
+	string line;
+	
+	switch(property.IdType)
+	{
+		case IdTypes.none: case IdTypes.type:
+			line = "string " + key;
+			break;
+		default:
+			line = "";
+			var lines = new List<string>();
+			
+			foreach(var model in property.RawChildren)
+			{
+				lines.Add(model.TypeBased);
+			}
+			line += string.Join(", ", lines.Distinct().OrderBy(p => p));
+			line += $" {key}";
+			break;
+	}
+	
+	return line;
+}
+
+public List<string> ParsePlantUmlAssociation(RawModel model)
+{
+	var myName = model.TypeBased is null ? model.TagBased : model.TypeBased.Replace(':','_');
+	List<string> list = null;
+	
+	if(model.XmlProperties is not null)
+		foreach(var property in model.XmlProperties.Values)
+			switch(property.IdType)
+			{
+				case IdTypes.none: case IdTypes.type:
+					break;
+				default:
+					if(list is null)
+						list = new List<string>();
+					list.AddRange(property.RawChildren.GroupBy(c => c.TypeBased).Select(c => c.First()).Select(c => $"{myName} --> {c.TypeBased.Replace(':','_')}").ToList());
+					break;
+			}
+	
+	return list;
+}
+
+public string ParsePlantUmlModelToCode(PlantUmlModel model)
+{
+	var line = $"class {model.ReferenceName} as \"{model.ClassName}\" " + "{\r\n";
+	foreach(var property in model.Properties)
+	{
+		foreach(var elements in property.Value)
+			line += $"\t{elements}\r\n";
+	}
+	
+	line += "}\r\n\r\n";
+	
+	if(model.Associations is not null)
+		foreach(var assocation in model.Associations)
+			line += $"{assocation}\r\n";
+	
+	return line;
 }
