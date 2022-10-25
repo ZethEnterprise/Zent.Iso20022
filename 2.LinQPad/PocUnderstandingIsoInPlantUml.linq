@@ -35,9 +35,9 @@ void Main()
 	
 	//This seems to be taking a toll on LinQPad. It can render it from time to time, but it might be that it is taking too much of it.
 	//rawModels.Dump();
-	Distinctable(rawModels);
+	var plantUmlRawModel = Distinctable(rawModels);
 	
-	//GeneratePlantUml(rawModels);
+	GeneratePlantUml(plantUmlRawModel);
 }
 
 public static Dictionary<string,RawModel> rawModelDictionary;
@@ -80,15 +80,106 @@ public class RawXmlProperty
 }
 
 //Methods to generate the RawModel and its properties
+public class RawModelComparer : IEqualityComparer<RawModel>
+{
+	public bool Equals( RawModel x, RawModel y)
+	{
+		return x?.TypeBased == y?.TypeBased && x?.TagBased == y?.TagBased;
+	}
+
+	public int GetHashCode(RawModel obj)
+	{
+		return obj is null ? "null".GetHashCode() : ((obj.TypeBased??"null") + obj.TagBased).GetHashCode();
+	}
+}
+
 public List<RawModel> Distinctable(List<RawModel> rawModels)
 {
 	var list = new List<RawModel>();
 	
 	var listTypeBased = rawModels.Where(r => r.TypeBased is not null).GroupBy(r => r.TypeBased).ToDictionary(m => m.Key, g => g.ToList());
-	listTypeBased.Dump();
-	var listTagBased = rawModels.Where(r => r.TypeBased is null).GroupBy(r => r.TagBased);
+	
+	foreach(var grouped in listTypeBased.Values)
+	{
+		var first = grouped[0];
+		var element = new RawModel
+		{
+			Id = first.Id,
+			TypeBased = first.TypeBased,
+			TagBased = first.TagBased
+		};
+		
+		var children = new List<RawModel>();
+		var properties = new List<RawXmlProperty>();
+		foreach(var rmodel in grouped)
+		{
+			if(rmodel.RawChildren is not null)
+				children.AddRange(rmodel.RawChildren);
+				
+			if(rmodel.XmlProperties is not null)
+				foreach(var val in rmodel.XmlProperties.Values)
+					properties.Add(val);
+		}
+		
+		element.XmlProperties = DistinctAndMergeToDictionary(properties);
+		
+		element.RawChildren = children.Distinct(new RawModelComparer()).ToList();
+		
+		list.Add(element);
+	}
+	var listTagBased = rawModels.Where(r => r.TypeBased is null).GroupBy(r => r.TagBased).ToDictionary(m => m.Key, g => g.ToList());
+	
+	foreach(var grouped in listTagBased.Values)
+	{
+		var first = grouped[0];
+		var element = new RawModel
+		{
+			Id = first.Id,
+			TypeBased = first.TypeBased,
+			TagBased = first.TagBased
+		};
+		
+		var children = new List<RawModel>();
+		var properties = new List<RawXmlProperty>();
+		foreach(var rmodel in grouped)
+		{
+			if(rmodel.RawChildren is not null)
+				children.AddRange(rmodel.RawChildren);
+				
+			if(rmodel.XmlProperties is not null)
+				foreach(var val in rmodel.XmlProperties.Values)
+					properties.Add(val);
+		}
+		
+		element.XmlProperties = DistinctAndMergeToDictionary(properties);
+		
+		element.RawChildren = children.Distinct(new RawModelComparer()).ToList();
+		
+		list.Add(element);
+	}
+	
 	
 	return list;
+}
+
+public Dictionary<string,RawXmlProperty> DistinctAndMergeToDictionary(List<RawXmlProperty> properties)
+{
+	var dict = properties.Where(p => p.IdType == IdTypes.none || p.IdType == IdTypes.type).GroupBy(g => g.Name).ToDictionary(k => k.Key, v => v.ToList().First());
+	
+	var children = properties.Where(p => p.IdType != IdTypes.none && p.IdType != IdTypes.type).GroupBy(g => g.Name).ToDictionary(k => k.Key, v => v.ToList());
+	
+	foreach(var child in children)
+	{
+		var first = child.Value.First();
+		foreach(var raw in child.Value)
+		{
+			first.RawChildren.AddRange(raw.RawChildren);
+		}
+		first.RawChildren = first.RawChildren.Distinct(new RawModelComparer()).ToList();
+		dict.Add(child.Key,first);
+	}
+	
+	return dict;
 }
 
 public List<RawModel> GetChildren(List<XElement> parents)
@@ -155,8 +246,8 @@ public Dictionary<string,RawXmlProperty> GetXmlProperties(XElement element)
 	
 	
 	IEnumerable<XAttribute> attList =  
-    from att in element.Attributes()  
-    select att; 
+	    from att in element.Attributes()  
+	    select att; 
 	foreach(var prop in attList)
 		properties.Add(prop.Name.ToString(), new RawXmlProperty{Name = prop.Name.ToString(), RawValue = prop.Value, IdType = prop.Name.ToString().ToIdTypes()});
 		
@@ -243,6 +334,17 @@ public void CorrectXmlProperties(IEnumerable<RawModel> models, IDictionary<strin
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+public static class StringExtensions
+{
+    public static string FirstCharToUpper(this string input) =>
+        input switch
+        {
+            null => throw new ArgumentNullException(nameof(input)),
+            "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
+            _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
+        };
+}
+
 
 public void GeneratePlantUml(IList<RawModel> rawModels)
 {
@@ -250,6 +352,8 @@ public void GeneratePlantUml(IList<RawModel> rawModels)
 	
 	foreach(var rmodel in rawModels)
 		pmodels.Add(PlantUmlClass(rmodel));
+	
+	pmodels.Count.Dump();
 	
 	var plantUmlCode = PlantUmlStart() + PlantUmlClasses(pmodels) + PlantUmlEnd();
 	
@@ -268,7 +372,7 @@ public class PlantUmlModel
 
 public string PlantUmlStart()
 {
-	return "@startuml ERepository.iso20022 Model (Auto-Generated)\r\n\r\n";
+	return "@startuml ERepository.iso20022 Model (Auto-Generated)\r\n\r\n' Split into 4 pages\r\npage 4x1\r\nskinparam linetype ortho\r\n\r\n";
 }
 
 public string PlantUmlClasses(List<PlantUmlModel> pmodels)
@@ -292,6 +396,17 @@ public PlantUmlModel PlantUmlClass(RawModel rawModel)
 				properties[property.Key].Add(ParsePlantumlProperty(property));
 			else
 				properties.Add(property.Key, new List<string>{ParsePlantumlProperty(property)});
+	
+	if(rawModel.RawChildren is not null)
+		foreach(var child in rawModel.RawChildren)
+		{
+			var childName = child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_');
+			var line = $"{childName} {childName.FirstCharToUpper()}";
+			if(properties.ContainsKey(childName))
+				properties[childName].Add(line);
+			else
+				properties.Add(childName, new List<string>{line});
+		}	
 	
 	
 	var model = new PlantUmlModel
@@ -351,6 +466,13 @@ public List<string> ParsePlantUmlAssociation(RawModel model)
 					list.AddRange(property.RawChildren.GroupBy(c => c.TypeBased).Select(c => c.First()).Select(c => $"{myName} --> {c.TypeBased.Replace(':','_')}").ToList());
 					break;
 			}
+
+	if(model.RawChildren is not null)
+		foreach(var child in model.RawChildren)
+			if(list is not null)
+				list.Add($"{myName} --> {(child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_'))}");
+			else
+				list = new List<string>{$"{myName} --> {(child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_'))}"};
 	
 	return list;
 }
