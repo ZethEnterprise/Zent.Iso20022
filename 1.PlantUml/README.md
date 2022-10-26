@@ -6,3 +6,7 @@ I finally managed to take some of the easy classes and draw them up, but when I 
 
 # 2022-10-21
 So finally there is generated a PlantUml file from LinQPad query. The funny part is that it is not previewable. To think of all the different possibilities that a specific type can be in: Missing a "MinOccur" field or a different kind of "DerivedComponent" fields or something like that. Even if we look at the list as distinctive, it is still too many components to make it PlantUml previewable. To top that one, the puml file generated is still too large to be easily trimmed down by hand (I should know).
+
+# 2022-10-25
+It finally happened! Something, which looks like a PlantUml model was generated. It is now linking the RawChildren and the XmlProperties to eachother. This will minimize the manual work needed afterwards. This means that the next step of understanding this weird model is in the PlantUml project - now we have the base code. Next step is to modify the base code to model the structure in some neat way.
+

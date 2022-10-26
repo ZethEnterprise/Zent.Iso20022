@@ -1,3 +1,21 @@
+@startuml Namespace test
+
+namespace a {
+    class b {
+        d D;
+    }
+    b --> c.d
+}
+
+package c{
+    class d{
+        b B;
+    }
+}
+
+@enduml
+
+
 @startuml ERepository.iso20022 Model
 class Constraint as "Constraint" {
     ID id
