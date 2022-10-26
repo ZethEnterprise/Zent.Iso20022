@@ -10,3 +10,5 @@ So finally there is generated a PlantUml file from LinQPad query. The funny part
 # 2022-10-25
 It finally happened! Something, which looks like a PlantUml model was generated. It is now linking the RawChildren and the XmlProperties to eachother. This will minimize the manual work needed afterwards. This means that the next step of understanding this weird model is in the PlantUml project - now we have the base code. Next step is to modify the base code to model the structure in some neat way.
 
+# 2022-10-26
+YAY! The model has been re-exported as SVG. It is still a mess, but I finally got it cleaned up a bit. It is still a mess, but now it is organized chaos instead of chaotic chaos. Adding some namespaces (which by the way is bad to do in a 600+ line PlantUml file - you might skip something and the namespacing vs. packages are not the same) with some colors and pseudo-organizing it gives a better overview. What's left now is actually checking the model through for errors to see what is missed. One thing though. The Model should NOT be auto generated any longer (don't want to loose my hard work <imagine a laughing smileyface here>).
