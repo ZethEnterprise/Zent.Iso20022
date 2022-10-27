@@ -345,7 +345,6 @@ public static class StringExtensions
         };
 }
 
-
 public void GeneratePlantUml(IList<RawModel> rawModels)
 {
 	var pmodels = new List<PlantUmlModel>();
@@ -353,9 +352,11 @@ public void GeneratePlantUml(IList<RawModel> rawModels)
 	foreach(var rmodel in rawModels)
 		pmodels.Add(PlantUmlClass(rmodel));
 	
+	PlantUmlAssociateClasses(pmodels);
+	
 	pmodels.Count.Dump();
 	
-	var plantUmlCode = PlantUmlStart() + PlantUmlClasses(pmodels) + PlantUmlEnd();
+	var plantUmlCode = PlantUmlStart() + ParsePlantUmlModelToNamespacedCode(pmodels) + PlantUmlEnd();
 	
 	var filepath = Path.GetDirectoryName (Util.CurrentQueryPath) + @"\..\1.PlantUml\1.iso20022_Repo\model_auto_generated.puml";
 	System.IO.File.WriteAllText(filepath,plantUmlCode, Encoding.UTF8);
@@ -365,9 +366,13 @@ public class PlantUmlModel
 {
 	public string ClassName { get;set; }
 	public string ReferenceName { get;set; }
-	public string PlantUmlCode { get;set; }
+	public string PlantUmlCode { get { return PlantUmlClassCode; } }
+	public string PlantUmlNamespace { get;set; }
+	public string PlantUmlClassCode { get;set; }
+	public List<string> PlantUmlAssociationsCode { get;set; }
 	public Dictionary<string,IList<string>> Properties { get;set; }
 	public List<string> Associations { get;set; }
+	public List<(string me, string friend)> RawAssociations { get; set; }
 }
 
 public string PlantUmlStart()
@@ -384,6 +389,40 @@ public string PlantUmlClasses(List<PlantUmlModel> pmodels)
 public string PlantUmlEnd()
 {
 	return "\r\n\r\n@enduml";
+}
+
+public static Dictionary<string,string> PumlClassToNamespace = new Dictionary<string,string>();
+
+public string PlantUmlNamespace(RawModel rawModel)
+{
+	var name = rawModel.TypeBased is null ? rawModel.TagBased : rawModel.TypeBased.Replace(':','_');
+	if(rawModel.TypeBased is null)
+		PumlClassToNamespace.Add(name,"SimpleTypes");
+	else
+		if(name.Contains("Business"))
+			PumlClassToNamespace.Add(name,"ISO20022.Business");
+		else if(name.Contains("Message"))
+			PumlClassToNamespace.Add(name,"ISO20022.Message");
+		else
+			PumlClassToNamespace.Add(name,"ISO20022.Properties");
+			
+	return PumlClassToNamespace[name];
+}
+
+public void PlantUmlAssociateClasses(List<PlantUmlModel> pmodels)
+{
+	foreach(var pmodel in pmodels)
+	{
+		if(pmodel.RawAssociations is null) 
+			continue;
+		List<string> list = new List<string>();
+		
+		foreach(var associate in pmodel.RawAssociations)
+		{
+			list.Add($"{associate.me} --> {PumlClassToNamespace[associate.friend]}.{associate.friend}");
+		}
+		pmodel.PlantUmlAssociationsCode = list.Distinct().OrderBy(s => s).ToList();
+	}
 }
 
 public PlantUmlModel PlantUmlClass(RawModel rawModel)
@@ -408,16 +447,18 @@ public PlantUmlModel PlantUmlClass(RawModel rawModel)
 				properties.Add(childName, new List<string>{line});
 		}	
 	
-	
+	(var associations, var rawAssociations) = ParsePlantUmlAssociation(rawModel);
 	var model = new PlantUmlModel
 	{
 		ClassName = rawModel.TypeBased ?? rawModel.TagBased,
 		ReferenceName = rawModel.TypeBased is null ? rawModel.TagBased : rawModel.TypeBased.Replace(':','_'),
 		Properties = properties,
-		Associations = ParsePlantUmlAssociation(rawModel)
+		PlantUmlNamespace = PlantUmlNamespace(rawModel),
+		Associations = associations,
+		RawAssociations = rawAssociations
 	};
 	
-	model.PlantUmlCode = ParsePlantUmlModelToCode(model);
+	model.PlantUmlClassCode = ParsePlantUmlClassToCode(model);
 	
 	return model;
 }
@@ -449,10 +490,11 @@ public string ParsePlantumlProperty(KeyValuePair<string,RawXmlProperty> property
 	return line;
 }
 
-public List<string> ParsePlantUmlAssociation(RawModel model)
+public (List<string>,List<(string me, string friend)>) ParsePlantUmlAssociation(RawModel model)
 {
 	var myName = model.TypeBased is null ? model.TagBased : model.TypeBased.Replace(':','_');
 	List<string> list = null;
+	List<(string me, string friend)> rawList = null;
 	
 	if(model.XmlProperties is not null)
 		foreach(var property in model.XmlProperties.Values)
@@ -463,18 +505,70 @@ public List<string> ParsePlantUmlAssociation(RawModel model)
 				default:
 					if(list is null)
 						list = new List<string>();
+					if(rawList is null)
+						rawList = new List<(string me, string friend)>();
+						
 					list.AddRange(property.RawChildren.GroupBy(c => c.TypeBased).Select(c => c.First()).Select(c => $"{myName} --> {c.TypeBased.Replace(':','_')}").ToList());
+					rawList.AddRange(property.RawChildren.GroupBy(c => c.TypeBased).Select(c => c.First()).Select(c => (myName,c.TypeBased.Replace(':','_'))).ToList());
 					break;
 			}
 
 	if(model.RawChildren is not null)
 		foreach(var child in model.RawChildren)
+		{
 			if(list is not null)
 				list.Add($"{myName} --> {(child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_'))}");
 			else
 				list = new List<string>{$"{myName} --> {(child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_'))}"};
+				
+			if(rawList is not null)
+				rawList.Add((myName,(child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_'))));
+			else
+				rawList = new List<(string me, string friend)>{(myName,(child.TypeBased is null ? child.TagBased : child.TypeBased.Replace(':','_')))};
+		}
 	
-	return list;
+	return (list,rawList);
+}
+
+public string ParsePlantUmlClassToCode(PlantUmlModel model)
+{
+	var line = $"class {model.ReferenceName} as \"{model.ClassName}\" " + "{\r\n";
+	foreach(var property in model.Properties)
+	{
+		foreach(var elements in property.Value)
+			line += $"\t{elements}\r\n";
+	}
+	
+	line += "}\r\n\r\n";
+	
+	return line;
+}
+
+public string ParsePlantUmlModelToNamespacedCode(List<PlantUmlModel> pmodels)
+{
+	var line = "";
+	
+	var namespacedGrouping = pmodels.GroupBy(p => p.PlantUmlNamespace).ToDictionary(g => g.Key, g => g.ToList());
+	
+	foreach(var group in namespacedGrouping)
+	{
+		line += $"\r\nnamespace {group.Key} {{\r\n";
+		var models = group.Value;
+		
+		var associations = "\r\n";
+		
+		foreach(var model in models)
+		{
+			line += model.PlantUmlClassCode;
+			if(model.PlantUmlAssociationsCode is not null)
+				associations += $"{string.Join("\r\n", model.PlantUmlAssociationsCode)}\r\n";
+		}
+		
+		line += $"{associations}\r\n}}\r\n";
+	}
+	
+	
+	return line;
 }
 
 public string ParsePlantUmlModelToCode(PlantUmlModel model)
