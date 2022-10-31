@@ -5,7 +5,7 @@ page 4x1
 skinparam linetype ortho
 
 
-namespace ISO20022.Business {
+namespace ISO20022.Business #DDAAAA {
 class iso20022_BusinessAttribute as "iso20022:BusinessAttribute" {
 	string {http://www.omg.org/XMI}id
 	string {http://www.w3.org/2001/XMLSchema-instance}type
@@ -106,7 +106,13 @@ iso20022_BusinessProcess --> SimpleTypes.businessRole
 
 }
 
-namespace ISO20022.Message {
+ISO20022.Properties -[hidden]left-> SimpleTypes
+ISO20022.Business -[hidden]left-> ISO20022.Message
+ISO20022.Business -[hidden]down-> ISO20022.Properties
+ISO20022.Message -[hidden]down-> SimpleTypes
+
+
+namespace ISO20022.Message #AADDAA {
 class iso20022_MessageAttribute as "iso20022:MessageAttribute" {
 	string {http://www.omg.org/XMI}id
 	string {http://www.w3.org/2001/XMLSchema-instance}type
@@ -208,7 +214,13 @@ iso20022_MessageSet --> SimpleTypes.doclet
 
 }
 
-namespace ISO20022.Properties {
+ISO20022.Properties -[hidden]left-> SimpleTypes
+ISO20022.Business -[hidden]left-> ISO20022.Message
+ISO20022.Business -[hidden]down-> ISO20022.Properties
+ISO20022.Message -[hidden]down-> SimpleTypes
+
+
+namespace ISO20022.Properties #AAAADD {
 class iso20022_ChoiceComponent as "iso20022:ChoiceComponent" {
 	string {http://www.omg.org/XMI}id
 	string {http://www.w3.org/2001/XMLSchema-instance}type
@@ -453,7 +465,13 @@ iso20022_Year --> SimpleTypes.example
 
 }
 
-namespace SimpleTypes {
+ISO20022.Properties -[hidden]left-> SimpleTypes
+ISO20022.Business -[hidden]left-> ISO20022.Message
+ISO20022.Business -[hidden]down-> ISO20022.Properties
+ISO20022.Message -[hidden]down-> SimpleTypes
+
+
+namespace SimpleTypes #DDDDDD {
 class elements as "elements" {
 	string {http://www.omg.org/XMI}id
 	string name
@@ -584,6 +602,12 @@ messageDefinition --> SimpleTypes.xors
 businessRole --> SimpleTypes.semanticMarkup
 
 }
+
+ISO20022.Properties -[hidden]left-> SimpleTypes
+ISO20022.Business -[hidden]left-> ISO20022.Message
+ISO20022.Business -[hidden]down-> ISO20022.Properties
+ISO20022.Message -[hidden]down-> SimpleTypes
+
 
 
 @enduml

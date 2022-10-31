@@ -392,6 +392,13 @@ public string PlantUmlEnd()
 }
 
 public static Dictionary<string,string> PumlClassToNamespace = new Dictionary<string,string>();
+public static Dictionary<string,string> PumlClassToNamespaceColoring = new Dictionary<string,string>
+{
+	{"SimpleTypes","#DDDDDD"},
+	{"ISO20022.Business","#DDAAAA"},
+	{"ISO20022.Message","#AADDAA"},
+	{"ISO20022.Properties","#AAAADD"}
+};
 
 public string PlantUmlNamespace(RawModel rawModel)
 {
@@ -552,7 +559,7 @@ public string ParsePlantUmlModelToNamespacedCode(List<PlantUmlModel> pmodels)
 	
 	foreach(var group in namespacedGrouping)
 	{
-		line += $"\r\nnamespace {group.Key} {{\r\n";
+		line += $"\r\nnamespace {group.Key} {PumlClassToNamespaceColoring[group.Key]} {{\r\n";
 		var models = group.Value;
 		
 		var associations = "\r\n";
@@ -565,6 +572,10 @@ public string ParsePlantUmlModelToNamespacedCode(List<PlantUmlModel> pmodels)
 		}
 		
 		line += $"{associations}\r\n}}\r\n";
+		line += "\r\nISO20022.Properties -[hidden]left-> SimpleTypes";
+		line += "\r\nISO20022.Business -[hidden]left-> ISO20022.Message";
+		line += "\r\nISO20022.Business -[hidden]down-> ISO20022.Properties";
+		line += "\r\nISO20022.Message -[hidden]down-> SimpleTypes\r\n\r\n";
 	}
 	
 	
