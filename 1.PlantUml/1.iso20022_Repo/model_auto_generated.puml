@@ -32,7 +32,7 @@ class iso20022_BusinessAssociationEnd as "iso20022:BusinessAssociationEnd" {
 	string name
 	iso20022:BusinessAssociationEnd opposite
 	string registrationStatus
-	string type
+	iso20022:BusinessComponent type
 	semanticMarkup SemanticMarkup
 }
 
@@ -90,6 +90,7 @@ iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Year
 iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_YearMonth
 iso20022_BusinessAttribute --> SimpleTypes.semanticMarkup
 iso20022_BusinessAssociationEnd --> ISO20022.Business.iso20022_BusinessAssociationEnd
+iso20022_BusinessAssociationEnd --> ISO20022.Business.iso20022_BusinessComponent
 iso20022_BusinessAssociationEnd --> ISO20022.Message.iso20022_MessageAssociationEnd
 iso20022_BusinessAssociationEnd --> ISO20022.Message.iso20022_MessageAttribute
 iso20022_BusinessAssociationEnd --> SimpleTypes.semanticMarkup
@@ -166,7 +167,7 @@ class iso20022_MessageAssociationEnd as "iso20022:MessageAssociationEnd" {
 	string nextVersions
 	string previousVersion
 	string registrationStatus
-	string type
+	iso20022:ChoiceComponent, iso20022:ExternalSchema, iso20022:MessageComponent type
 	string xmlTag
 	semanticMarkup SemanticMarkup
 }
@@ -209,6 +210,9 @@ iso20022_MessageComponent --> ISO20022.Message.iso20022_MessageAttribute
 iso20022_MessageComponent --> SimpleTypes.constraint
 iso20022_MessageComponent --> SimpleTypes.semanticMarkup
 iso20022_MessageComponent --> SimpleTypes.xors
+iso20022_MessageAssociationEnd --> ISO20022.Message.iso20022_MessageComponent
+iso20022_MessageAssociationEnd --> ISO20022.Properties.iso20022_ChoiceComponent
+iso20022_MessageAssociationEnd --> ISO20022.Properties.iso20022_ExternalSchema
 iso20022_MessageAssociationEnd --> SimpleTypes.semanticMarkup
 iso20022_MessageSet --> SimpleTypes.doclet
 

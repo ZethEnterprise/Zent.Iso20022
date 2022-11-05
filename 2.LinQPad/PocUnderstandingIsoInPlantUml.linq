@@ -41,7 +41,7 @@ void Main()
 }
 
 public static Dictionary<string,RawModel> rawModelDictionary;
-public enum IdTypes { none, associationDomain, complexType, derivation, derivationComponent, derivationElement, opposite, simpleType, subType, superType, type }
+public enum IdTypes { none, associationDomain, complexType, derivation, derivationComponent, derivationElement, opposite, simpleType, subType, superType, type, idType }
 public static XNamespace iso20022 = "urn:iso:std:iso:20022:2013:ecore";
 public static XNamespace xmi = "http://www.omg.org/XMI";
 public static XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
@@ -172,9 +172,8 @@ public Dictionary<string,RawXmlProperty> DistinctAndMergeToDictionary(List<RawXm
 	{
 		var first = child.Value.First();
 		foreach(var raw in child.Value)
-		{
 			first.RawChildren.AddRange(raw.RawChildren);
-		}
+			
 		first.RawChildren = first.RawChildren.Distinct(new RawModelComparer()).ToList();
 		dict.Add(child.Key,first);
 	}
@@ -262,8 +261,25 @@ public void CorrectXmlProperties(IEnumerable<RawModel> models, IDictionary<strin
 		{
 			switch(property.IdType)
 			{
-				case IdTypes.none: case IdTypes.type:
+				case IdTypes.none:
 					//Do nothing
+					break;
+				case IdTypes.type:
+				
+					var rawIds = property.RawValue.Split(' ').ToList<string>();
+					
+					foreach(var id in rawIds)
+						if(modelDictionary.ContainsKey(id))
+							if(property.RawChildren is null)
+								property.RawChildren = new List<RawModel>{modelDictionary[id]};
+							else
+								property.RawChildren.Add(modelDictionary[id]);
+							
+					if(property.RawChildren is not null)
+					{
+						property.RawIds  = rawIds;
+						property.IdType = IdTypes.idType; 
+					}
 					break;
 				case IdTypes.associationDomain: case IdTypes.opposite:
 				case IdTypes.complexType: case IdTypes.simpleType:
