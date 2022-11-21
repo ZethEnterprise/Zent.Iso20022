@@ -1,0 +1,578 @@
+﻿@startuml ERepository.iso20022 Model (Auto-Generated)
+
+' Split into 4 pages
+page 4x1
+skinparam linetype ortho
+
+
+namespace ISO20022.Business #DDAAAA {
+	class iso20022_BusinessAttribute as "iso20022:BusinessAttribute" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		iso20022:BusinessComponent complexType
+		string definition
+		iso20022:MessageAssociationEnd, iso20022:MessageAttribute derivation
+		string isDerived
+		string maxOccurs
+		string minOccurs
+		string name
+		string registrationStatus
+		iso20022:Amount, iso20022:Binary, iso20022:CodeSet, iso20022:Date, iso20022:DateTime, iso20022:IdentifierSet, iso20022:Indicator, iso20022:Quantity, iso20022:Rate, iso20022:SchemaType, iso20022:Text, iso20022:Time, iso20022:Year, iso20022:YearMonth simpleType
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_BusinessAssociationEnd as "iso20022:BusinessAssociationEnd" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		iso20022:MessageAssociationEnd, iso20022:MessageAttribute derivation
+		string isDerived
+		string maxOccurs
+		string minOccurs
+		string name
+		iso20022:BusinessAssociationEnd opposite
+		string registrationStatus
+		iso20022:BusinessComponent type
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_BusinessComponent as "iso20022:BusinessComponent" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		iso20022:BusinessAssociationEnd associationDomain
+		string definition
+		iso20022:ChoiceComponent, iso20022:MessageComponent derivationComponent
+		iso20022:MessageAssociationEnd, iso20022:MessageAttribute derivationElement
+		string name
+		string registrationStatus
+		iso20022:BusinessComponent subType
+		iso20022:BusinessComponent superType
+		iso20022_BusinessAttribute Iso20022_BusinessAttribute
+		iso20022_BusinessAssociationEnd Iso20022_BusinessAssociationEnd
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_BusinessArea as "iso20022:BusinessArea" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string code
+		string definition
+		string name
+		string registrationStatus
+		messageDefinition MessageDefinition
+	}
+}
+
+
+
+namespace ISO20022.Message #AADDAA {
+	class iso20022_MessageAttribute as "iso20022:MessageAttribute" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string businessComponentTrace
+		string businessElementTrace
+		iso20022:ChoiceComponent, iso20022:ExternalSchema, iso20022:MessageComponent, iso20022:UserDefined complexType
+		string definition
+		string isDerived
+		string maxOccurs
+		string minOccurs
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		iso20022:Amount, iso20022:Binary, iso20022:CodeSet, iso20022:Date, iso20022:DateTime, iso20022:IdentifierSet, iso20022:Indicator, iso20022:Month, iso20022:Quantity, iso20022:Rate, iso20022:SchemaType, iso20022:Text, iso20022:Time, iso20022:Year, iso20022:YearMonth simpleType
+		string xmlTag
+		semanticMarkup SemanticMarkup
+		constraint Constraint
+		example Example
+	}
+
+	class iso20022_MessageComponent as "iso20022:MessageComponent" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string messageBuildingBlock
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		string removalDate
+		string trace
+		iso20022_MessageAttribute Iso20022_MessageAttribute
+		xors Xors
+		iso20022_MessageAssociationEnd Iso20022_MessageAssociationEnd
+		constraint Constraint
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_MessageAssociationEnd as "iso20022:MessageAssociationEnd" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string businessComponentTrace
+		string businessElementTrace
+		string definition
+		string isComposite
+		string isDerived
+		string maxOccurs
+		string minOccurs
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		iso20022:ChoiceComponent, iso20022:ExternalSchema, iso20022:MessageComponent type
+		string xmlTag
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_MessageSet as "iso20022:MessageSet" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string messageDefinition
+		string name
+		string registrationStatus
+		doclet Doclet
+	}
+
+
+
+}
+
+
+namespace ISO20022.Properties #AAAADD {
+	class iso20022_ChoiceComponent as "iso20022:ChoiceComponent" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string messageBuildingBlock
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		string removalDate
+		string trace
+		iso20022_MessageAttribute Iso20022_MessageAttribute
+		constraint Constraint
+		iso20022_MessageAssociationEnd Iso20022_MessageAssociationEnd
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_UserDefined as "iso20022:UserDefined" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string name
+		string namespace
+		string namespaceList
+		string processContents
+		string registrationStatus
+		string removalDate
+	}
+
+	class iso20022_ExternalSchema as "iso20022:ExternalSchema" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string messageBuildingBlock
+		string name
+		string processContent
+		string registrationStatus
+		constraint Constraint
+		namespaceList NamespaceList
+	}
+
+	class iso20022_Text as "iso20022:Text" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string length
+		string maxLength
+		string minLength
+		string name
+		string pattern
+		string registrationStatus
+		string removalDate
+	}
+	
+	class iso20022_IdentifierSet as "iso20022:IdentifierSet" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string identificationScheme
+		string maxLength
+		string minLength
+		string name
+		string pattern
+		string registrationStatus
+		string removalDate
+		example Example
+		constraint Constraint
+	}
+
+	class iso20022_CodeSet as "iso20022:CodeSet" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		iso20022:CodeSet derivation
+		string length
+		string maxLength
+		string minLength
+		string name
+		string nextVersions
+		string pattern
+		string previousVersion
+		string registrationStatus
+		string removalDate
+		string trace
+		example Example
+		constraint Constraint
+		code Code
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_Indicator as "iso20022:Indicator" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string meaningWhenFalse
+		string meaningWhenTrue
+		string name
+		string registrationStatus
+		semanticMarkup SemanticMarkup
+	}
+
+	class iso20022_Quantity as "iso20022:Quantity" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string fractionDigits
+		string maxInclusive
+		string minInclusive
+		string name
+		string pattern
+		string registrationStatus
+		string removalDate
+		string totalDigits
+		example Example
+		constraint Constraint
+	}
+
+	class iso20022_Amount as "iso20022:Amount" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string currencyIdentifierSet
+		string definition
+		string fractionDigits
+		string maxInclusive
+		string minInclusive
+		string name
+		string registrationStatus
+		string totalDigits
+		example Example
+		constraint Constraint
+	}
+
+	class iso20022_Time as "iso20022:Time" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string name
+		string registrationStatus
+	}
+
+	class iso20022_Rate as "iso20022:Rate" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string baseValue
+		string definition
+		string fractionDigits
+		string maxInclusive
+		string minInclusive
+		string name
+		string registrationStatus
+		string removalDate
+		string totalDigits
+		example Example
+	}
+
+	class iso20022_YearMonth as "iso20022:YearMonth" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string name
+		string registrationStatus
+		example Example
+	}
+
+	class iso20022_Year as "iso20022:Year" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string maxInclusive
+		string minInclusive
+		string name
+		string registrationStatus
+		example Example
+	}
+
+	class iso20022_Binary as "iso20022:Binary" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string maxLength
+		string minLength
+		string name
+		string registrationStatus
+	}
+
+	class iso20022_SchemaType as "iso20022:SchemaType" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string kind
+		string name
+		string registrationStatus
+	}
+
+	class iso20022_Month as "iso20022:Month" {
+		string {http://www.omg.org/XMI}id
+		string {http://www.w3.org/2001/XMLSchema-instance}type
+		string definition
+		string name
+		string registrationStatus
+	}
+
+
+
+}
+
+
+
+namespace SimpleTypes #DDDDDD {
+	class elements as "elements" {
+		string {http://www.omg.org/XMI}id
+		string name
+		string value
+	}
+
+	class semanticMarkup as "semanticMarkup" {
+		string {http://www.omg.org/XMI}id
+		string type
+		elements Elements
+	}
+
+	class xors as "xors" {
+		string {http://www.omg.org/XMI}id
+		string definition
+		string impactedElements
+		string impactedMessageBuildingBlocks
+		string name
+		string registrationStatus
+	}
+
+	class constraint as "constraint" {
+		string {http://www.omg.org/XMI}id
+		string definition
+		string expression
+		string expressionLanguage
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+	}
+
+	class example as "example" {
+	}
+
+	class namespaceList as "namespaceList" {
+	}
+
+	class code as "code" {
+		string {http://www.omg.org/XMI}id
+		string codeName
+		string definition
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		string removalDate
+		semanticMarkup SemanticMarkup
+	}
+
+	class doclet as "doclet" {
+		string {http://www.omg.org/XMI}id
+		string content
+		string type
+	}
+
+	class messageBuildingBlock as "messageBuildingBlock" {
+		string {http://www.omg.org/XMI}id
+		iso20022:ChoiceComponent, iso20022:ExternalSchema, iso20022:MessageComponent complexType
+		string definition
+		string maxOccurs
+		string minOccurs
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		iso20022:Amount, iso20022:CodeSet, iso20022:Date, iso20022:DateTime, iso20022:Indicator, iso20022:Quantity, iso20022:Text simpleType
+		string xmlTag
+		semanticMarkup SemanticMarkup
+		example Example
+	}
+
+	class messageDefinitionIdentifier as "messageDefinitionIdentifier" {
+		string businessArea
+		string flavour
+		string messageFunctionality
+		string version
+	}
+
+	class messageDefinition as "messageDefinition" {
+		string {http://www.omg.org/XMI}id
+		string definition
+		string messageSet
+		string name
+		string nextVersions
+		string previousVersion
+		string registrationStatus
+		string rootElement
+		string xmlName
+		string xmlTag
+		constraint Constraint
+		messageBuildingBlock MessageBuildingBlock
+		messageDefinitionIdentifier MessageDefinitionIdentifier
+		doclet Doclet
+		xors Xors
+		semanticMarkup SemanticMarkup
+	}
+}
+
+ISO20022.Properties -[hidden]left-> SimpleTypes
+ISO20022.Business -[hidden]left-> ISO20022.Message
+ISO20022.Business -[hidden]down-> ISO20022.Properties
+ISO20022.Message -[hidden]down-> SimpleTypes
+
+
+ISO20022.Properties.iso20022_ExternalSchema --> SimpleTypes.namespaceList
+
+SimpleTypes.semanticMarkup --> SimpleTypes.elements
+
+ISO20022.Properties.iso20022_Amount --> SimpleTypes.example
+SimpleTypes.messageBuildingBlock --> SimpleTypes.example
+ISO20022.Message.iso20022_MessageAttribute --> SimpleTypes.example
+ISO20022.Properties.iso20022_IdentifierSet --> SimpleTypes.example
+ISO20022.Properties.iso20022_CodeSet --> SimpleTypes.example
+ISO20022.Properties.iso20022_Quantity --> SimpleTypes.example
+ISO20022.Properties.iso20022_Rate --> SimpleTypes.example
+ISO20022.Properties.iso20022_YearMonth --> SimpleTypes.example
+ISO20022.Properties.iso20022_Year --> SimpleTypes.example
+
+ISO20022.Properties.iso20022_Amount --> SimpleTypes.constraint
+SimpleTypes.messageDefinition --> SimpleTypes.constraint
+ISO20022.Message.iso20022_MessageAttribute --> SimpleTypes.constraint
+ISO20022.Message.iso20022_MessageComponent --> SimpleTypes.constraint
+ISO20022.Properties.iso20022_ChoiceComponent --> SimpleTypes.constraint
+ISO20022.Properties.iso20022_ExternalSchema --> SimpleTypes.constraint
+ISO20022.Properties.iso20022_IdentifierSet --> SimpleTypes.constraint
+ISO20022.Properties.iso20022_CodeSet --> SimpleTypes.constraint
+ISO20022.Properties.iso20022_Quantity --> SimpleTypes.constraint
+
+SimpleTypes.messageDefinition --> SimpleTypes.xors
+ISO20022.Message.iso20022_MessageComponent --> SimpleTypes.xors
+
+SimpleTypes.messageDefinition --> SimpleTypes.doclet
+ISO20022.Message.iso20022_MessageSet --> SimpleTypes.doclet
+
+SimpleTypes.code --> SimpleTypes.semanticMarkup
+SimpleTypes.messageBuildingBlock --> SimpleTypes.semanticMarkup
+SimpleTypes.messageDefinition --> SimpleTypes.semanticMarkup
+ISO20022.Business.iso20022_BusinessAttribute --> SimpleTypes.semanticMarkup
+ISO20022.Business.iso20022_BusinessAssociationEnd --> SimpleTypes.semanticMarkup
+ISO20022.Business.iso20022_BusinessComponent --> SimpleTypes.semanticMarkup
+ISO20022.Message.iso20022_MessageAttribute --> SimpleTypes.semanticMarkup
+ISO20022.Message.iso20022_MessageComponent --> SimpleTypes.semanticMarkup
+ISO20022.Message.iso20022_MessageAssociationEnd --> SimpleTypes.semanticMarkup
+ISO20022.Properties.iso20022_ChoiceComponent --> SimpleTypes.semanticMarkup
+ISO20022.Properties.iso20022_CodeSet --> SimpleTypes.semanticMarkup
+ISO20022.Properties.iso20022_Indicator --> SimpleTypes.semanticMarkup
+
+ISO20022.Properties.iso20022_CodeSet --> SimpleTypes.code
+
+ISO20022.Properties.iso20022_CodeSet --> ISO20022.Properties.iso20022_CodeSet
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_CodeSet
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_CodeSet
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_CodeSet
+
+
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Amount
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Amount
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Amount
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Binary
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Binary
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_ExternalSchema
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_ExternalSchema
+ISO20022.Message.iso20022_MessageAssociationEnd --> ISO20022.Properties.iso20022_ExternalSchema
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_IdentifierSet
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_IdentifierSet
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Indicator
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Indicator
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Indicator
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Month
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Quantity
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Quantity
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Quantity
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Rate
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Rate
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_SchemaType
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_SchemaType
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Text
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Text
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Text
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Time
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Time
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_UserDefined
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Year
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Year
+ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_YearMonth
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_YearMonth
+
+ISO20022.Properties.iso20022_ChoiceComponent <--> ISO20022.Message.iso20022_MessageAttribute
+ISO20022.Properties.iso20022_ChoiceComponent <--> ISO20022.Message.iso20022_MessageAssociationEnd
+
+SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_ChoiceComponent
+ISO20022.Business.iso20022_BusinessComponent --> ISO20022.Properties.iso20022_ChoiceComponent
+
+
+ISO20022.Message.iso20022_MessageComponent <--> ISO20022.Message.iso20022_MessageAssociationEnd
+ISO20022.Message.iso20022_MessageComponent <--> ISO20022.Message.iso20022_MessageAttribute
+
+SimpleTypes.messageBuildingBlock --> ISO20022.Message.iso20022_MessageComponent
+ISO20022.Business.iso20022_BusinessComponent --> ISO20022.Message.iso20022_MessageComponent
+
+SimpleTypes.messageDefinition --> SimpleTypes.messageBuildingBlock
+SimpleTypes.messageDefinition --> SimpleTypes.messageDefinitionIdentifier
+ISO20022.Business.iso20022_BusinessArea --> SimpleTypes.messageDefinition
+
+ISO20022.Business.iso20022_BusinessAttribute <--> ISO20022.Business.iso20022_BusinessComponent
+
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Message.iso20022_MessageAssociationEnd
+
+ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Message.iso20022_MessageAttribute
+
+
+ISO20022.Business.iso20022_BusinessAssociationEnd <--> ISO20022.Business.iso20022_BusinessComponent
+
+ISO20022.Business.iso20022_BusinessAssociationEnd --> ISO20022.Business.iso20022_BusinessAssociationEnd
+ISO20022.Business.iso20022_BusinessAssociationEnd --> ISO20022.Message.iso20022_MessageAssociationEnd
+ISO20022.Business.iso20022_BusinessAssociationEnd --> ISO20022.Message.iso20022_MessageAttribute
+
+ISO20022.Business.iso20022_BusinessComponent --> ISO20022.Business.iso20022_BusinessComponent
+ISO20022.Business.iso20022_BusinessComponent --> ISO20022.Message.iso20022_MessageAssociationEnd
+ISO20022.Business.iso20022_BusinessComponent --> ISO20022.Message.iso20022_MessageAttribute
+
+
+
+
+
+@enduml
