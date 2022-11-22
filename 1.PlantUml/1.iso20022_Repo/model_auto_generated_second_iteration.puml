@@ -3,6 +3,7 @@
 ' Split into 4 pages
 page 4x1
 skinparam linetype ortho
+skinparam backgroundColor DimGrey
 
 
 namespace ISO20022.Business #DDAAAA {
@@ -193,7 +194,7 @@ namespace ISO20022.Properties #AAAADD {
 		string registrationStatus
 		string removalDate
 	}
-	
+
 	class iso20022_IdentifierSet as "iso20022:IdentifierSet" {
 		string {http://www.omg.org/XMI}id
 		string {http://www.w3.org/2001/XMLSchema-instance}type
@@ -241,90 +242,6 @@ namespace ISO20022.Properties #AAAADD {
 		semanticMarkup SemanticMarkup
 	}
 
-	class iso20022_Quantity as "iso20022:Quantity" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string definition
-		string fractionDigits
-		string maxInclusive
-		string minInclusive
-		string name
-		string pattern
-		string registrationStatus
-		string removalDate
-		string totalDigits
-		example Example
-		constraint Constraint
-	}
-
-	class iso20022_Amount as "iso20022:Amount" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string currencyIdentifierSet
-		string definition
-		string fractionDigits
-		string maxInclusive
-		string minInclusive
-		string name
-		string registrationStatus
-		string totalDigits
-		example Example
-		constraint Constraint
-	}
-
-	class iso20022_Time as "iso20022:Time" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string definition
-		string name
-		string registrationStatus
-	}
-
-	class iso20022_Rate as "iso20022:Rate" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string baseValue
-		string definition
-		string fractionDigits
-		string maxInclusive
-		string minInclusive
-		string name
-		string registrationStatus
-		string removalDate
-		string totalDigits
-		example Example
-	}
-
-	class iso20022_YearMonth as "iso20022:YearMonth" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string definition
-		string name
-		string registrationStatus
-		example Example
-	}
-
-	class iso20022_Year as "iso20022:Year" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string definition
-		string maxInclusive
-		string minInclusive
-		string name
-		string registrationStatus
-		example Example
-	}
-
-	class iso20022_Binary as "iso20022:Binary" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string definition
-		string maxLength
-		string minLength
-		string name
-		string registrationStatus
-	}
-
 	class iso20022_SchemaType as "iso20022:SchemaType" {
 		string {http://www.omg.org/XMI}id
 		string {http://www.w3.org/2001/XMLSchema-instance}type
@@ -333,17 +250,6 @@ namespace ISO20022.Properties #AAAADD {
 		string name
 		string registrationStatus
 	}
-
-	class iso20022_Month as "iso20022:Month" {
-		string {http://www.omg.org/XMI}id
-		string {http://www.w3.org/2001/XMLSchema-instance}type
-		string definition
-		string name
-		string registrationStatus
-	}
-
-
-
 }
 
 
@@ -379,9 +285,6 @@ namespace SimpleTypes #DDDDDD {
 		string nextVersions
 		string previousVersion
 		string registrationStatus
-	}
-
-	class example as "example" {
 	}
 
 	class namespaceList as "namespaceList" {
@@ -458,17 +361,6 @@ ISO20022.Properties.iso20022_ExternalSchema --> SimpleTypes.namespaceList
 
 SimpleTypes.semanticMarkup --> SimpleTypes.elements
 
-ISO20022.Properties.iso20022_Amount --> SimpleTypes.example
-SimpleTypes.messageBuildingBlock --> SimpleTypes.example
-ISO20022.Message.iso20022_MessageAttribute --> SimpleTypes.example
-ISO20022.Properties.iso20022_IdentifierSet --> SimpleTypes.example
-ISO20022.Properties.iso20022_CodeSet --> SimpleTypes.example
-ISO20022.Properties.iso20022_Quantity --> SimpleTypes.example
-ISO20022.Properties.iso20022_Rate --> SimpleTypes.example
-ISO20022.Properties.iso20022_YearMonth --> SimpleTypes.example
-ISO20022.Properties.iso20022_Year --> SimpleTypes.example
-
-ISO20022.Properties.iso20022_Amount --> SimpleTypes.constraint
 SimpleTypes.messageDefinition --> SimpleTypes.constraint
 ISO20022.Message.iso20022_MessageAttribute --> SimpleTypes.constraint
 ISO20022.Message.iso20022_MessageComponent --> SimpleTypes.constraint
@@ -476,7 +368,6 @@ ISO20022.Properties.iso20022_ChoiceComponent --> SimpleTypes.constraint
 ISO20022.Properties.iso20022_ExternalSchema --> SimpleTypes.constraint
 ISO20022.Properties.iso20022_IdentifierSet --> SimpleTypes.constraint
 ISO20022.Properties.iso20022_CodeSet --> SimpleTypes.constraint
-ISO20022.Properties.iso20022_Quantity --> SimpleTypes.constraint
 
 SimpleTypes.messageDefinition --> SimpleTypes.xors
 ISO20022.Message.iso20022_MessageComponent --> SimpleTypes.xors
@@ -505,11 +396,6 @@ ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Co
 SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_CodeSet
 
 
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Amount
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Amount
-SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Amount
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Binary
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Binary
 ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_ExternalSchema
 SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_ExternalSchema
 ISO20022.Message.iso20022_MessageAssociationEnd --> ISO20022.Properties.iso20022_ExternalSchema
@@ -518,24 +404,12 @@ ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Id
 ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Indicator
 ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Indicator
 SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Indicator
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Month
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Quantity
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Quantity
-SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Quantity
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Rate
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Rate
 ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_SchemaType
 ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_SchemaType
 ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Text
 ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Text
 SimpleTypes.messageBuildingBlock --> ISO20022.Properties.iso20022_Text
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Time
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Time
 ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_UserDefined
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_Year
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_Year
-ISO20022.Message.iso20022_MessageAttribute --> ISO20022.Properties.iso20022_YearMonth
-ISO20022.Business.iso20022_BusinessAttribute --> ISO20022.Properties.iso20022_YearMonth
 
 ISO20022.Properties.iso20022_ChoiceComponent <--> ISO20022.Message.iso20022_MessageAttribute
 ISO20022.Properties.iso20022_ChoiceComponent <--> ISO20022.Message.iso20022_MessageAssociationEnd
