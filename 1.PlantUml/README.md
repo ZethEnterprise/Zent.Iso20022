@@ -31,3 +31,7 @@ Let's remove some of the "simple types" such as Date or DateTime. Constraints ar
 Now we have trimmed it a bit, by removing a few in Iso20022.Properties namespace. Let's see, what the other stuff in SimpleTypes are.
 
 * Doclet: Doclet seems to be just a neat descriptive component, what I got from it so far is that Doclet (as a program) generates the documentation of Java source code, just like Doxygen (D'oh! I've should have seen this one coming a mile away). Funny part it that it got me thinking: "That the heck <i>IS</i> a ECORE file anyway?". I know for sure that it is not a file in Evil Corp (if you don't know that reference, then watch a very nerdy TV serie). Searching a bit on, what ECORE actually is, I get a neat message that it is related to Eclipse (Yes - Java. The dots are connected). One funny thought: "What happens if I try to open the ECORE file with Eclipse?". That is a thought for another day, though.
+
+* iso20022:Quantity, Amount, Time, Rate, YearMonth, Year, Binary, Month: These are so to speak just simple types describing quite nicely what they are meant for.
+
+* (simpleTypes) example: Well, that is very obvious what it is about.
