@@ -35,3 +35,6 @@ Now we have trimmed it a bit, by removing a few in Iso20022.Properties namespace
 * iso20022:Quantity, Amount, Time, Rate, YearMonth, Year, Binary, Month: These are so to speak just simple types describing quite nicely what they are meant for.
 
 * (simpleTypes) example: Well, that is very obvious what it is about.
+
+# 2023-05-03
+We are back! Sorry about the delay - had a lot to attend to, but now we are back once more! So, let's see where we left off. It seems to be a long time ago since we had a check-up in there. Ah! The second iteration file. Should we see, what else we can remove from that iteration, which does not make any sense in the XSD creation sense. Let's look into <i>XORS</i>. XORS actually describes <i>either one must be present, but only one</i>-rule on the component it is linked to. This rule seems more businessey-like than anything else. So perhaps a bit more conceptual like "that either this field field is present in this subchild from this parent or in this sub-subchild from the same parent".
