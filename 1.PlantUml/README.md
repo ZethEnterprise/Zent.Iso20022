@@ -44,3 +44,6 @@ The <i>XORS</i> got <i>impactedElements</i> and <i>impactedMessageBuildingBlocks
 
 So - what's next? <i>Code</i>! What in the (blasfemis) World is <i>Code</i> doing here? It is a part of <i>Iso20022:CodeSet</i>, which contains <i>Constraints</i>, <i>SemanticMarkups</i> and <i>Examples</i>. So Code got <i>CodeName</i> (47!).
 I actually found a good example. CodeName "DIST". I got two almost similar TopLevelDictionaryEntries for the same thing. The one of type CodeSet has this Code with the CodeName "DIST" and that Code's name is "Distribution". But here's the thing: That TopLevelDictionaryEntry got a derivation class, which is also a TopLevelDictionaryEntry of type CodeSet. This one links back to the previous one through the field Trace and it got an <i>Example</i> which ontains "DIST" and it has a Code with the name "Distribution". This means it actually have two versions of the same and here's the thing: The one with the without the CodeName is <i>Provisionally Registered</i>. So it seems like the ones <i>Provisionally Registered</i> are used as "Submitted for evaluation and not usable in real life".
+
+# 2023-05-12
+Hi there! <Ticker tape, ticker tape>.
