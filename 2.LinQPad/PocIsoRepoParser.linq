@@ -6,12 +6,28 @@ void Main()
 	var fullRepo = "../3.Iso20022Files/1.SourceFiles/20220520_ISO20022_2013_eRepository.iso20022";
 	var pain001Repo = "../3.Iso20022Files/1.SourceFiles/pain.001.001.03_version_eRepository.iso20022";
 	var repo = pain001Repo;
-	var content = System.IO.File.ReadAllText($"{scriptPath}/{repo}",Encoding.UTF8);
-	var doc = XDocument.Parse(content);
+	//var content = System.IO.File.ReadAllText($"{scriptPath}/{repo}",Encoding.UTF8);
+	//var doc = XDocument.Parse(content);
 	
-	XNamespace iso20022 = "urn:iso:std:iso:20022:2013:ecore";
-	XNamespace xmi = "http://www.omg.org/XMI";
-	XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
+	XDocument doc = null;
+	XmlNamespaceManager xnm = null;
+	using (StreamReader streamReader = new StreamReader($"{scriptPath}/{repo}", Encoding.UTF8, true))
+    {
+		var reader = new XmlTextReader(streamReader);
+		doc = XDocument.Load(reader);
+		XmlNameTable table = reader.NameTable;
+	 	xnm= new XmlNamespaceManager(table);
+		
+		XNamespace xmlns = xnm.LookupNamespace("xmlns");
+		xnm.AddNamespace("iso20022",doc.Elements().First().Attribute(xmlns + "iso20022").Value);
+		xnm.AddNamespace("xmi",doc.Elements().First().Attribute(xmlns + "xmi").Value);
+		xnm.AddNamespace("xsi",doc.Elements().First().Attribute(xmlns + "xsi").Value);
+    }
+	
+	
+	XNamespace iso20022 = xnm.LookupNamespace("iso20022"); // "urn:iso:std:iso:20022:2013:ecore";
+	XNamespace xmi = xnm.LookupNamespace("xmi");           //"http://www.omg.org/XMI";
+	XNamespace xsi = xnm.LookupNamespace("xsi");           //"http://www.w3.org/2001/XMLSchema-instance";
 	
 	var ou = from c in doc.Descendants(iso20022 + "Repository")
 						  .Descendants("dataDictionary")
@@ -19,7 +35,16 @@ void Main()
 				where c.Attribute(xmi + "id").Value == "_PxqyMtp-Ed-ak6NoX_4Aeg_21204997"
 				select c;
 				
-	Parse(iso20022, xmi, xsi, doc, "pain.001.001.03");
+	(from c in doc.Descendants(iso20022 + "Repository")
+				where c.Attribute(xmi + "id").Value == "_a8PpJ9p-Ed-ak6NoX_4Aeg_-779465922"
+				select c).Dump();
+				
+	
+	xnm.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+	xnm.AddNamespace("xmi", "http://www.omg.org/XMI");
+	doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\"_T-soNtp-Ed-ak6NoX_4Aeg_330596074\"]", xnm).Dump();
+
+	Parse(iso20022, xmi, xsi, doc, xnm, "pain.001.001.03");
 }
 
 // You can define other methods, fields, classes and namespaces here
@@ -39,6 +64,8 @@ public class PropertyObject :XObject
 public class SimplePropertyObject : PropertyObject
 {
 	public string MyType;
+	public string SpecifiedType;
+	public string TraceId;
 }
 
 public class ClassObject : XObject
@@ -71,10 +98,10 @@ public (Dictionary<string, XElement> data, Dictionary<string, XElement> messages
 	foreach( var e in msg)
 		messages.Add(e.Attribute(xmi + "id").Value, e);
 
-	return (data, messages);
+	return (data, messages.Dump());
 }
 
-public void Parse(XNamespace iso20022, XNamespace xmi, XNamespace xsi, XDocument doc, params string[] schemas)
+public void Parse(XNamespace iso20022, XNamespace xmi, XNamespace xsi, XDocument doc, XmlNamespaceManager xnm, params string[] schemas)
 {
 	(var data, var messages) = GenerateDictionary(doc, iso20022, xmi, xsi);
 	var myPain = from c in messages.Values
@@ -193,9 +220,11 @@ public PropertyObject ParseProperty(XNamespace iso20022, XNamespace xmi, XNamesp
 		myProperty = new SimplePropertyObject
 		{
 			Id = simpleTypeDefinition.Attribute(xmi + "id").Value,
-			Name = simpleTypeDefinition.Attribute("name").Value,
+			Name = propertyDefinition.Attribute("name").Value,
+			SpecifiedType = simpleTypeDefinition.Attribute("name").Value,
 			MyKind = PropertyType.Simple,
-			MyType = simpleTypeDefinition.Attribute(xsi + "type").Value
+			MyType = simpleTypeDefinition.Attribute(xsi + "type").Value,
+			TraceId = simpleTypeDefinition.Attribute(xsi + "traceId")?.Value ?? ""
 		};
 	}
 	else if(propertyDefinition.Attribute("complexType") is not null)
