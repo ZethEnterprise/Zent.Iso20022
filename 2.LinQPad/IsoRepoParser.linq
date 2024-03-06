@@ -134,11 +134,87 @@ public void ParseBaseClass(MasterData master, XElement baseObject)
 	{
 		Id = baseObject.Attribute(master.Prefix("xmi") + "id").Value,
 		Name = baseObject.Attribute("name").Value,
-		Properties = propertyObjects.Select(p => ParseBaseProperties(iso20022, xmi, xsi, p, data)).ToList()
+		Properties = propertyObjects.Select(p => ParseBaseProperties(master, p)).ToList()
 	};
 	
 	//RecursivePrint(myBase);
 	
 	myBase.Dump();
 	master.SchemaModels.Add(myBase);
+}
+
+public PropertyObject ParseBaseProperties(MasterData master, XElement basePropertyObject)
+{
+	var definitionXElement = master.data[basePropertyObject.Attribute("complexType").Value];//.Dump();
+	//var classDefinition = ParseClass(iso20022, xmi, xsi, definitionXElement, data);
+	var myProperty = new ClassPropertyObject
+	{
+		Id = basePropertyObject.Attribute(master.Prefix("xmi") + "id").Value,
+		Name = basePropertyObject.Attribute("name").Value,
+		MyKind = PropertyType.Complex,
+		MyType = ParseClass(master, definitionXElement)
+	};
+	
+	return myProperty;
+}
+
+public ClassObject ParseClass(MasterData master, XElement classDefinition)
+{
+	var propertyXElements = from c in classDefinition
+								.Descendants("messageElement")
+							select c;
+	
+	var myClass = new ClassObject
+	{
+		Id = classDefinition.Attribute(master.Prefix("xmi") + "id").Value,
+		Name = classDefinition.Attribute("name").Value,
+		Properties = propertyXElements.Select(p => ParseProperty(master, p)).ToList()
+	};
+	
+	return myClass;
+}
+
+public PropertyObject ParseProperty(MasterData master, XElement propertyDefinition)
+{
+	PropertyObject myProperty = null;
+	
+	if(propertyDefinition.Attribute("simpleType") is not null)
+	{
+		var simpleTypeDefinition = master.data[propertyDefinition.Attribute("simpleType").Value];//.Dump();
+		myProperty = new SimplePropertyObject
+		{
+			Id = simpleTypeDefinition.Attribute(master.Prefix("xmi") + "id").Value,
+			Name = propertyDefinition.Attribute("name").Value,
+			SpecifiedType = simpleTypeDefinition.Attribute("name").Value,
+			MyKind = PropertyType.Simple,
+			MyType = simpleTypeDefinition.Attribute(master.Prefix("xsi") + "type").Value,
+			TraceId = simpleTypeDefinition.Attribute("trace")?.Value ?? ""
+		};
+	}
+	else if(propertyDefinition.Attribute("complexType") is not null)
+	{
+		//propertyDefinition.Dump();
+		var complexTypeDefinition = master.data[propertyDefinition.Attribute("complexType").Value];//.Dump();
+		myProperty = new ClassPropertyObject
+		{
+			Id = propertyDefinition.Attribute(master.Prefix("xmi") + "id").Value,
+			Name = propertyDefinition.Attribute("name").Value,
+			MyKind = PropertyType.Complex,
+			MyType = ParseClass(master, complexTypeDefinition)
+		};
+	}
+	else
+	{
+		//propertyDefinition.Dump();
+		var complexTypeDefinition = master.data[propertyDefinition.Attribute("type").Value];//.Dump();
+		myProperty = new ClassPropertyObject
+		{
+			Id = propertyDefinition.Attribute(master.Prefix("xmi") + "id").Value,
+			Name = propertyDefinition.Attribute("name").Value,
+			MyKind = PropertyType.Multiple,
+			MyType = ParseClass(master, complexTypeDefinition)
+		};
+	}
+	
+	return myProperty;
 }
