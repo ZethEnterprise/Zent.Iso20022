@@ -35,14 +35,11 @@ void Main()
 				where c.Attribute(xmi + "id").Value == "_PxqyMtp-Ed-ak6NoX_4Aeg_21204997"
 				select c;
 				
-	(from c in doc.Descendants(iso20022 + "Repository")
-				where c.Attribute(xmi + "id").Value == "_a8PpJ9p-Ed-ak6NoX_4Aeg_-779465922"
-				select c).Dump();
-				
-	
-	xnm.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	xnm.AddNamespace("xmi", "http://www.omg.org/XMI");
-	doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\"_T-soNtp-Ed-ak6NoX_4Aeg_330596074\"]", xnm).Dump();
+			
+	xnm.Dump();
+	//xnm.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+	//xnm.AddNamespace("xmi", "http://www.omg.org/XMI");
+	//doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\"_T-soNtp-Ed-ak6NoX_4Aeg_330596074\"]", xnm).Dump();
 
 	Parse(iso20022, xmi, xsi, doc, xnm, "pain.001.001.03");
 }
@@ -98,7 +95,7 @@ public (Dictionary<string, XElement> data, Dictionary<string, XElement> messages
 	foreach( var e in msg)
 		messages.Add(e.Attribute(xmi + "id").Value, e);
 
-	return (data, messages.Dump());
+	return (data, messages);
 }
 
 public void Parse(XNamespace iso20022, XNamespace xmi, XNamespace xsi, XDocument doc, XmlNamespaceManager xnm, params string[] schemas)
@@ -224,7 +221,7 @@ public PropertyObject ParseProperty(XNamespace iso20022, XNamespace xmi, XNamesp
 			SpecifiedType = simpleTypeDefinition.Attribute("name").Value,
 			MyKind = PropertyType.Simple,
 			MyType = simpleTypeDefinition.Attribute(xsi + "type").Value,
-			TraceId = simpleTypeDefinition.Attribute(xsi + "traceId")?.Value ?? ""
+			TraceId = simpleTypeDefinition.Attribute("trace")?.Value ?? ""
 		};
 	}
 	else if(propertyDefinition.Attribute("complexType") is not null)
