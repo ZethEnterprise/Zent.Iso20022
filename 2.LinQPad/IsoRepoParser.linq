@@ -5,7 +5,7 @@ void Main()
 	var scriptPath = Path.GetDirectoryName (Util.CurrentQueryPath);
 	var fullRepo = "../3.Iso20022Files/1.SourceFiles/20220520_ISO20022_2013_eRepository.iso20022";
 	var pain001Repo = "../3.Iso20022Files/1.SourceFiles/pain.001.001.03_version_eRepository.iso20022";
-	var repo = pain001Repo;
+	var repo = fullRepo;
 	//var content = System.IO.File.ReadAllText($"{scriptPath}/{repo}",Encoding.UTF8);
 	//var doc = XDocument.Parse(content);
 	
@@ -83,6 +83,7 @@ public class MasterData
 	public XDocument Doc { get; set; }
 	public XmlNamespaceManager Xnm { get; set; }
 	public List<ClassObject> SchemaModels { get; } = new List<ClassObject>();
+	
 	
 	public XNamespace Prefix(string prefix) => Xnm.LookupNamespace(prefix);
 }
@@ -181,6 +182,7 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 	if(propertyDefinition.Attribute("simpleType") is not null)
 	{
 		var simpleTypeDefinition = master.Data[propertyDefinition.Attribute("simpleType").Value];//.Dump();
+		
 		myProperty = new SimplePropertyObject
 		{
 			Id = simpleTypeDefinition.Attribute(master.Prefix("xmi") + "id").Value,
@@ -190,6 +192,12 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 			MyType = simpleTypeDefinition.Attribute(master.Prefix("xsi") + "type").Value,
 			TraceId = simpleTypeDefinition.Attribute("trace")?.Value ?? ""
 		};
+		
+		if((simpleTypeDefinition.Attribute("trace")?.Value is not null))
+		{
+			simpleTypeDefinition.Attribute("trace").Value.Dump();
+			master.Doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\""+simpleTypeDefinition.Attribute("trace")?.Value+"\"]", master.Xnm).Dump();
+		}
 	}
 	else if(propertyDefinition.Attribute("complexType") is not null)
 	{
@@ -206,7 +214,7 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 	else
 	{
 		//propertyDefinition.Dump();
-		var complexTypeDefinition = master.data[propertyDefinition.Attribute("type").Value];//.Dump();
+		var complexTypeDefinition = master.Data[propertyDefinition.Attribute("type").Value];//.Dump();
 		myProperty = new ClassPropertyObject
 		{
 			Id = propertyDefinition.Attribute(master.Prefix("xmi") + "id").Value,
