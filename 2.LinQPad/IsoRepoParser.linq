@@ -1,4 +1,4 @@
-<Query Kind="Expression" />
+<Query Kind="Program" />
 
 void Main()
 {
@@ -41,7 +41,7 @@ void Main()
 	//xnm.AddNamespace("xmi", "http://www.omg.org/XMI");
 	//doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\"_T-soNtp-Ed-ak6NoX_4Aeg_330596074\"]", xnm).Dump();
 
-	var masterData = new MasterData {Doc = doc, Xnm = xnm};
+	var masterData = new MasterData{Doc = doc, Xnm = xnm};
 	
 	Parse(masterData, "pain.001.001.03");
 }
@@ -79,10 +79,10 @@ public class ClassPropertyObject : PropertyObject
 
 public class MasterData
 {
-	Dictionary<string, XElement> Data { get; set; }
-	XDocument Doc { get; }
-	XmlNamespaceManager Xnm { get; }
-	List<ClassObject> SchemaModels { get; } = new();
+	public Dictionary<string, XElement> Data { get; set; }
+	public XDocument Doc { get; set; }
+	public XmlNamespaceManager Xnm { get; set; }
+	public List<ClassObject> SchemaModels { get; } = new List<ClassObject>();
 	
 	public XNamespace Prefix(string prefix) => Xnm.LookupNamespace(prefix);
 }
@@ -92,14 +92,14 @@ public Dictionary<string, XElement> GenerateDictionary(MasterData master)
 	var data = new Dictionary<string, XElement>();
 	var messages = new Dictionary<string, XElement>();
 	
-	var dt = from c in master.Doc.Descendants(iso20022 + "Repository")
+	var dt = from c in master.Doc.Descendants(master.Prefix("iso20022") + "Repository")
 						  .Descendants("dataDictionary")
 						  .Descendants("topLevelDictionaryEntry")
 				select c;
 	foreach(var e in dt)
 		data.Add(e.Attribute(master.Prefix("xmi") + "id").Value, e);
 		
-	var msg = from c in master.Doc.Descendants(iso20022 + "Repository")
+	var msg = from c in master.Doc.Descendants(master.Prefix("iso20022") + "Repository")
 						   .Descendants("businessProcessCatalogue")
 						   .Descendants("topLevelCatalogueEntry")
 				select c;
@@ -145,7 +145,7 @@ public void ParseBaseClass(MasterData master, XElement baseObject)
 
 public PropertyObject ParseBaseProperties(MasterData master, XElement basePropertyObject)
 {
-	var definitionXElement = master.data[basePropertyObject.Attribute("complexType").Value];//.Dump();
+	var definitionXElement = master.Data[basePropertyObject.Attribute("complexType").Value];//.Dump();
 	//var classDefinition = ParseClass(iso20022, xmi, xsi, definitionXElement, data);
 	var myProperty = new ClassPropertyObject
 	{
@@ -180,7 +180,7 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 	
 	if(propertyDefinition.Attribute("simpleType") is not null)
 	{
-		var simpleTypeDefinition = master.data[propertyDefinition.Attribute("simpleType").Value];//.Dump();
+		var simpleTypeDefinition = master.Data[propertyDefinition.Attribute("simpleType").Value];//.Dump();
 		myProperty = new SimplePropertyObject
 		{
 			Id = simpleTypeDefinition.Attribute(master.Prefix("xmi") + "id").Value,
@@ -194,7 +194,7 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 	else if(propertyDefinition.Attribute("complexType") is not null)
 	{
 		//propertyDefinition.Dump();
-		var complexTypeDefinition = master.data[propertyDefinition.Attribute("complexType").Value];//.Dump();
+		var complexTypeDefinition = master.Data[propertyDefinition.Attribute("complexType").Value];//.Dump();
 		myProperty = new ClassPropertyObject
 		{
 			Id = propertyDefinition.Attribute(master.Prefix("xmi") + "id").Value,
