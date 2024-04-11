@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="PocSimple"
+    targetNamespace="http://tempuri.org/PocSimple.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/PocSimple.xsd"
+    xmlns:mstns="http://tempuri.org/PocSimple.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+	<xs:element name="Document" type="Document"/>
+	<xs:complexType name="Document">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string"/>
+			</xs:sequence>  
+	</xs:complexType>
+</xs:schema>

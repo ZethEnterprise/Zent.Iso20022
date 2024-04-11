@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ClassTemplates\**" />
+    <EmbeddedResource Remove="ClassTemplates\**" />
+    <None Remove="ClassTemplates\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="SourceFiles\20220520_ISO20022_2013_eRepository.iso20022" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SourceFiles\20220520_ISO20022_2013_eRepository.iso20022" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CodeDom" Version="8.0.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Iso20022T4Templates\Iso20022T4Templates.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+</Project>
