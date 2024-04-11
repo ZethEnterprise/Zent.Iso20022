@@ -82,10 +82,36 @@ public class MasterData
 	public Dictionary<string, XElement> Data { get; set; }
 	public XDocument Doc { get; set; }
 	public XmlNamespaceManager Xnm { get; set; }
-	public List<ClassObject> SchemaModels { get; } = new List<ClassObject>();
+	public List<ClassObject> SchemaModels { get; } = new ();
+	public Dictionary<string, CodeSet> Enums { get; set; } = new ();
 	
 	
 	public XNamespace Prefix(string prefix) => Xnm.LookupNamespace(prefix);
+}
+
+public class CodeSet
+{
+	public string TraceId { get; set; }
+	public string Name { get; set; }
+	public XElement Xelement { get; set; }
+}
+
+public class ComplexCodeSet : CodeSet
+{
+	
+}
+
+public class SimpleEnumeration : CodeSet
+{
+	public IEnumerable<Code> Codes { get; set; }
+}
+
+public class Code
+{
+	public string Name { get; set; }
+	public string CodeName { get; set; }
+	public string Description {get; set; }
+	public XElement Xelement { get; set; }
 }
 
 public Dictionary<string, XElement> GenerateDictionary(MasterData master)
@@ -140,6 +166,7 @@ public void ParseBaseClass(MasterData master, XElement baseObject)
 	
 	//RecursivePrint(myBase);
 	
+	master.Enums.Dump();
 	myBase.Dump();
 	master.SchemaModels.Add(myBase);
 }
@@ -175,6 +202,54 @@ public ClassObject ParseClass(MasterData master, XElement classDefinition)
 	return myClass;
 }
 
+public CodeSet ParseEnum(MasterData master, XElement xelement)
+{
+	var ExternalAttribute = xelement.Descendants("semanticMarkup")
+					.Where(c => c.Attribute("type").Value == "ExternalCodeSetAttribute")
+					.Descendants("elements")
+					.Where(c => c.Attribute("name").Value == "IsExternalCodeSet")
+					.FirstOrDefault();
+			
+	if(ExternalAttribute?.Attribute("value").Value == "true")
+	{
+		return new CodeSet
+		{
+			TraceId = xelement.Attribute(master.Prefix("xmi") + "id").Value,
+			Name = xelement.Attribute("name").Value,
+			Xelement = xelement
+		};
+	}
+	else
+	{
+		var codes = xelement.Descendants("code")
+						.Select(c => new Code
+							{
+								Name = c.Attribute("name").Value,
+								CodeName = c.Attribute("codeName").Value,
+								Description = c.Attribute("definition")?.Value,
+								Xelement = c
+							});
+		
+		if(codes is null)
+		{
+			return new ComplexCodeSet
+			{
+				TraceId = xelement.Attribute(master.Prefix("xmi") + "id").Value,
+				Name = xelement.Attribute("name").Value,
+				Xelement = xelement
+			};
+		}
+		
+		return new SimpleEnumeration
+		{
+			TraceId = xelement.Attribute(master.Prefix("xmi") + "id").Value,
+			Name = xelement.Attribute("name").Value,
+			Xelement = xelement,
+			Codes = codes
+		};
+	}
+}
+
 public PropertyObject ParseProperty(MasterData master, XElement propertyDefinition)
 {
 	PropertyObject myProperty = null;
@@ -195,8 +270,13 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 		
 		if((simpleTypeDefinition.Attribute("trace")?.Value is not null))
 		{
-			simpleTypeDefinition.Attribute("trace").Value.Dump();
-			master.Doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\""+simpleTypeDefinition.Attribute("trace")?.Value+"\"]", master.Xnm).Dump();
+			var id = simpleTypeDefinition.Attribute("trace").Value;
+			var xelement = master.Doc.XPathSelectElement("//topLevelDictionaryEntry[@xmi:id=\""+simpleTypeDefinition.Attribute("trace")?.Value+"\"]", master.Xnm);
+			
+			if(!master.Enums.ContainsKey(id))
+			{
+				master.Enums.TryAdd(id, ParseEnum(master, xelement));
+			}
 		}
 	}
 	else if(propertyDefinition.Attribute("complexType") is not null)

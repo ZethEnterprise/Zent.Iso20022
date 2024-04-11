@@ -30,3 +30,18 @@ The model has been re-exported as SVG. It is still a mess, but I finally got it 
 # 2022-10-27
 Funny story - Do you know this YouTuber "Let's game it out"? He is playing games for a livin' and actually tries out the limits of the games that he plays. Limits such as how much can you misuse the game and beat it up in a funny way. Limits like "how much stuff can you spawn in the game before it actually lowers your framerate to basically nothing. The reason I am asking is: We are sort of doing the same with LinQPad right now. The last couple of days I managed to get weird exceptions in <b>PocUnderstandingIsoPlantUml.linq</b> - running it too many times in a row can break the Results window. I will also give you the resolution for getting it to work again without restarting everything. Go to Menu => Query => Cancel All Threads and Reset. From my investigations (didn't go into details though) is thAt it is using Edge for displaying the results and there is some memory leak in that area.
 And furthermore! I actually got the model to be built to more or less look just alike the previous (version 1) one.
+
+# 2024-02-28
+Today I finally got something. I have been working on the PocIsoRepoParser, because I want to move forward on actually making the model. This PoC is actually a PoC trying to make a model based on the elements from the Pain. I figured that I was sourcing the name wrongfully when parsing the SimpleTyped elements - so I have added a bit in that regards. Something still bugged me and that was actually this part of the CodeSets. I know they are Enums to be frank - but the ID of the element did not match with the values they should contain. Then it dawned on me! That is what the Trace reference is used for. It shows the actual values, which can be in this field! It feels good, once you figure out these small things. But that also means that we need to run through the whole file in order to find all "xsi:type=iso20022:CodeSet" and transform them into Enums - but only the ones mentioned in your traces.
+
+# 2024-03-07
+So... We meet again Mr. Bond... Treasury Bonds... (Ba-dum tish) Sorry - one bad joke for the day, but anywho - back to business. I found the missing link between the CodeSets and the objects. It just turned out to be even more complex than initially thought. The interesting part is that there seems to be three different kinds of CodeSets:
+
+1. Simple => meaning every information I need is within my .iso20022 file
+2. Simple+ => meaning that we have some informations within my .iso20022 file for what we can call the enum, BUT (there is always a 'but') the actual XML code, which should be translated into these enums are actually something coming from the 'ExternalCodeSets_1Q2022.xsd' file
+3. NotSimple+++ => meaning textbased field restricted with Regex to describe some arbitrary lettered/numbered code, which can change in an instant (like currency codes)
+
+I haven't found all of them just yet as LinqPad at this moment is just looking up all of them (meaning looking them up again if the occur more than once). That will be the next step. Them only one of each out.
+
+# 2024-03-08
+I have finally put in some more work on the IsoParser. I think I will pause the LinQPad part of things now and actually see how I can manually can make a parser for a XML just like the XSD.exe does it. My idea is that I want it to be able to generate two different types of models: The XSD.exe type, where it basically makes it all the way in depth - and a slim version (just like Playstation does it. My idea is that the slim version should minimize the nesting by the usage of Abstract classes and make the model nicer to look at).
