@@ -7,11 +7,12 @@ public enum PropertyType { Simple, Complex, Class, Multiple };
 public class XObject
 {
     public string Id;
+    public string Name;
+    public string Description;
 }
 
 public abstract class PropertyObject : XObject
 {
-    public string Name;
     public PropertyType MyKind;
 
     public abstract string MyStringbasedKind();
@@ -26,9 +27,11 @@ public class SimplePropertyObject : PropertyObject
     public override string MyStringbasedKind() => this.SpecifiedType;
 }
 
+/// <summary>
+/// 
+/// </summary>
 public class ClassObject : XObject
 {
-    public string Name;
     public List<PropertyObject> Properties;
 }
 
@@ -46,6 +49,7 @@ public class MasterData
     public XmlNamespaceManager Xnm { get; set; }
     public List<ClassObject> SchemaModels { get; } = new();
     public Dictionary<string, CodeSet> Enums { get; set; } = new();
+    public Dictionary<string, ClassObject> Classes { get; set; } = new();
 
 
     public XNamespace Prefix(string prefix) => Xnm.LookupNamespace(prefix);

@@ -36,7 +36,7 @@ void Main()
 				select c;
 				
 			
-	xnm.Dump();
+	//xnm.Dump();
 	//xnm.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 	//xnm.AddNamespace("xmi", "http://www.omg.org/XMI");
 	//doc.XPathSelectElements("//topLevelDictionaryEntry[@xmi:id=\"_T-soNtp-Ed-ak6NoX_4Aeg_330596074\"]", xnm).Dump();
@@ -52,6 +52,7 @@ public class XObject
 {
 	public string Id;
 	public XElement MyElement;
+	public string Description;
 }
 
 public class PropertyObject :XObject
@@ -163,12 +164,13 @@ public void ParseBaseClass(MasterData master, XElement baseObject)
 		Id = baseObject.Attribute(master.Prefix("xmi") + "id").Value,
 		Name = baseObject.Attribute("name").Value,
 		Properties = propertyObjects.Select(p => ParseBaseProperties(master, p)).ToList(),
-		MyElement = baseObject
+		//MyElement = baseObject,
+		//Description = baseObject.Attribute("definition").Value
 	};
 	
 	//RecursivePrint(myBase);
 	
-	master.Enums.Dump();
+	//master.Enums.Dump();
 	myBase.Dump();
 	master.SchemaModels.Add(myBase);
 }
@@ -183,7 +185,7 @@ public PropertyObject ParseBaseProperties(MasterData master, XElement baseProper
 		Name = basePropertyObject.Attribute("name").Value,
 		MyKind = PropertyType.Complex,
 		MyType = ParseClass(master, definitionXElement),
-		MyElement = definitionXElement
+		//MyElement = definitionXElement
 	};
 	
 	return myProperty;
@@ -268,7 +270,9 @@ public PropertyObject ParseProperty(MasterData master, XElement propertyDefiniti
 			SpecifiedType = simpleTypeDefinition.Attribute("name").Value,
 			MyKind = PropertyType.Simple,
 			MyType = simpleTypeDefinition.Attribute(master.Prefix("xsi") + "type").Value,
-			TraceId = simpleTypeDefinition.Attribute("trace")?.Value ?? ""
+			TraceId = simpleTypeDefinition.Attribute("trace")?.Value ?? "",
+			//MyElement = propertyDefinition
+			Description = propertyDefinition.Attribute("definition").Value
 		};
 		
 		if((simpleTypeDefinition.Attribute("trace")?.Value is not null))

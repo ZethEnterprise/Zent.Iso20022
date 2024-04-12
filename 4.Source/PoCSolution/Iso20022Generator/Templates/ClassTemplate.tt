@@ -6,9 +6,30 @@
 
 namespace <#= Namespace #>;
 
+/// <summary>
+<# var classSummaryLines = ClassObject.Description.Split(Environment.NewLine); #>
+<# var lastsummary = classSummaryLines.Last(); #>
+<# foreach(var line in classSummaryLines ){ #>
+	/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
+<# } #>
+<# } #>
+
+/// </summary>
 public class <#= ClassObject.Name #>
 {
 <# foreach(var thisProperty in ClassObject.Properties){ #>
+<# if(thisProperty.Description is not null){ #>
+	/// <summary>
+<# var lines = thisProperty.Description.Split(Environment.NewLine); #>
+<# var last = lines.Last(); #>
+<# foreach(var line in lines ){ #>
+	/// <#= line #> <# if(!line.Equals(last)){ #> <br/>
+<# } #>
+<# } #>
+
+	/// </summary>
+<# } #>
 	public <#= thisProperty.MyStringbasedKind() #> <#=  thisProperty.Name #> { get; set; }
+
 <# } #>
 }
