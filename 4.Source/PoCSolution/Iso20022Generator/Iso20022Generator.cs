@@ -4,14 +4,27 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using Iso20022Generator.Model;
+using Iso20022Generator.Templates;
 
 namespace Iso20022Generator;
 public static class Iso20022Generator
 {
     public static void Generate(string schema)
     {
-        T4Interfacer.Accessor();
+        var md = GenerateModel(schema);
 
+        var template = new ClassTemplate()
+        {
+            Namespace = "Iso20022",
+            ClassObject = md.SchemaModels[0]
+        };
+        
+        var payload = template.TransformText();
+        var a = payload;
+    }
+    public static MasterData GenerateModel(string schema)
+    {
         XDocument doc = null;
         XmlNamespaceManager xnm = null;
 
@@ -45,6 +58,8 @@ public static class Iso20022Generator
         Parse(masterData, schema);
 
         var md = masterData;
+
+        return masterData;
     }
 
     public static Dictionary<string, XElement> GenerateDictionary(MasterData master)

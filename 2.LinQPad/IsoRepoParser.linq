@@ -51,6 +51,7 @@ public enum PropertyType { Simple, Complex, Class, Multiple};
 public class XObject
 {
 	public string Id;
+	public XElement MyElement;
 }
 
 public class PropertyObject :XObject
@@ -161,7 +162,8 @@ public void ParseBaseClass(MasterData master, XElement baseObject)
 	{
 		Id = baseObject.Attribute(master.Prefix("xmi") + "id").Value,
 		Name = baseObject.Attribute("name").Value,
-		Properties = propertyObjects.Select(p => ParseBaseProperties(master, p)).ToList()
+		Properties = propertyObjects.Select(p => ParseBaseProperties(master, p)).ToList(),
+		MyElement = baseObject
 	};
 	
 	//RecursivePrint(myBase);
@@ -180,7 +182,8 @@ public PropertyObject ParseBaseProperties(MasterData master, XElement baseProper
 		Id = basePropertyObject.Attribute(master.Prefix("xmi") + "id").Value,
 		Name = basePropertyObject.Attribute("name").Value,
 		MyKind = PropertyType.Complex,
-		MyType = ParseClass(master, definitionXElement)
+		MyType = ParseClass(master, definitionXElement),
+		MyElement = definitionXElement
 	};
 	
 	return myProperty;
