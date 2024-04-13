@@ -158,7 +158,7 @@ public void ParseBaseClass(MasterData master, XElement baseObject)
 	var propertyObjects = from c in baseObject
 									.Descendants("messageBuildingBlock")
 						  select c;
-	
+	baseObject.Dump();
 	var myBase = new ClassObject
 	{
 		Id = baseObject.Attribute(master.Prefix("xmi") + "id").Value,

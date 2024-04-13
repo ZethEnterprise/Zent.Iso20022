@@ -10,12 +10,19 @@ using Iso20022Generator.Templates;
 namespace Iso20022Generator;
 public static class Iso20022Generator
 {
+    internal static string GetAssemblyVersion()
+    {
+        System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+        return fvi.FileVersion;
+    }
     public static void Generate(string schema)
     {
         var md = GenerateModel(schema);
 
         var template = new ClassTemplate()
         {
+            SoftwareVersion = GetAssemblyVersion(),
             Namespace = "Iso20022",
             ClassObject = md.SchemaModels[0]
         };

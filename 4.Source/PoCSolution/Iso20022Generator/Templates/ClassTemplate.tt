@@ -15,6 +15,11 @@ namespace <#= Namespace #>;
 <# } #>
 
 /// </summary>
+[System.CodeDom.Compiler.GeneratedCodeAttribute("zent", "<#= SoftwareVersion #>")]
+[System.SerializableAttribute()]
+[System.Diagnostics.DebuggerStepThroughAttribute()]
+[System.ComponentModel.DesignerCategoryAttribute("code")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace="<#= SoftwareVersion #>")]
 public class <#= ClassObject.Name #>
 {
 <# foreach(var thisProperty in ClassObject.Properties){ #>

@@ -81,96 +81,112 @@ namespace Iso20022Generator.Templates
             
             #line default
             #line hidden
-            this.Write("\r\n/// </summary>\r\npublic class ");
+            this.Write("\r\n/// </summary>\r\n[System.CodeDom.Compiler.GeneratedCodeAttribute(\"zent\", \"");
             
             #line 18 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(SoftwareVersion));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\n[System.SerializableAttribute()]\r\n[System.Diagnostics.DebuggerStepThroughAtt" +
+                    "ribute()]\r\n[System.ComponentModel.DesignerCategoryAttribute(\"code\")]\r\n[System.Xm" +
+                    "l.Serialization.XmlTypeAttribute(Namespace=\"");
+            
+            #line 22 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(SoftwareVersion));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\npublic class ");
+            
+            #line 23 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClassObject.Name));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  foreach(var thisProperty in ClassObject.Properties){ 
             
             #line default
             #line hidden
             
-            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  if(thisProperty.Description is not null){ 
             
             #line default
             #line hidden
             this.Write("\t/// <summary>\r\n");
             
-            #line 23 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 28 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  var lines = thisProperty.Description.Split(Environment.NewLine); 
             
             #line default
             #line hidden
             
-            #line 24 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 29 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  var last = lines.Last(); 
             
             #line default
             #line hidden
             
-            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 30 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  foreach(var line in lines ){ 
             
             #line default
             #line hidden
             this.Write("\t/// ");
             
-            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(line));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  if(!line.Equals(last)){ 
             
             #line default
             #line hidden
             this.Write(" <br/>\r\n");
             
-            #line 27 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 32 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 28 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 33 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\r\n\t/// </summary>\r\n");
             
-            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\tpublic ");
             
-            #line 32 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.MyStringbasedKind()));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 32 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
             
             #line default
             #line hidden
             this.Write(" { get; set; }\r\n\r\n");
             
-            #line 34 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 39 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  } 
             
             #line default
