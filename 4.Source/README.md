@@ -15,4 +15,4 @@ $installPath = &$vsWherePath -all -latest -property installationPath
 $vsregedit = Join-Path $installPath 'Common7\IDE\vsregedit.exe'
 & $VsRegEdit set "$installPath" "HKLM" "XmlEditor" "MaxFileSizeSupportedByLanguageService" string 100
 
- One thing that is a bit interesting is the identification of the schema namespace => How should we do that???
+ One thing that is a bit interesting is the identification of the schema namespace => How should we do that??? Uh - the generator will also take the version number of the assembly and put it in just like the XSD.exe does. Next question is to see how it can change based on builds, commits, pushes etc.?
