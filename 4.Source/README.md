@@ -10,9 +10,12 @@ So the first class has been sort of generated. So now there is some small detail
 
 Execute this in a PowerShell window in order to make the setting for a larger size (in this case it is 100MB):
 
-$vsWherePath = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+`$vsWherePath = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 $installPath = &$vsWherePath -all -latest -property installationPath
 $vsregedit = Join-Path $installPath 'Common7\IDE\vsregedit.exe'
-& $VsRegEdit set "$installPath" "HKLM" "XmlEditor" "MaxFileSizeSupportedByLanguageService" string 100
+& $VsRegEdit set "$installPath" "HKLM" "XmlEditor" "MaxFileSizeSupportedByLanguageService" string 100`
 
  One thing that is a bit interesting is the identification of the schema namespace => How should we do that??? Uh - the generator will also take the version number of the assembly and put it in just like the XSD.exe does. Next question is to see how it can change based on builds, commits, pushes etc.?
+
+ # 2024-04-14
+ So - now all the classes schould have been generatable, though they might be a bit faulty. To summarize: The main classes are generated with some human readable namings and not the xsd tags like the xsd.exe file did. We have some of the normal attributes (xsd namespaces) on the class as well as summaries on the fields and classes (if any definition was present in the XElement entry of said object). Next step is to add the XML tags on the entries and then see how the classes then will look.

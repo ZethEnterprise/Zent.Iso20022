@@ -14,6 +14,7 @@ public class XObject
 public abstract class PropertyObject : XObject
 {
     public PropertyType MyKind;
+    public string XmlTag;
 
     public abstract string MyStringbasedKind();
 }
@@ -33,6 +34,7 @@ public class SimplePropertyObject : PropertyObject
 public class ClassObject : XObject
 {
     public List<PropertyObject> Properties;
+    public bool IsRoot = false;
 }
 
 public class ClassPropertyObject : PropertyObject

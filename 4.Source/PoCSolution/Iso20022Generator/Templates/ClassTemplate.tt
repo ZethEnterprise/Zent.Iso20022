@@ -6,20 +6,25 @@
 
 namespace <#= Namespace #>;
 
+<# if(ClassObject.Description is not null){ #>
 /// <summary>
 <# var classSummaryLines = ClassObject.Description.Split(Environment.NewLine); #>
 <# var lastsummary = classSummaryLines.Last(); #>
 <# foreach(var line in classSummaryLines ){ #>
-	/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
+/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
 <# } #>
 <# } #>
 
 /// </summary>
-[System.CodeDom.Compiler.GeneratedCodeAttribute("zent", "<#= SoftwareVersion #>")]
+<# } #>
+[System.CodeDom.Compiler.GeneratedCodeAttribute("zent.ISO20022.Generator", "<#= SoftwareVersion #>")]
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace="<#= SoftwareVersion #>")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>")]
+<# if(ClassObject.IsRoot){ #>
+[System.Xml.Serialization.XmlRootAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>", IsNullable=false)]
+<# } #>
 public class <#= ClassObject.Name #>
 {
 <# foreach(var thisProperty in ClassObject.Properties){ #>

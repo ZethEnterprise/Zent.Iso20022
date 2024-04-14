@@ -20,15 +20,19 @@ public static class Iso20022Generator
     {
         var md = GenerateModel(schema);
 
-        var template = new ClassTemplate()
+        foreach (var classModelObject in md.Classes)
         {
-            SoftwareVersion = GetAssemblyVersion(),
-            Namespace = "Iso20022",
-            ClassObject = md.SchemaModels[0]
-        };
-        
-        var payload = template.TransformText();
-        var a = payload;
+            var template = new ClassTemplate()
+            {
+                SoftwareVersion = GetAssemblyVersion(),
+                SchemaVersion = schema,
+                Namespace = "Iso20022",
+                ClassObject = classModelObject.Value
+            };
+
+            var payload = template.TransformText();
+            var a = payload;
+        }
     }
     public static MasterData GenerateModel(string schema)
     {
@@ -111,8 +115,7 @@ public static class Iso20022Generator
         var propertyObjects = from c in baseObject
                                         .Descendants("messageBuildingBlock")
                               select c;
-
-        var myBase = new ClassObject
+        var firstProperty = new ClassObject
         {
             Id = baseObject.Attribute(master.Prefix("xmi") + "id").Value,
             Name = baseObject.Attribute("name").Value,
@@ -120,8 +123,26 @@ public static class Iso20022Generator
             Properties = propertyObjects.Select(p => ParseBaseProperties(master, p)).ToList()
         };
 
+        var myBase = new ClassObject
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = baseObject.Attribute("rootElement").Value,
+            IsRoot = true,
+            Properties = new()
+            {
+                new ClassPropertyObject
+                {
+                    Name = baseObject.Attribute("xmlTag").Value,
+                    XmlTag = baseObject.Attribute("xmlTag").Value,
+                    MyKind = PropertyType.Class,
+                    MyType = firstProperty
+                }
+            }
+        };
+
         master.SchemaModels.Add(myBase);
         master.Classes.TryAdd(myBase.Id, myBase);
+        master.Classes.TryAdd(firstProperty.Id, firstProperty);
     }
 
     public static PropertyObject ParseBaseProperties(MasterData master, XElement basePropertyObject)

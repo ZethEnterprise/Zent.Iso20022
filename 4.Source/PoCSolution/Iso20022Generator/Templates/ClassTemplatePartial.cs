@@ -4,7 +4,8 @@ namespace Iso20022Generator.Templates;
 
 public partial class ClassTemplate
 {
-    public string SoftwareVersion { get; set; }
-    public string Namespace { get; set; }
-    public ClassObject ClassObject { get; set; }
+    public string SoftwareVersion { get; init; }
+    public string SchemaVersion { get; init; }
+    public string Namespace { get; init; }
+    public ClassObject ClassObject { get; init; }
 }
