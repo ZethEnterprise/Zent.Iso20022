@@ -206,23 +206,30 @@ namespace Iso20022Generator.Templates
             
             #line default
             #line hidden
-            this.Write("\tpublic ");
+            this.Write("\r\n    [System.Xml.Serialization.XmlElementAttribute(\"");
             
-            #line 42 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 43 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.XmlTag));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\n\tpublic ");
+            
+            #line 44 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.MyStringbasedKind()));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 42 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 44 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
             
             #line default
             #line hidden
             this.Write(" { get; set; }\r\n\r\n");
             
-            #line 44 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
+            #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Iso20022Generator\Templates\ClassTemplate.tt"
  } 
             
             #line default

@@ -19,3 +19,6 @@ $vsregedit = Join-Path $installPath 'Common7\IDE\vsregedit.exe'
 
  # 2024-04-14
  So - now all the classes schould have been generatable, though they might be a bit faulty. To summarize: The main classes are generated with some human readable namings and not the xsd tags like the xsd.exe file did. We have some of the normal attributes (xsd namespaces) on the class as well as summaries on the fields and classes (if any definition was present in the XElement entry of said object). Next step is to add the XML tags on the entries and then see how the classes then will look.
+
+ # 2024-04-18
+ Hello fellow nerdies! We have now generated the classes as much as possible (for now) and the next step is to generate in a way such as the classes can be used for serialization. There is still some quirks about the simple types of properties, which we need to get solved first. One of them is the infamous field 'IBAN2007Identifier' a.k.a. the IBAN field, which will in xsd.exe be translated into a string stored as an object as it can also be a generic typed class. So far I know at this point this 'IBAN2007Identifier' will not be made as a class with the current model. The question is whether it should - so now I have to debate with myself pros and cons on this matter.

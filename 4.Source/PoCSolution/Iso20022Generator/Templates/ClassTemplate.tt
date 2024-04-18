@@ -39,6 +39,8 @@ public class <#= ClassObject.Name #>
 
 	/// </summary>
 <# } #>
+
+    [System.Xml.Serialization.XmlElementAttribute("<#= thisProperty.XmlTag #>")]
 	public <#= thisProperty.MyStringbasedKind() #> <#=  thisProperty.Name #> { get; set; }
 
 <# } #>

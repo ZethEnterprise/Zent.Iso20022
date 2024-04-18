@@ -31,6 +31,10 @@ public static class Iso20022Generator
             };
 
             var payload = template.TransformText();
+
+            if (classModelObject.Value.Name == "AccountIdentification4Choice")
+                payload = payload;
+
             var a = payload;
         }
     }
@@ -153,6 +157,7 @@ public static class Iso20022Generator
         {
             Id = basePropertyObject.Attribute(master.Prefix("xmi") + "id").Value,
             Name = basePropertyObject.Attribute("name").Value,
+            XmlTag = basePropertyObject.Attribute("xmlTag").Value,
             Description = definitionXElement.Attribute("definition").Value,
             MyKind = PropertyType.Complex,
             MyType = ParseClass(master, definitionXElement)
@@ -236,16 +241,7 @@ public static class Iso20022Generator
         {
             var simpleTypeDefinition = master.Data[propertyDefinition.Attribute("simpleType").Value];
 
-            myProperty = new SimplePropertyObject
-            {
-                Id = simpleTypeDefinition.Attribute(master.Prefix("xmi") + "id").Value,
-                Name = propertyDefinition.Attribute("name").Value,
-                Description = propertyDefinition.Attribute("definition").Value,
-                SpecifiedType = simpleTypeDefinition.Attribute("name").Value,
-                MyKind = PropertyType.Simple,
-                MyType = simpleTypeDefinition.Attribute(master.Prefix("xsi") + "type").Value,
-                TraceId = simpleTypeDefinition.Attribute("trace")?.Value ?? ""
-            };
+            myProperty = SimplePropertyObject.Parse(master, simpleTypeDefinition, propertyDefinition);
 
             if ((simpleTypeDefinition.Attribute("trace")?.Value is not null))
             {
@@ -265,6 +261,7 @@ public static class Iso20022Generator
             {
                 Id = propertyDefinition.Attribute(master.Prefix("xmi") + "id").Value,
                 Name = propertyDefinition.Attribute("name").Value,
+                XmlTag = propertyDefinition.Attribute("xmlTag").Value,
                 Description = propertyDefinition.Attribute("Definition")?.Value,
                 MyKind = PropertyType.Complex,
                 MyType = ParseClass(master, complexTypeDefinition)
@@ -277,6 +274,7 @@ public static class Iso20022Generator
             {
                 Id = propertyDefinition.Attribute(master.Prefix("xmi") + "id").Value,
                 Name = propertyDefinition.Attribute("name").Value,
+                XmlTag = propertyDefinition.Attribute("xmlTag").Value,
                 Description = propertyDefinition.Attribute("definition").Value,
                 MyKind = PropertyType.Multiple,
                 MyType = ParseClass(master, complexTypeDefinition)
