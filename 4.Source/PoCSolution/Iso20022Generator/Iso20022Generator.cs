@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Iso20022T4Templates;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;

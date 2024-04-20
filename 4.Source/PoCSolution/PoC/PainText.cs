@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Iso20022Generator;
 using pain;
+using Zent.Iso20022.ClassGeneration;
 
 namespace PoC;
 
@@ -16,7 +16,10 @@ internal static class PainText
 {
     public static void ExampleGeneration()
     {
-        Iso20022Generator.Iso20022Generator.Generate("pain.001.001.03");
+        //Iso20022Generator.Iso20022Generator.Generate("pain.001.001.03");
+
+        Class1.Generate("pain.001.001.03");
+
     }
 
     public static void Example()

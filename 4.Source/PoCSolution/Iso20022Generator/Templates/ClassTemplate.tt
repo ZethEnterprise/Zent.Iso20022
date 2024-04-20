@@ -3,6 +3,8 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
+<#@ assembly name="$(TargetPath)" #>
+<#@ import namespace="Iso20022Generator.Model" #>
 
 namespace <#= Namespace #>;
 
@@ -27,6 +29,7 @@ namespace <#= Namespace #>;
 <# } #>
 public class <#= ClassObject.Name #>
 {
+
 <# foreach(var thisProperty in ClassObject.Properties){ #>
 <# if(thisProperty.Description is not null){ #>
 	/// <summary>
@@ -41,7 +44,13 @@ public class <#= ClassObject.Name #>
 <# } #>
 
     [System.Xml.Serialization.XmlElementAttribute("<#= thisProperty.XmlTag #>")]
+<# if(thisProperty is RegexStringbasedSimpletonObject) { #>
+	[RegularExpression(@"<#= thisProperty.Pattern #>", ErrorMessage = "Invalid format of field <#= thisProperty.Name #> (xmlTag: <#= thisProperty.XmlTag #>). It did not adhere to pattern: \"<#= thisProperty.Pattern #>\"")]
+	public string <#=  thisProperty.Name.FirstCharToLower() #> { get; set; }
+
+<# } else { #>
 	public <#= thisProperty.MyStringbasedKind() #> <#=  thisProperty.Name #> { get; set; }
 
+<# } #>
 <# } #>
 }

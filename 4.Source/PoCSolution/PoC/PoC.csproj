@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Iso20022Generator\Iso20022Generator.csproj" />
+    <ProjectReference Include="..\Zent.Iso20022.ClassGeneration\Zent.Iso20022.ClassGeneration.csproj" />
+    <ProjectReference Include="..\Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj" />
   </ItemGroup>
 
 </Project>
