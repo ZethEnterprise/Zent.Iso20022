@@ -18,7 +18,8 @@ namespace <#= Namespace #>;
 
 /// </summary>
 <# } #>
-[System.CodeDom.Compiler.GeneratedCodeAttribute("zent.ISO20022.Generator", "<#= SoftwareVersion #>")]
+[System.CodeDom.Compiler.GeneratedCodeAttribute("<#= Generator #>", "<#= SoftwareVersion #>")]
+[Description("This has been generated on the Model version: <#= ModelVersion #>")]
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]

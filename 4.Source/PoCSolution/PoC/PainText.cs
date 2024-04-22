@@ -14,6 +14,13 @@ namespace PoC;
 
 internal static class PainText
 {
+    internal static string GetAssemblyVersion()
+    {
+        System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+        return fvi.FileVersion;
+    }
+
     public static void ExampleGeneration()
     {
         //Iso20022Generator.Iso20022Generator.Generate("pain.001.001.03");

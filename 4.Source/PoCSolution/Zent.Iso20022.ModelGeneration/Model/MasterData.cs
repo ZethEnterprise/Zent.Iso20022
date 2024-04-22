@@ -5,6 +5,7 @@ namespace Zent.Iso20022.ModelGeneration.Model;
 
 public class MasterData
 {
+    public string ModelVersion { get; set; }
     public Dictionary<string, XElement> Data { get; set; }
     public XDocument Doc { get; set; }
     public XmlNamespaceManager Xnm { get; set; }

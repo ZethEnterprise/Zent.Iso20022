@@ -9,6 +9,12 @@ namespace Zent.Iso20022.ModelGeneration;
 
 public class Architect
 {
+    internal static string GetAssemblyVersion()
+    {
+        System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+        return fvi.FileVersion;
+    }
     public static MasterData BuildModel(string schema)
     {
         XDocument doc;
@@ -39,7 +45,7 @@ public class Architect
             xnm.AddNamespace("xsi", doc.Elements().First().Attribute(xmlns + "xsi").Value);
         }
 
-        var masterData = new MasterData { Doc = doc, Xnm = xnm };
+        var masterData = new MasterData { Doc = doc, Xnm = xnm, ModelVersion = GetAssemblyVersion() };
 
         Parse(masterData, schema);
 
