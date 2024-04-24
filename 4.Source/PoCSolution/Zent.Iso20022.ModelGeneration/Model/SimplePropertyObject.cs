@@ -10,8 +10,11 @@ public class SimplePropertyObject : PropertyObject
 
     internal static PropertyObject? Parse(MasterData master, XElement simpleTypeDefinition, XElement propertyDefinition)
     {
+        if (simpleTypeDefinition.Attribute("name").Value.Contains("max"))
+            propertyDefinition = propertyDefinition;
+
         if (simpleTypeDefinition.Attribute("pattern")?.Value is not null)
-            return RegexStringbasedSimpletonObject.ParseSpecific(master, simpleTypeDefinition, propertyDefinition);
+            return Iso20022IdentifierSet.ParseSpecific(master, simpleTypeDefinition, propertyDefinition);
 
         return new SimplePropertyObject
         {

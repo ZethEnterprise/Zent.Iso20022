@@ -46,7 +46,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             this.Write("/// <summary>\r\n");
             
             #line 12 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- var classSummaryLines = ClassObject.Description.Split(Environment.NewLine); 
+ var classSummaryLines = ClassObject.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
             
             #line default
             #line hidden
@@ -110,7 +110,8 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             
             #line default
             #line hidden
-            this.Write("\")]\r\n[Description(\"This has been generated on the Model version: ");
+            this.Write("\")]\r\n[System.ComponentModel.Description(\"This has been generated on the Model ver" +
+                    "sion: ");
             
             #line 22 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ModelVersion));
@@ -171,7 +172,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             this.Write("\t/// <summary>\r\n");
             
             #line 35 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- var lines = thisProperty.Description.Split(Environment.NewLine); 
+ var lines = thisProperty.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
             
             #line default
             #line hidden
@@ -231,14 +232,14 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             this.Write("\")]\r\n");
             
             #line 45 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- if(thisProperty is RegexStringbasedSimpletonObject) { 
+ if(thisProperty is Iso20022IdentifierSet) { 
             
             #line default
             #line hidden
-            this.Write("\t[RegularExpression(@\"");
+            this.Write("\t[System.ComponentModel.DataAnnotations.RegularExpression(@\"");
             
             #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(((RegexStringbasedSimpletonObject)thisProperty).Pattern));
+            this.Write(this.ToStringHelper.ToStringWithCulture(((Iso20022IdentifierSet)thisProperty).Pattern));
             
             #line default
             #line hidden
@@ -256,14 +257,14 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             
             #line default
             #line hidden
-            this.Write("). It did not adhere to pattern: \\\"");
+            this.Write("). It did not adhere to pattern: \\\"\"+@\"");
             
             #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(((RegexStringbasedSimpletonObject)thisProperty).Pattern));
+            this.Write(this.ToStringHelper.ToStringWithCulture(((Iso20022IdentifierSet)thisProperty).Pattern));
             
             #line default
             #line hidden
-            this.Write("\\\"\")]\r\n\tpublic string ");
+            this.Write("\"+\"\\\"\")]\r\n\tpublic string ");
             
             #line 47 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));

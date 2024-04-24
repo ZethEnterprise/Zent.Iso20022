@@ -9,7 +9,7 @@ namespace <#= Namespace #>;
 
 <# if(ClassObject.Description is not null){ #>
 /// <summary>
-<# var classSummaryLines = ClassObject.Description.Split(Environment.NewLine); #>
+<# var classSummaryLines = ClassObject.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
 <# var lastsummary = classSummaryLines.Last(); #>
 <# foreach(var line in classSummaryLines ){ #>
 /// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
@@ -19,7 +19,7 @@ namespace <#= Namespace #>;
 /// </summary>
 <# } #>
 [System.CodeDom.Compiler.GeneratedCodeAttribute("<#= Generator #>", "<#= SoftwareVersion #>")]
-[Description("This has been generated on the Model version: <#= ModelVersion #>")]
+[System.ComponentModel.Description("This has been generated on the Model version: <#= ModelVersion #>")]
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -32,7 +32,7 @@ public class <#= ClassObject.Name #>
 <# foreach(var thisProperty in ClassObject.Properties){ #>
 <# if(thisProperty.Description is not null){ #>
 	/// <summary>
-<# var lines = thisProperty.Description.Split(Environment.NewLine); #>
+<# var lines = thisProperty.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
 <# var last = lines.Last(); #>
 <# foreach(var line in lines ){ #>
 	/// <#= line #> <# if(!line.Equals(last)){ #> <br/>
@@ -42,8 +42,8 @@ public class <#= ClassObject.Name #>
 	/// </summary>
 <# } #>
 	[System.Xml.Serialization.XmlElementAttribute("<#= thisProperty.XmlTag #>")]
-<# if(thisProperty is RegexStringbasedSimpletonObject) { #>
-	[RegularExpression(@"<#= ((RegexStringbasedSimpletonObject)thisProperty).Pattern #>", ErrorMessage = "Invalid format of field <#= thisProperty.Name #> (xmlTag: <#= thisProperty.XmlTag #>). It did not adhere to pattern: \"<#= ((RegexStringbasedSimpletonObject)thisProperty).Pattern #>\"")]
+<# if(thisProperty is Iso20022IdentifierSet) { #>
+	[System.ComponentModel.DataAnnotations.RegularExpression(@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>", ErrorMessage = "Invalid format of field <#= thisProperty.Name #> (xmlTag: <#= thisProperty.XmlTag #>). It did not adhere to pattern: \""+@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>"+"\"")]
 	public string <#=  thisProperty.Name #> { get; set; }
 
 <# } else { #>

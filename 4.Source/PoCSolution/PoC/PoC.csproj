@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Generated\" />
+  </ItemGroup>
+
 </Project>

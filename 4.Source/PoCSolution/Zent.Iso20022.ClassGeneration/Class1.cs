@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Zent.Iso20022.ClassGeneration.Templates;
+﻿using Zent.Iso20022.ClassGeneration.Templates;
 using Zent.Iso20022.ModelGeneration;
 
 namespace Zent.Iso20022.ClassGeneration
@@ -33,11 +32,26 @@ namespace Zent.Iso20022.ClassGeneration
 
                 var payload = template.TransformText();
 
-                if (classModelObject.Value.Name == "AccountIdentification4Choice")
+                var WorkingDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+                if (classModelObject.Value.Name == "BranchAndFinancialInstitutionIdentification4") //"AccountIdentification4Choice")
                     payload = payload;
 
+                WriteCodeToFile(payload, WorkingDir, classModelObject.Value.Name);
                 var a = payload;
+
             }
+        }
+
+        public static void WriteCodeToFile(string code, string WorkingDir, string filename)
+        {
+            var folderName = "generatedCode";
+            if (!Path.Exists(Path.Combine(WorkingDir, folderName)))
+                Directory.CreateDirectory(Path.Combine(WorkingDir, folderName));
+
+            var path = Path.Combine(WorkingDir, folderName, filename + ".cs");
+
+            File.WriteAllText(path, code, System.Text.Encoding.UTF8);
         }
     }
 }

@@ -29,3 +29,14 @@ $vsregedit = Join-Path $installPath 'Common7\IDE\vsregedit.exe'
  But fear not! I think I've located the answer in my search on StackOverflow (my kudos goes to a Phillip Scott Givens) with this link: https://stackoverflow.com/questions/22182441/calling-a-class-in-the-same-project-from-t4-template
 
 I think that this calls for a newly structured PoC, where I put a bit more effort into making it clean to begin with. So... It is finally managed and this thing did work like it should. I had other sources telling me to adding the assembly from the $TargetPath, but just having it in two separate projects and letting one reference to another works out of the box. This way the compiler will build first the dependency and use that reference in the next project without any issues. It runs so beautifully well. So yet another thank you to Sir Phillip. These T4 templates got a lot of various hits when trying to look up any help on a VERY specific and niche functionality, which people usually don't explore. But not me - just call me Dora (the Explorer) as I am not the one to back down from a fight. I want my code to do as I want and not something else.
+
+# 2024-04-24
+Yesterday on another train ride home I thought of something... Why do I make these weird class names for the simple types. We do already have a representation of them in the ISO model! So why not use them. First of - RegexStringbasedSimpletonObject...???!!! That it represented was actually an IdentifierSet. Looking back at the model the iso20022:Text can also contain a Regex. But would we always translate an IdentifierSet into a string or could it be that we wanted to translate it into an object, which can actually have some properties? See! This is what I did wrong from the beginning! iso20022:IdentifierSet and iso20022:Text can have more or less the same properties (pattern, minLength, etc.), but they might as well mean differently in our generator!
+
+(At this point in time all I could think of was a funny quote from Stifler in one of his Bloopers: "Being dumb is so smart", but fact checking it got me some other quotes - whether they are said by those persons or not I have not checked -
+
+1. "Everybody is a genis. But if you judge a fish by its ability to climb a tree, it will live its whole life believing that it is stupid." - Albert Einstein
+2. "A fool thinks himself to be wise, but a wise man thinks himself to be a fool." - William Shakespeare
+
+I just thought that those quotes could work as a nice motivational quote of the day. Have fun with them.)
+
