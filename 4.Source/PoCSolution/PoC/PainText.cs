@@ -9,6 +9,7 @@ using System.Xml;
 using System.Xml.Linq;
 using pain;
 using Zent.Iso20022.ClassGeneration;
+using Iso20022;
 
 namespace PoC;
 
@@ -24,24 +25,24 @@ internal static class PainText
     public static void ExampleGeneration()
     {
         //Iso20022Generator.Iso20022Generator.Generate("pain.001.001.03");
-
+        Example();
         Class1.Generate("pain.001.001.03");
 
     }
 
     public static void Example()
     {
-        var painFile = new Document
+        var painFile = new pain.Document
         {
-            CstmrCdtTrfInitn = new CustomerCreditTransferInitiationV03
+            CstmrCdtTrfInitn = new pain.CustomerCreditTransferInitiationV03
             {
                 PmtInf =
                 [
-                    new PaymentInstructionInformation3
+                    new pain.PaymentInstructionInformation3
                     {
-                        DbtrAcct = new CashAccount16
+                        DbtrAcct = new pain.CashAccount16
                         {
-                            Id = new AccountIdentification4Choice
+                            Id = new pain.AccountIdentification4Choice
                             {
                                 Item = "IBANFieldInfo",
                             }
@@ -51,7 +52,7 @@ internal static class PainText
             }
         };
 
-        var xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(Document));
+        var xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(pain.Document));
 
         TextWriter writer = new StreamWriter(Path.Combine(Environment.CurrentDirectory, "pain.001.001.03.xml"));
         xmlSerializer.Serialize(writer, painFile);
@@ -59,7 +60,7 @@ internal static class PainText
         writer.Close();
 
 
-        var xmlSerializer2 = new System.Xml.Serialization.XmlSerializer(typeof(Custom.Document));
+        var xmlSerializer2 = new System.Xml.Serialization.XmlSerializer(typeof(Iso20022.Document));
 
         TextReader reader = new StreamReader(Path.Combine(Environment.CurrentDirectory, "pain.001.001.03.xml"));
         var element = xmlSerializer2.Deserialize(reader);

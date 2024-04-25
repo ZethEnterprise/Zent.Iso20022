@@ -271,21 +271,14 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             
             #line default
             #line hidden
-            this.Write(" { get; set; }\r\n\r\n");
+            this.Write(" { get; set; }\r\n\t\r\n");
             
             #line 49 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- } else { 
+ } else if(thisProperty is Iso20022Text) { 
             
             #line default
             #line hidden
-            this.Write("\tpublic ");
-            
-            #line 50 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.MyStringbasedKind()));
-            
-            #line default
-            #line hidden
-            this.Write(" ");
+            this.Write("\tpublic string ");
             
             #line 50 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
@@ -295,12 +288,47 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             this.Write(" { get; set; }\r\n\r\n");
             
             #line 52 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+ } else if(thisProperty is Iso20022Date) { 
+            
+            #line default
+            #line hidden
+            this.Write("\tpublic DateTime ");
+            
+            #line 53 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
+            
+            #line default
+            #line hidden
+            this.Write(" { get; set; }\r\n\r\n");
+            
+            #line 55 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            this.Write("\tpublic ");
+            
+            #line 56 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.MyStringbasedKind()));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 56 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
+            
+            #line default
+            #line hidden
+            this.Write(" { get; set; }\r\n\r\n");
+            
+            #line 58 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 53 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 59 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
  } 
             
             #line default

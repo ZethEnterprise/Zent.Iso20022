@@ -45,6 +45,12 @@ public class <#= ClassObject.Name #>
 <# if(thisProperty is Iso20022IdentifierSet) { #>
 	[System.ComponentModel.DataAnnotations.RegularExpression(@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>", ErrorMessage = "Invalid format of field <#= thisProperty.Name #> (xmlTag: <#= thisProperty.XmlTag #>). It did not adhere to pattern: \""+@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>"+"\"")]
 	public string <#=  thisProperty.Name #> { get; set; }
+	
+<# } else if(thisProperty is Iso20022Text) { #>
+	public string <#=  thisProperty.Name #> { get; set; }
+
+<# } else if(thisProperty is Iso20022Date) { #>
+	public DateTime <#=  thisProperty.Name #> { get; set; }
 
 <# } else { #>
 	public <#= thisProperty.MyStringbasedKind() #> <#=  thisProperty.Name #> { get; set; }

@@ -40,3 +40,11 @@ Yesterday on another train ride home I thought of something... Why do I make the
 
 I just thought that those quotes could work as a nice motivational quote of the day. Have fun with them.)
 
+# 2024-04-25
+I GOT SOMETHING GENERATED, WHICH CAN BE DESERIALIZED INTO AN OBJECT AGAIN!
+
+Okay... All fairness... We are not there... Yet... But we are now at a new break point in the development of this nice and cool tool!!!!!
+
+I AM SO HAPPY!!! <insert GIF of dancing dog> - Another thought... How can I insert a picture or GIF in a README file for Repo reading? Must be tested out...
+
+![The classic cat!](https://upload.wikimedia.org/wikipedia/commons/0/04/So_happy_smiling_cat.jpg)
