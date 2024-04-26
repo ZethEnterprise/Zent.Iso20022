@@ -48,3 +48,15 @@ Okay... All fairness... We are not there... Yet... But we are now at a new break
 I AM SO HAPPY!!! <insert GIF of dancing dog> - Another thought... How can I insert a picture or GIF in a README file for Repo reading? Must be tested out...
 
 ![The classic cat!](https://upload.wikimedia.org/wikipedia/commons/0/04/So_happy_smiling_cat.jpg)
+
+# 2024-04-26
+(I found another cat I had to add. It will come in the end of this update.)
+
+Hi there everyone! So we finally made a runnable version of our code. The next part is to trim out the faults such as amounts are not strings etc. Amounts is a bit interesting - I can see that 'InstructedAmount' is translated into an object of 'ActiveOrHistoricCurrencyAndAmount' when generated through the xsd.exe tool, which is quite interesting. Looking further into this field I can see that it 'isComposite'. What does that mean? I know what the word means, but what does it mean in this regime? As far as I can see is that it is not as 'Simple Type' as first thought of. So it must therefore mean that it is a complex simpleton instead.
+
+
+
+
+
+
+![Hi There!](https://c.tenor.com/5Wox2TQlBowAAAAC/tenor.gif)
