@@ -1,4 +1,4 @@
-﻿using Zent.Iso20022.ModelGeneration.Model;
+﻿using Zent.Iso20022.ModelGeneration.Model.V1.Iso20022;
 
 namespace Zent.Iso20022.ClassGeneration.Templates;
 

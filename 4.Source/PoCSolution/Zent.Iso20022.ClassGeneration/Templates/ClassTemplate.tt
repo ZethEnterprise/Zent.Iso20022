@@ -3,7 +3,8 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ import namespace="Zent.Iso20022.ModelGeneration.Model" #>
+<#@ import namespace="Zent.Iso20022.ModelGeneration.Model.V1" #>
+<#@ import namespace="Zent.Iso20022.ModelGeneration.Model.V1.Iso20022.Properties" #>
 
 namespace <#= Namespace #>;
 
@@ -50,6 +51,9 @@ public class <#= ClassObject.Name #>
 	public string <#=  thisProperty.Name #> { get; set; }
 
 <# } else if(thisProperty is Iso20022Date) { #>
+	public DateTime <#=  thisProperty.Name #> { get; set; }
+
+<# } else if(thisProperty is Iso20022DateTime) { #>
 	public DateTime <#=  thisProperty.Name #> { get; set; }
 
 <# } else { #>

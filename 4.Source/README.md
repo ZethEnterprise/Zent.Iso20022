@@ -54,9 +54,10 @@ I AM SO HAPPY!!! <insert GIF of dancing dog> - Another thought... How can I inse
 
 Hi there everyone! So we finally made a runnable version of our code. The next part is to trim out the faults such as amounts are not strings etc. Amounts is a bit interesting - I can see that 'InstructedAmount' is translated into an object of 'ActiveOrHistoricCurrencyAndAmount' when generated through the xsd.exe tool, which is quite interesting. Looking further into this field I can see that it 'isComposite'. What does that mean? I know what the word means, but what does it mean in this regime? As far as I can see is that it is not as 'Simple Type' as first thought of. So it must therefore mean that it is a complex simpleton instead.
 
-
-
-
-
-
 ![Hi There!](https://c.tenor.com/5Wox2TQlBowAAAAC/tenor.gif)
+
+# 2024-05-02
+So. I'm sitting here. Thinking of the Identifier component. Perhaps I want that one to be a class for itself, but should all the Iso20022 properties be classes for themselves? I think not - that would make a serialized representation of an object be very object heavy with a lot of levels to go through. That would be waste of good memory. So how to determine what to classify and not to classify?
+
+# 2024-05-16
+Hello fellow ISO nerds! Sorry for the radio silence... The last couple of days I've been using the spare minutes trying to generate Enums. Fun fact is tat not all CodeSets have an external codesets. What's even more curious is that  not all codeset contains code elements!?!! And here's why: Some codes are too dynamic/volatile for them to lock them in the ISO standard, others are described in other ISO standards. Some of these are e.g. CountryCode - it is covered with ISO 3166. Codes like LanguageCode are the ones marked as "validation by table", so it is codes that this standard does not want to control.
