@@ -56,6 +56,7 @@ void Main()
 											where i.Attribute(xsi + "type").Value == "iso20022:CodeSet" 
 											   && i.Attribute(xmi + "id").Value == c.Attribute("trace").Value
 											select i).Descendants("code")
+								where c.Descendants("code").Any(k => k.Attribute("name").Value == j.Attribute("name").Value)
 								select (new Code
 									{
 										Name = j.Attribute("name").Value,
@@ -63,9 +64,33 @@ void Main()
 										CodeName = j.Attribute("codeName").Value
 									})).ToArray()
 					});
-	//traced.Dump();
+	traced.Dump();
 	
-	var volatileCodes = from c in doc.Descendants(iso20022 + "Repository")
+	var standalones = from c in doc.Descendants(iso20022 + "Repository")
+						.Descendants("dataDictionary")
+						.Descendants("topLevelDictionaryEntry")
+				where c.Attribute(xsi + "type").Value == "iso20022:CodeSet" 
+				      && 
+					  (
+						c.Descendants("code")?.FirstOrDefault() is not null &&
+						c.Attribute("trace")?.Value is null
+					  )
+				select (new CodeSet
+					{
+						Id = c.Attribute(xmi + "id").Value,
+						Name = c.Attribute("name").Value,
+						Definition = c.Attribute("definition").Value,
+						Codes = (from i in c.Descendants("code")
+								select (new Code
+									{
+										Name = i.Attribute("name").Value,
+										Definition = i.Attribute("definition").Value,
+										CodeName = i.Attribute("codeName").Value
+									})).ToArray()
+					});
+	//standalones.Dump();
+	
+	var volatiles = from c in doc.Descendants(iso20022 + "Repository")
 						.Descendants("dataDictionary")
 						.Descendants("topLevelDictionaryEntry")
 				where c.Attribute(xsi + "type").Value == "iso20022:CodeSet" 
@@ -80,51 +105,13 @@ void Main()
 						Name = c.Attribute("name").Value,
 						Definition = c.Attribute("definition").Value
 					});
-					
-	volatileCodes.Dump();
-	//var ou = from c in doc.Descendants(xs + "schema")
-	//					.Descendants(xs + "simpleType")
-	//		select c;		
-	//ou.Dump();
+	//volatiles.Dump();
 	
-	//var codeSets = from c in doc.Descendants(xs + "schema")
-	//					.Descendants(xs + "simpleType")
-	//		select (new CodeSet
-	//			{ 
-	//				Name = 
-	//					(
-	//						from i in c.Descendants(xs + "documentation")
-	//						where i.Attribute("source").Value == "Name"
-	//						select i.Value
-	//					).First(),
-	//				Definition = 
-	//					(
-	//						from i in c.Descendants(xs + "documentation")
-	//						where i.Attribute("source").Value == "Definition"
-	//						select i.Value
-	//					).First(),
-	//				Codes = 
-	//					( 
-	//						from i in c.Descendants(xs + "enumeration")
-	//						select new Code
-	//							{ 
-	//								Name = 
-	//									(
-	//										from j in i.Descendants(xs + "documentation")
-	//										where j.Attribute("source").Value == "Name"
-	//										select j.Value
-	//									).First(),
-	//							  	Definition = 
-	//									(
-	//										from j in i.Descendants(xs + "documentation")
-	//									where j.Attribute("source").Value == "Definition"
-	//									select j.Value
-	//									).First()
-	//							}
-	//					).ToArray()
-	//				});
-	//codeSets.Dump();
-	doc.Dump();
+	//externals.Count().Dump();
+	//traced.Count().Dump();
+	//standalones.Count().Dump();
+	//volatiles.Count().Dump();
+	//doc.Dump();
 }
 
 public class CodeSet
