@@ -32,7 +32,14 @@ void Main()
 				select (new CodeSet
 					{
 						Id = c.Attribute(xmi + "id").Value,
-						Name = c.Attribute("name").Value
+						Name = c.Attribute("name").Value,
+						Requirements = new CodeSetRequirements
+						{
+							Pattern = c.Attribute("pattern")?.Value,
+							MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+							MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+							
+						}
 					});
 	//externals.Dump();
 	
@@ -50,6 +57,13 @@ void Main()
 						Id = c.Attribute(xmi + "id").Value,
 						Name = c.Attribute("name").Value,
 						Definition = c.Attribute("definition").Value,
+						Requirements = new CodeSetRequirements
+						{
+							Pattern = c.Attribute("pattern")?.Value,
+							MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+							MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+							
+						},
 						Codes = (from j in (from i in doc.Descendants(iso20022 + "Repository")
 														 .Descendants("dataDictionary")
 														 .Descendants("topLevelDictionaryEntry")
@@ -80,6 +94,13 @@ void Main()
 						Id = c.Attribute(xmi + "id").Value,
 						Name = c.Attribute("name").Value,
 						Definition = c.Attribute("definition").Value,
+						Requirements = new CodeSetRequirements
+						{
+							Pattern = c.Attribute("pattern")?.Value,
+							MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+							MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+							
+						},
 						Codes = (from i in c.Descendants("code")
 								select (new Code
 									{
@@ -103,7 +124,15 @@ void Main()
 					{
 						Id = c.Attribute(xmi + "id").Value,
 						Name = c.Attribute("name").Value,
-						Definition = c.Attribute("definition").Value
+						Definition = c.Attribute("definition").Value,
+						Requirements = new CodeSetRequirements
+						{
+							Pattern = c.Attribute("pattern")?.Value,
+							MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+							MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+							ValidationByTable = c.Descendants("constraint").Any(x => x.Attribute("name")?.Value == "ValidationByTable")
+							
+						}
 					});
 	//volatiles.Dump();
 	
@@ -120,6 +149,15 @@ public class CodeSet
 	public string Name { get; set; }
 	public string Definition { get; set; }
 	public Code[] Codes { get; set; }
+	public CodeSetRequirements Requirements { get; set; }
+}
+
+public class CodeSetRequirements
+{
+	public string Pattern { get; set; }
+	public int? MinLength { get; set; }
+	public int? MaxLength { get; set; }
+	public bool ValidationByTable { get; set; }
 }
 
 public class Code
