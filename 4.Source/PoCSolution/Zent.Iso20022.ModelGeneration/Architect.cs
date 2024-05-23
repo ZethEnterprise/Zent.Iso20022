@@ -21,7 +21,7 @@ public class Architect
 
     public static MasterData BuildModel(string schema)
     {
-        return BuildModelV1(schema);
+        return (new Architect()).BuildModelV2(schema);
     }
 
     public static MasterData BuildModelV1(string schema)
@@ -78,7 +78,7 @@ public class Architect
         }
 
         var modelBuilder = new V2.Parser(LocateERepository(), LocateExternalCodeSets());
-
+        modelBuilder.Parse(()=>GetAssemblyVersion(), schema);
 
         return null;
     }

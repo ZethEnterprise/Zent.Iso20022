@@ -5,6 +5,6 @@ using System.Reflection.Metadata;
 
 Console.WriteLine("Hello, World!");
 
-PainText.Example();
+//PainText.Example();
 PainText.ExampleGeneration();
 

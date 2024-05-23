@@ -74,3 +74,8 @@ Okay... It took 1.335 seconds to run without rendering. That might be acceptable
 So... I have finally made the CodeSet lists in those four categories in LinQPad and got them parsed into something that I can use. Next step: Generate the code for them, but we don't want all of 3950 Codesets written in. Uh! Sorry, 3911 CodeSets (the last 39 are the Volatiles ones, which cannot be translated into an Enum when push comes to shove). Next stop! More code generation!!!
 
 ![Woo Hoo!](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVsp6iETQvP5P3fSl4HwyjGkWL2w1A3mm6deJ3e5PcwQ&s)
+
+# 2024-05-23
+![D'oh!](https://i.pinimg.com/474x/17/01/77/170177e2f0a024564a2f78db42599e23.jpg)
+
+Soh... I got the Enums merged into the same Dictionary.. Or so I thought. It turned out that some traced CodeSets are also to be located in external code sets... But what?! Does that make any sense? So I looked into the CAMT.006.001.09 and surely enough. It does not work as an Enum. It works as a string-based thingy - so... Is that to be expected? Now to think of what to do in that relation.

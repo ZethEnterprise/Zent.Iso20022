@@ -9,10 +9,12 @@
 
   <ItemGroup>
     <None Remove="SourceFiles\20220520_ISO20022_2013_eRepository.iso20022" />
+    <None Remove="SourceFiles\ExternalCodeSets_1Q2022.xsd" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="SourceFiles\20220520_ISO20022_2013_eRepository.iso20022" />
+    <EmbeddedResource Include="SourceFiles\ExternalCodeSets_1Q2022.xsd" />
   </ItemGroup>
 
 </Project>
