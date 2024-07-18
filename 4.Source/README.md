@@ -79,3 +79,7 @@ So... I have finally made the CodeSet lists in those four categories in LinQPad 
 ![D'oh!](https://i.pinimg.com/474x/17/01/77/170177e2f0a024564a2f78db42599e23.jpg)
 
 Soh... I got the Enums merged into the same Dictionary.. Or so I thought. It turned out that some traced CodeSets are also to be located in external code sets... But what?! Does that make any sense? So I looked into the CAMT.006.001.09 and surely enough. It does not work as an Enum. It works as a string-based thingy - so... Is that to be expected? Now to think of what to do in that relation.
+
+# 2024-05-24
+What to say...? <i>"Education never ends, Watson. It is a series of lessons, with the greatest for the last."</i>
+Aaaaaanywho. Let's get moving: Some small checkpoints: all of the External CodeSets will only be translated into strings - WITH limitations of some sorts. I will therefore do some magic to add it as an Enum, but also as the Raw input as a string. In that way we should be able to get the best of the two worlds. Well - best of one world and the lesser evil from another.

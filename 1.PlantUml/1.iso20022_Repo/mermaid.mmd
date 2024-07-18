@@ -1,0 +1,57 @@
+classDiagram
+namespace ISO20022eRepository {
+    class ParentCodeWithElements {
+        Code Codes;
+        Element c1d1t0e0;
+    }
+    class ParentCodeWithElementsWithExternals {
+        Code Codes;
+        Element c1d1t0e1;
+    }
+    class ParentCodeWithoutElements {
+        Element c0d1t0e0;
+        Notes ThisIsInterestingNotAEnum;
+    }
+    class ParentCodeWithoutElementsWithExternals {
+        Element c0d1t0e1;
+    }
+
+    class OriginalCodeWithElements {
+        Code Codes;
+        Element c1d0t0e0;
+    }
+    class OriginalCodeWithoutElementsWithExternals {
+        Element c0d0t0e1;
+    }
+    class OriginalCodeWithoutElements {
+        Element c0d0t0e0;
+    }
+    class OriginalCodeWithElementAndWithExternals {
+        Element DoesNotExist;
+        Element c1d0t0e1;
+    }
+    class ChildWithoutElementWithExternals {
+        Element c0d0t1e1;
+    }
+    class ChildWithElementWithExternals {
+        Element c1d0t1e1;
+    }
+    class ChildWithoutElement {
+        Element c0d0t1e0;
+    }
+    class ChildWithElement {
+        Element c1d0t1e0;
+    }
+}
+
+namespace ExternalCodes {
+    class ExternalCodeWithElements {
+    }
+    class ExternalCodeWithoutElements {
+    }
+}
+
+%%ParentCodeWithElementsWithExternals --> ExternalCodeWithElements
+
+%%OriginalCodeWithElements --|> ParentCodeWithElements
+%%OriginalCodeWithoutElements --|> ParentCodeWithElements

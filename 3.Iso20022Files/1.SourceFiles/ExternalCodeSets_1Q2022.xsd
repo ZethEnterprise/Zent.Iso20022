@@ -1715,7 +1715,7 @@ This is a synonym of the external cash clearing system code list, extended outsi
 External code sets can be downloaded from www.iso20022.org.</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:string">
-			<xs:minLength value="1"/>
+			<xs:a value="1"/>
 			<xs:maxLength value="3"/>
 			<xs:enumeration value="ABE">
 				<xs:annotation>

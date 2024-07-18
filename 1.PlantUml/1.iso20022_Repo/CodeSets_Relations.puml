@@ -1,0 +1,15 @@
+@startuml Namespace test
+
+namespace a {
+    class b {
+        d D;
+    }
+}
+ 
+package c{
+    class d{
+        b B;
+    }
+}
+
+@enduml
