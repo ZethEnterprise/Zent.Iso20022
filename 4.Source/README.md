@@ -93,4 +93,12 @@ c. The External Codes file... YAY! The external file from 1Q2022 did not have an
 d. Well - that wraps it up - if there is a code on either parent or child in the inheritage tree, it should/could be considered an enum
 
 So... That was interesting.
+
 ![Annoyingly thinks for myself](https://media1.tenor.com/m/TO2kHrt7xIIAAAAC/work-thinking.gif)
+
+I think that might concludes my train of thoughts on the Enum problem. So this is the next step:
+
+1. Locate all Coded CodeSets and their parents
+2. Also locate all nonCoded CodeSets with their Coded parents
+3. Link all Coded CodeSets with their External opposites
+4. Generate Enums
