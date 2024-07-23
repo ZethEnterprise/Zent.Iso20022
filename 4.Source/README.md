@@ -83,3 +83,14 @@ Soh... I got the Enums merged into the same Dictionary.. Or so I thought. It tur
 # 2024-05-24
 What to say...? <i>"Education never ends, Watson. It is a series of lessons, with the greatest for the last."</i>
 Aaaaaanywho. Let's get moving: Some small checkpoints: all of the External CodeSets will only be translated into strings - WITH limitations of some sorts. I will therefore do some magic to add it as an Enum, but also as the Raw input as a string. In that way we should be able to get the best of the two worlds. Well - best of one world and the lesser evil from another.
+
+# 2024-07-22
+Hello fellow ISO20022 hunters. It's been some time since last (textual) update. Todays topic is (still) CodeSets - a.k.a. Enums... Or so I originally thought. I've been looking a bit into (and fact-checking) some of the various codes in order to see, if I have correctly figured out how to translate them. I came across this one 'ExternalDebtorAgentInstruction1Code', which is really annoying. The reasons:
+
+a. Only the inherited code set does not have any codes within it
+b. There is a link to the External Codes file
+c. The External Codes file... YAY! The external file from 1Q2022 did not have any codes for it, but 1Q2024 has - updated a month ago (does this mean that there is a new eRepository as well - jeez...)
+d. Well - that wraps it up - if there is a code on either parent or child in the inheritage tree, it should/could be considered an enum
+
+So... That was interesting.
+![Annoyingly thinks for myself](https://media1.tenor.com/m/TO2kHrt7xIIAAAAC/work-thinking.gif)
