@@ -84,7 +84,7 @@ internal class Parser
                               && !c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
 
         // Original with code (standalone) external
@@ -95,7 +95,7 @@ internal class Parser
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
 
         // Original without code (standalone) internal
@@ -106,7 +106,7 @@ internal class Parser
                               && !c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
 
         // Original with code (standalone) internal
@@ -117,7 +117,7 @@ internal class Parser
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
 
 
@@ -130,7 +130,7 @@ internal class Parser
                               && !c.Descendants("code").Any()
                               && c.Attribute("derivation") is not null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
 
         // Parent with code (standalone) external
@@ -141,7 +141,7 @@ internal class Parser
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is not null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
 
         // Parent without code (standalone) internal
@@ -152,7 +152,7 @@ internal class Parser
                               && !c.Descendants("code").Any()
                               && c.Attribute("derivation") is not null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
 
         // Parent with code (standalone) internal
@@ -163,7 +163,7 @@ internal class Parser
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is not null
                               && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
 
 
@@ -176,7 +176,7 @@ internal class Parser
                               && !c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
 
         // child with code (standalone) external
@@ -187,7 +187,7 @@ internal class Parser
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
 
         // child without code (standalone) internal
@@ -198,7 +198,7 @@ internal class Parser
                               && !c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
 
         // child with code (standalone) internal
@@ -209,7 +209,7 @@ internal class Parser
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
 
         var IDSc0d1t0e1 = c0d1t0e1.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
@@ -284,37 +284,37 @@ internal class Parser
         Console.WriteLine(" c1d0t0e1 ({1},   0): {0}", c1d0t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e1.Count.ToString().PadLeft(4));
         // ValidationByTable, Pattern, etc
         Console.WriteLine(" c0d0t0e0 ({1},   0): {0}", c0d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t0e0.Count.ToString().PadLeft(4));
-        // Real enums (I guess)
-        Console.WriteLine(" c1d0t0e0 ({1},   0): {0}", c1d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e0.Count.ToString().PadLeft(4));
-        // Enums? But to be searched in their derivations and then in external codes?
-        Console.WriteLine("?c0d1t0e1 ({1},{2}): {0}" , c0d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e1.Count.ToString().PadLeft(4), linkc0d1t0e1.Count.ToString().PadLeft(4));
-        // Enums? But to be searched in their derivations and then in external codes, but fall backs on their original codes?
-        Console.WriteLine("?c1d1t0e1 ({1},{2}): {0}" , c1d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e1.Count.ToString().PadLeft(4), linkc1d1t0e1.Count.ToString().PadLeft(4));
+        // Real enums
+        Console.WriteLine("*c1d0t0e0 ({1},   0): {0}", c1d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e0.Count.ToString().PadLeft(4));
+        // Not Enums.
+        Console.WriteLine(" c0d1t0e1 ({1},{2}): {0}" , c0d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e1.Count.ToString().PadLeft(4), linkc0d1t0e1.Count.ToString().PadLeft(4));
+        // Hybrid enums
+        Console.WriteLine("+c1d1t0e1 ({1},{2}): {0}" , c1d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e1.Count.ToString().PadLeft(4), linkc1d1t0e1.Count.ToString().PadLeft(4));
         // Patterns etc.
         Console.WriteLine(" c0d1t0e0 ({1},{2}): {0}" , c0d1t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e0.Count.ToString().PadLeft(4), linkc0d1t0e0.Count.ToString().PadLeft(4));
         // Real enums but with parent enums where the code names are, but derivations got their own subset of codes?
         Console.WriteLine("*c1d1t0e0 ({1},{2}): {0}" , c1d1t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e0.Count.ToString().PadLeft(4), linkc1d1t0e0.Count.ToString().PadLeft(4));
-        // Real enums if the external code set tells us that? Otherwise some pattern thingies etc.
-        Console.WriteLine("*c0d0t1e1 ({1},{2}): {0}" , c0d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e1.Count.ToString().PadLeft(4), linkc0d0t1e1.Count.ToString().PadLeft(4));
-        // Real enums located in the external code set as well. But does the child have a sub set of it?
-        Console.WriteLine("*c1d0t1e1 ({1},{2}): {0}" , c1d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e1.Count.ToString().PadLeft(4), linkc1d0t1e1.Count.ToString().PadLeft(4));
+        // Not enums.
+        Console.WriteLine(" c0d0t1e1 ({1},{2}): {0}" , c0d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e1.Count.ToString().PadLeft(4), linkc0d0t1e1.Count.ToString().PadLeft(4));
+        // Hybrid enums
+        Console.WriteLine("+c1d0t1e1 ({1},{2}): {0}" , c1d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e1.Count.ToString().PadLeft(4), linkc1d0t1e1.Count.ToString().PadLeft(4));
         // Patterns etc.
         Console.WriteLine(" c0d0t1e0 ({1},{2}): {0}" , c0d0t1e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e0.Count.ToString().PadLeft(4), linkc0d0t1e0.Count.ToString().PadLeft(4));
         // Real enums, contains the sub sets, etc.
         Console.WriteLine("*c1d0t1e0 ({1},{2}): {0}" , c1d0t1e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e0.Count.ToString().PadLeft(4), linkc1d0t1e0.Count.ToString().PadLeft(4));
 
-        Console.WriteLine("c0d1t0e1...........");
-        foreach (var e in c0d1t0e1)
+        Console.WriteLine("c1d1t0e1...........");
+        foreach (var e in c1d1t0e1)
         {
             Console.WriteLine(e.Attribute("name").Value);
         }
-        Console.WriteLine("c0d0t1e1...........");
-        foreach (var e in c0d0t1e1)
+        Console.WriteLine("c1d0t1e1...........");
+        foreach (var e in c1d0t1e1)
         {
             Console.WriteLine(e.Attribute("name").Value);
         }
 
-        var b = "";
+        var b = "";   
         //foreach (var codeset in ExtCodeSets)
         //{
         //    var slim = externals[codeset.Name];

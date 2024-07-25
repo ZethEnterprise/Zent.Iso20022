@@ -8,13 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SourceFiles\20220520_ISO20022_2013_eRepository.iso20022" />
-    <None Remove="SourceFiles\ExternalCodeSets_1Q2022.xsd" />
+    <None Remove="SourceFiles\1Q2024_ExternalCodeSets_v2.xsd" />
+    <None Remove="SourceFiles\20240411_ISO20022_2013_eRepository.iso20022" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="SourceFiles\20220520_ISO20022_2013_eRepository.iso20022" />
-    <EmbeddedResource Include="SourceFiles\ExternalCodeSets_1Q2022.xsd" />
+    <EmbeddedResource Include="SourceFiles\1Q2024_ExternalCodeSets_v2.xsd" />
+    <EmbeddedResource Include="SourceFiles\20240411_ISO20022_2013_eRepository.iso20022" />
   </ItemGroup>
 
 </Project>

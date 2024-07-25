@@ -102,3 +102,9 @@ I think that might concludes my train of thoughts on the Enum problem. So this i
 2. Also locate all nonCoded CodeSets with their Coded parents
 3. Link all Coded CodeSets with their External opposites
 4. Generate Enums
+
+# 2024-07-25
+Hello fellow nerds (in the best meaningful way)! So... Looking into these new codes from the new ISO repository and External CodeSet files I think I am about that place in time, where I can make an educated guess: Everything from External CodeSet file is seen in the XSD files as stringbased restrictions. This means that my set will actually be able to enrich this part even more. It also means that I might need to add some possibility of chosing between having a "RawStringOfField" and "EnumOfFieldWithRealFieldName" or the other way around (in order to not making breaking changes when people are migrating from their versions over to mine).
+
+(oddly enough I am talking about others using mine - who knows whether that will be something that will be happening at all...? Oh well - one can hope)
+

@@ -87,7 +87,7 @@ public class Architect
     {
         using var stream = Assembly
             .GetExecutingAssembly()
-            .GetManifestResourceStream("Zent.Iso20022.ModelGeneration.SourceFiles.20220520_ISO20022_2013_eRepository.iso20022")!;
+            .GetManifestResourceStream("Zent.Iso20022.ModelGeneration.SourceFiles.20240411_ISO20022_2013_eRepository.iso20022")!;
         using (var streamReader = new StreamReader(stream, Encoding.UTF8, true))
         {
             var reader = new XmlTextReader(streamReader);
@@ -108,7 +108,7 @@ public class Architect
     {
         using var stream = Assembly
             .GetExecutingAssembly()
-            .GetManifestResourceStream("Zent.Iso20022.ModelGeneration.SourceFiles.ExternalCodeSets_1Q2022.xsd")!;
+            .GetManifestResourceStream("Zent.Iso20022.ModelGeneration.SourceFiles.1Q2024_ExternalCodeSets_v2.xsd")!;
         using (var streamReader = new StreamReader(stream, Encoding.UTF8, true))
         {
             var reader = new XmlTextReader(streamReader);
