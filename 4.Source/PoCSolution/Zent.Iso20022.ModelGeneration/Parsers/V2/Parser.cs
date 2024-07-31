@@ -1,17 +1,18 @@
 ﻿using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Zent.Iso20022.ModelGeneration.Model.V2.Iso20022;
 using Zent.Iso20022.ModelGeneration.Models.V2;
+using Zent.Iso20022.ModelGeneration.Models.V2.Iso20022;
 using Zent.Iso20022.ModelGeneration.Models.V2.Iso20022.Properties;
 
 namespace Zent.Iso20022.ModelGeneration.Parsers.V2;
 
 internal class Parser
 {
-    internal Dictionary<string, XElement> DataEntries = new Dictionary<string, XElement>();
-    internal Dictionary<string, XElement> IsoMessages = new Dictionary<string, XElement>();
-    internal Dictionary<string, CodeSet> DefinedEnums = new Dictionary<string, CodeSet>();
+    internal IReadOnlyDictionary<string, XElement> DataEntries { get; init; }
+    internal IReadOnlyDictionary<string, XElement> IsoMessages { get; init; }
+    internal IReadOnlyDictionary<string, MessageSet> IsoMessageSets { get; init; }
+    internal IReadOnlyDictionary<string, CodeSet> DefinedEnums { get; init; }
     internal BluePrint ERepository;
     internal BluePrint ExternalCodeSets;
 
@@ -20,527 +21,575 @@ internal class Parser
         ERepository = eRepository;
         ExternalCodeSets = externalCodeSets;
 
-        GenerateCodeSetDictionary();
-        GenerateMessageDictionary();
-        GenerateDataEntryDictionary();
+        DefinedEnums = GenerateCodeSetDictionary(eRepository, externalCodeSets);
+        IsoMessages = GenerateMessageDictionary(eRepository);
+        IsoMessageSets = GenerateMessageSetDictionary(eRepository);
+        DataEntries = GenerateDataEntryDictionary(eRepository);
     }
 
     /// <summary>
     /// Generating a dictionary for locating the various types of messages in the ISO20022 standard
     /// </summary>
-    private void GenerateMessageDictionary()
+    private static IReadOnlyDictionary<string, XElement> GenerateMessageDictionary(BluePrint eRepository)
     {
-        var msg = from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var isoMessages = new Dictionary<string, XElement>();
+
+        var msg = from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
+                               .Descendants("businessProcessCatalogue")
+                               .Descendants("topLevelCatalogueEntry")
+                  where (c.Attribute(eRepository.Prefix("xsi") + "type")?.Value == "iso20022:BusinessArea") is true
+                  select c;
+        foreach (var e in msg)
+            isoMessages.Add(e.Attribute(eRepository.Prefix("xmi") + "id")!.Value, e);
+
+        foreach (var e in isoMessages.Values)
+            Console.WriteLine(e.Descendants("messageDefinitionIdentifier")!.First()!.Attribute("flavour")!.Value);
+
+        return isoMessages.ToImmutableDictionary();
+    }
+
+    /// <summary>
+    /// Generating a dictionary for locating the various types of messages in the ISO20022 standard
+    /// </summary>
+    private static IReadOnlyDictionary<string, MessageSet> GenerateMessageSetDictionary(BluePrint eRepository)
+    {
+        var isoMessages = new Dictionary<string, MessageSet>();
+
+        var msg = from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                                .Descendants("businessProcessCatalogue")
                                .Descendants("topLevelCatalogueEntry")
                   select c;
-        foreach (var e in msg)
-            IsoMessages.Add(e.Attribute(ERepository.Prefix("xmi") + "id")!.Value, e);
+        //foreach (var e in msg)
+        //    isoMessages.Add(e.Attribute(eRepository.Prefix("xmi") + "id")!.Value, e);
+
+        //foreach (var e in isoMessages.Values)
+        //    Console.WriteLine(e.Attribute("flavour").Value);
+
+        return isoMessages.ToImmutableDictionary();
     }
 
     /// <summary>
     /// Generating a dictionary for lookup of all Data Entries, which can be used
     /// </summary>
-    private void GenerateDataEntryDictionary()
+    private static IReadOnlyDictionary<string, XElement> GenerateDataEntryDictionary(BluePrint eRepository)
     {
+        var dataEntries = new Dictionary<string, XElement>();
 
-        var dt = from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var dt = from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                               .Descendants("dataDictionary")
                               .Descendants("topLevelDictionaryEntry")
                  select c;
         foreach (var e in dt)
-            DataEntries.Add(e.Attribute(ERepository.Prefix("xmi") + "id")!.Value, e);
+            dataEntries.Add(e.Attribute(eRepository.Prefix("xmi") + "id")!.Value, e);
+
+        return dataEntries.ToImmutableDictionary();
     }
 
     /// <summary>
     /// Generating a dictionary for lookup of Enum-based Code Sets, which can be used
     /// </summary>
-    private void GenerateCodeSetDictionary()
+    private static IReadOnlyDictionary<string, CodeSet> GenerateCodeSetDictionary(BluePrint eRepository, BluePrint externalCodeSets)
     {
-        var allIsoCodeSets = (from c in ERepository.Doc
-                                        .Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var allIsoCodeSets = (from c in eRepository.Doc
+                                        .Descendants(eRepository.Prefix("iso20022") + "Repository")
                                         .Descendants("dataDictionary")
                                         .Descendants("topLevelDictionaryEntry")
-                             where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                             where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
                              select c).ToList();
 
-        var standalonesTask = ExtractStandaloneEnumerableCodeSets(allIsoCodeSets);
-        var tracedTask = ExtractTracedEnumerableCodeSets(allIsoCodeSets);
-        var externalTask = ExtractExternalEnumerableCodeSets(allIsoCodeSets);
+        var standalonesTask = ExtractStandaloneEnumerableCodeSets(eRepository, allIsoCodeSets);
+        var tracedTask = ExtractTracedEnumerableCodeSets(eRepository, allIsoCodeSets);
+        var externalTask = ExtractExternalEnumerableCodeSets(eRepository, externalCodeSets, allIsoCodeSets);
 
         Task.WaitAll(standalonesTask, tracedTask, externalTask);
         var standalones = standalonesTask.Result;
         var traced = tracedTask.Result;
+        var externals = externalTask.Result;
 
-        var all = standalones.Concat(traced);
+        var all = Concatenate(standalones, traced, externals);
+        all.ToImmutableDictionary(x => x.Name);
+        #region ignore these
+        //// Original without code (standalone) external
+        //var c0d0t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && !c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
+        //                select (c)).ToList();
 
-        //var externalExtractionTask = GetExternalDictionaryTask();
+        //// Original with code (standalone) external
+        //var c1d0t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
+        //                select (c)).ToList();
+        
+        //// Original without code (standalone) internal
+        //var c0d0t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && !c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+        //                select (c)).ToList();
+        #endregion
+        #region ignore these
+        //// Parent without code (standalone) external
+        //var c0d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && !c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is not null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
+        //                select (c)).ToList();
 
-        // Original without code (standalone) external
-        var c0d0t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && !c.Descendants("code").Any()
-                              && c.Attribute("derivation") is null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
-                        select (c)).ToList();
+        //var IDSc0d1t0e1 = c0d1t0e1.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
+        //var linkc0d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                    where IDSc0d1t0e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
+        //                    && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                    select c).ToList();
+        #endregion
+        #region ignore these
+        //// Parent without code (standalone) internal
+        //var c0d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && !c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is not null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+        //                select (c)).ToList();
 
-        // Original with code (standalone) external
-        var c1d0t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && c.Descendants("code").Any()
-                              && c.Attribute("derivation") is null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
-                        select (c)).ToList();
+        //var IDSc0d1t0e0 = c0d1t0e0.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
+        //var linkc0d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                    where IDSc0d1t0e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
+        //                    && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                    select c).ToList();
+        #endregion
+        #region ignore these
+        //// child without code (standalone) external
+        //var c0d0t1e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && !c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is null
+        //                      && c.Attribute("trace") is not null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
+        //                select (c)).ToList();
 
-        // Original without code (standalone) internal
-        var c0d0t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && !c.Descendants("code").Any()
-                              && c.Attribute("derivation") is null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
-                        select (c)).ToList();
+        //var IDSc0d0t1e1 = c0d0t1e1.SelectMany(c => c.Attribute("trace")!.Value.Split(" ")).ToList();
+        //var linkc0d0t1e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                    where IDSc0d0t1e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
+        //                    && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                    select c).ToList();
+        #endregion
+        #region ignore these
+        //// child without code (standalone) internal
+        //var c0d0t1e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && !c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is null
+        //                      && c.Attribute("trace") is not null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+        //                select (c)).ToList();
 
+        //var IDSc0d0t1e0 = c0d0t1e0.SelectMany(c => c.Attribute("trace")!.Value.Split(" ")).ToList();
+        //var linkc0d0t1e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                    where IDSc0d0t1e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
+        //                    && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                    select c).ToList();
+        #endregion
+        #region will be covered from child
+        //// Parent with code (standalone) external
+        //var c1d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is not null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
+        //                select (c)).ToList();
+
+        //var IDSc1d1t0e1 = c1d1t0e1.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
+        //var linkc1d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                    where IDSc1d1t0e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
+        //                    && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                    select c).ToList();
+        #endregion
+        #region will be covered from child
+        //// Parent with code (standalone) internal
+        //var c1d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                      && c.Descendants("code").Any()
+        //                      && c.Attribute("derivation") is not null
+        //                      && c.Attribute("trace") is null
+        //                      && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+        //                select (c)).ToList();
+
+        //var IDSc1d1t0e0 = c1d1t0e0.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
+        //var linkc1d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        //         .Descendants("dataDictionary")
+        //         .Descendants("topLevelDictionaryEntry")
+        //                    where IDSc1d1t0e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
+        //                    && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+        //                    select c).ToList();
+        #endregion
+
+        #region c1d0t0e0 "real enums"
         // Original with code (standalone) internal
-        var c1d0t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var c1d0t0e0 = (from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                  .Descendants("dataDictionary")
                  .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                        where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is null
                               && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
                         select (c)).ToList();
+        #endregion
 
-
-
-        // Parent without code (standalone) external
-        var c0d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && !c.Descendants("code").Any()
-                              && c.Attribute("derivation") is not null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
-                        select (c)).ToList();
-
-        // Parent with code (standalone) external
-        var c1d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && c.Descendants("code").Any()
-                              && c.Attribute("derivation") is not null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
-                        select (c)).ToList();
-
-        // Parent without code (standalone) internal
-        var c0d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && !c.Descendants("code").Any()
-                              && c.Attribute("derivation") is not null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
-                        select (c)).ToList();
-
-        // Parent with code (standalone) internal
-        var c1d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && c.Descendants("code").Any()
-                              && c.Attribute("derivation") is not null
-                              && c.Attribute("trace") is null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
-                        select (c)).ToList();
-
-
-
-        // child without code (standalone) external
-        var c0d0t1e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && !c.Descendants("code").Any()
-                              && c.Attribute("derivation") is null
-                              && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
-                        select (c)).ToList();
-
+        #region c1d0t1e1 & c1d1t0e1 hybrid enums
         // child with code (standalone) external
-        var c1d0t1e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var c1d0t1e1 = (from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                  .Descendants("dataDictionary")
                  .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                        where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
                               && c.Descendants("code").Any()
                               && c.Attribute("derivation") is null
                               && c.Attribute("trace") is not null
                               && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
                         select (c)).ToList();
-
-        // child without code (standalone) internal
-        var c0d0t1e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && !c.Descendants("code").Any()
-                              && c.Attribute("derivation") is null
-                              && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
-                        select (c)).ToList();
-
-        // child with code (standalone) internal
-        var c1d0t1e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                        where c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                              && c.Descendants("code").Any()
-                              && c.Attribute("derivation") is null
-                              && c.Attribute("trace") is not null
-                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
-                        select (c)).ToList();
-
-        var IDSc0d1t0e1 = c0d1t0e1.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
-        var linkc0d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                            where IDSc0d1t0e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                            select c).ToList();
-
-        var IDSc1d1t0e1 = c1d1t0e1.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
-        var linkc1d1t0e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                            where IDSc1d1t0e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                            select c).ToList();
-
-        var IDSc0d1t0e0 = c0d1t0e0.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
-        var linkc0d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                            where IDSc0d1t0e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                            select c).ToList();
-
-        var IDSc1d1t0e0 = c1d1t0e0.SelectMany(c => c.Attribute("derivation")!.Value.Split(" ")).ToList();
-        var linkc1d1t0e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                            where IDSc1d1t0e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                            select c).ToList();
-
-        var IDSc0d0t1e1 = c0d0t1e1.SelectMany(c => c.Attribute("trace")!.Value.Split(" ")).ToList();
-        var linkc0d0t1e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
-                 .Descendants("dataDictionary")
-                 .Descendants("topLevelDictionaryEntry")
-                            where IDSc0d0t1e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                            select c).ToList();
 
         var IDSc1d0t1e1 = c1d0t1e1.SelectMany(c => c.Attribute("trace")!.Value.Split(" ")).ToList();
-        var linkc1d0t1e1 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var linkc1d0t1e1 = (from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                  .Descendants("dataDictionary")
                  .Descendants("topLevelDictionaryEntry")
-                            where IDSc1d0t1e1.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                            where IDSc1d0t1e1.Contains(c.Attribute(eRepository.Prefix("xmi") + "id")!.Value)
+                            && c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
                             select c).ToList();
+        #endregion
 
-        var IDSc0d0t1e0 = c0d0t1e0.SelectMany(c => c.Attribute("trace")!.Value.Split(" ")).ToList();
-        var linkc0d0t1e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        #region c1d0t1e0 & c1d1t0e0 "real enum"
+        // child with code (standalone) internal
+        var c1d0t1e0 = (from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                  .Descendants("dataDictionary")
                  .Descendants("topLevelDictionaryEntry")
-                            where IDSc0d0t1e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
-                            select c).ToList();
+                        where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                              && c.Descendants("code").Any()
+                              && c.Attribute("derivation") is null
+                              && c.Attribute("trace") is not null
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+                        select (c)).ToList();
 
         var IDSc1d0t1e0 = c1d0t1e0.SelectMany(c => c.Attribute("trace")!.Value.Split(" ")).ToList();
-        var linkc1d0t1e0 = (from c in ERepository.Doc.Descendants(ERepository.Prefix("iso20022") + "Repository")
+        var linkc1d0t1e0 = (from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
                  .Descendants("dataDictionary")
                  .Descendants("topLevelDictionaryEntry")
-                            where IDSc1d0t1e0.Contains(c.Attribute(ERepository.Prefix("xmi") + "id")!.Value)
-                            && c.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                            where IDSc1d0t1e0.Contains(c.Attribute(eRepository.Prefix("xmi") + "id")!.Value)
+                            && c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
                             select c).ToList();
+        #endregion
 
-
-
-        // Strings or patterns (mostly obsolete)
-        Console.WriteLine(" c0d0t0e1 ({1},   0): {0}", c0d0t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t0e1.Count.ToString().PadLeft(4));
-        // Does not exist
-        Console.WriteLine(" c1d0t0e1 ({1},   0): {0}", c1d0t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e1.Count.ToString().PadLeft(4));
-        // ValidationByTable, Pattern, etc
-        Console.WriteLine(" c0d0t0e0 ({1},   0): {0}", c0d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t0e0.Count.ToString().PadLeft(4));
+        #region ignore...
+        //// Strings or patterns (mostly obsolete)
+        //Console.WriteLine(" c0d0t0e1 ({1},   0): {0}", c0d0t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t0e1.Count.ToString().PadLeft(4));
+        //// Does not exist
+        //Console.WriteLine(" c1d0t0e1 ({1},   0): {0}", c1d0t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e1.Count.ToString().PadLeft(4));
+        //// ValidationByTable, Pattern, etc
+        //Console.WriteLine(" c0d0t0e0 ({1},   0): {0}", c0d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t0e0.Count.ToString().PadLeft(4));
+        #endregion
+        #region ignore...
+        //// Not Enums.
+        //Console.WriteLine(" c0d1t0e1 ({1},{2}): {0}" , c0d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e1.Count.ToString().PadLeft(4), linkc0d1t0e1.Count.ToString().PadLeft(4));
+        #endregion
+        #region already covered
+        //// Hybrid enums
+        //Console.WriteLine("-c1d1t0e1 ({1},{2}): {0}" , c1d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e1.Count.ToString().PadLeft(4), linkc1d1t0e1.Count.ToString().PadLeft(4));
+        #endregion
+        #region ignore...
+        //// Patterns etc.
+        //Console.WriteLine(" c0d1t0e0 ({1},{2}): {0}" , c0d1t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e0.Count.ToString().PadLeft(4), linkc0d1t0e0.Count.ToString().PadLeft(4));
+        #endregion
+        #region already covered
+        //// Real enums but with parent enums where the code names are, but derivations got their own subset of codes?
+        //Console.WriteLine("-c1d1t0e0 ({1},{2}): {0}" , c1d1t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e0.Count.ToString().PadLeft(4), linkc1d1t0e0.Count.ToString().PadLeft(4));
+        #endregion
+        #region ignore...
+        //// Not enums.
+        //Console.WriteLine(" c0d0t1e1 ({1},{2}): {0}" , c0d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e1.Count.ToString().PadLeft(4), linkc0d0t1e1.Count.ToString().PadLeft(4));
+        #endregion
+        #region ignore...
+        //// Patterns etc.
+        //Console.WriteLine(" c0d0t1e0 ({1},{2}): {0}" , c0d0t1e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e0.Count.ToString().PadLeft(4), linkc0d0t1e0.Count.ToString().PadLeft(4));
+        #endregion
         // Real enums
-        Console.WriteLine("*c1d0t0e0 ({1},   0): {0}", c1d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e0.Count.ToString().PadLeft(4));
-        // Not Enums.
-        Console.WriteLine(" c0d1t0e1 ({1},{2}): {0}" , c0d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e1.Count.ToString().PadLeft(4), linkc0d1t0e1.Count.ToString().PadLeft(4));
+        Console.WriteLine("*c1d0t0e0 ({1}-unknown,{2}): {0}", c1d0t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t0e0.Count.ToString().PadLeft(4), "   -");
+
         // Hybrid enums
-        Console.WriteLine("+c1d1t0e1 ({1},{2}): {0}" , c1d1t0e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e1.Count.ToString().PadLeft(4), linkc1d1t0e1.Count.ToString().PadLeft(4));
-        // Patterns etc.
-        Console.WriteLine(" c0d1t0e0 ({1},{2}): {0}" , c0d1t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d1t0e0.Count.ToString().PadLeft(4), linkc0d1t0e0.Count.ToString().PadLeft(4));
-        // Real enums but with parent enums where the code names are, but derivations got their own subset of codes?
-        Console.WriteLine("*c1d1t0e0 ({1},{2}): {0}" , c1d1t0e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d1t0e0.Count.ToString().PadLeft(4), linkc1d1t0e0.Count.ToString().PadLeft(4));
-        // Not enums.
-        Console.WriteLine(" c0d0t1e1 ({1},{2}): {0}" , c0d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e1.Count.ToString().PadLeft(4), linkc0d0t1e1.Count.ToString().PadLeft(4));
-        // Hybrid enums
-        Console.WriteLine("+c1d0t1e1 ({1},{2}): {0}" , c1d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e1.Count.ToString().PadLeft(4), linkc1d0t1e1.Count.ToString().PadLeft(4));
-        // Patterns etc.
-        Console.WriteLine(" c0d0t1e0 ({1},{2}): {0}" , c0d0t1e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c0d0t1e0.Count.ToString().PadLeft(4), linkc0d0t1e0.Count.ToString().PadLeft(4));
+        Console.WriteLine("+c1d0t1e1 ({1}-unknown,{2}): {0}" , c1d0t1e1.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e1.Count.ToString().PadLeft(4), linkc1d0t1e1.Count.ToString().PadLeft(4));
+        
         // Real enums, contains the sub sets, etc.
-        Console.WriteLine("*c1d0t1e0 ({1},{2}): {0}" , c1d0t1e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e0.Count.ToString().PadLeft(4), linkc1d0t1e0.Count.ToString().PadLeft(4));
+        Console.WriteLine("*c1d0t1e0 ({1}-unknown,{2}): {0}" , c1d0t1e0.FirstOrDefault()?.Attribute("name").Value ?? "<null>", c1d0t1e0.Count.ToString().PadLeft(4), linkc1d0t1e0.Count.ToString().PadLeft(4));
 
-        Console.WriteLine("c1d1t0e1...........");
-        foreach (var e in c1d1t0e1)
-        {
-            Console.WriteLine(e.Attribute("name").Value);
-        }
-        Console.WriteLine("c1d0t1e1...........");
-        foreach (var e in c1d0t1e1)
-        {
-            Console.WriteLine(e.Attribute("name").Value);
-        }
+        // Controlnumber
+        Console.WriteLine("=Joined   ({1}-{3},{2}): {0}", all.FirstOrDefault()?.Name ?? "<null>", all.Count.ToString().PadLeft(4), "   -", all.Sum(x => x.Codes.Count).ToString().PadLeft(7));
 
-        var b = "";   
-        //foreach (var codeset in ExtCodeSets)
-        //{
-        //    var slim = externals[codeset.Name];
-        //    codeset.Id = slim.Id;
-        //    codeset.Requirements = slim.Requirements;
-        //}
-
-        //var a = traced.Where(c => c.Id == "_amVqktp-Ed-ak6NoX_4Aeg_1632765855").ToList();
-        //var b = ExtCodeSets.Where(c => c.Id == "_amVqktp-Ed-ak6NoX_4Aeg_1632765855").ToList();
-        //DefinedEnums = ExtCodeSets.Concat(traced).ToDictionary(c => c.Id);
+        return all.ToDictionary(x => x.Id);
     }
 
-    private async Task<IList<CodeSet>> ExtractExternalEnumerableCodeSets(IList<XElement> elements)
+    private static async Task<IEnumerable<CodeSet>> ExtractExternalEnumerableCodeSets(BluePrint eRepository, BluePrint externalCodeSets, IList<XElement> elements)
     {
-        var externalCandidates = (from c in elements
-                                  where
-                                      c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
-                                  select c).ToList();
+        // child with code (standalone) external
+        var c1d0t1e1Task = GetERepositoryCodeSets();
+        var extCodeSetsTask = GetExternalCodeSets();
+        var c1d0t1e1 = await c1d0t1e1Task;
+        var extCodeSets = await extCodeSetsTask;
 
-        var ExtCodeSets = (from c in ExternalCodeSets.Doc.Descendants(ExternalCodeSets.Prefix("xs") + "schema")
-                        .Descendants(ExternalCodeSets.Prefix("xs") + "simpleType")
-                           select (new CodeSet
-                           {
-                               Name =
-                                       (
-                                           from i in c.Descendants(ExternalCodeSets.Prefix("xs") + "documentation")
-                                           where i.Attribute("source")!.Value == "Name"
-                                           select i.Value
-                                       ).First(),
-                               Definition =
-                                       (
-                                           from i in c.Descendants(ExternalCodeSets.Prefix("xs") + "documentation")
-                                           where i.Attribute("source")!.Value == "Definition"
-                                           select i.Value
-                                       ).First(),
-                               Codes =
-                                       (
-                                           from i in c.Descendants(ExternalCodeSets.Prefix("xs") + "enumeration")
-                                           select (new Code
-                                           {
-                                               Name =
-                                                       (
-                                                           from j in i.Descendants(ExternalCodeSets.Prefix("xs") + "documentation")
-                                                           where j.Attribute("source")!.Value == "Name"
-                                                           select j.Value
-                                                       ).First(),
-                                               Definition =
-                                                       (
-                                                           from j in i.Descendants(ExternalCodeSets.Prefix("xs") + "documentation")
-                                                           where j.Attribute("source")!.Value == "Definition"
-                                                           select j.Value
-                                                       ).First(),
-                                               CodeName = i.Attribute("value")!.Value,
-                                               ExternallyReferenced = true
-                                           }
-                                       ) as Code).ToList()
-                           })).ToDictionary(x => x.Name);
-
-        //var externalsWithoutBaseCodes = (from c in externalCandidates
-        //                                 where
-        //                                     c.Descendants("code")?.FirstOrDefault() is null &&
-        //                                     c.Attribute("derivation")?.Value is null
-        //                                 select (new CodeSet
-        //                                 {
-        //                                     Name =
-        //                                       (
-        //                                           from i in c.Descendants(ExternalCodeSets.Prefix("xs") + "documentation")
-        //                                           where i.Attribute("source")!.Value == "Name"
-        //                                           select i.Value
-        //                                       ).First(),
-        //                                     Codes = 
-                                       
-        //                               ).ToList();
-
-
-        //var what = (from c in externalCandidates
-        //            where
-        //                c.Descendants("code")?.FirstOrDefault() is not null &&
-        //                   c.Attribute("traces")?.Value is null
-        //            select c.Attribute(ERepository.Prefix("xmi") + "id")!.Value).ToList();
-
-
-        //var what2 = (from c in externalCandidates
-        //             where
-        //                 what.Contains(c.Attribute("derivation")?.Value) &&
-        //                 c.Descendants("code")?.FirstOrDefault() is null
-        //             select c.Attribute(ERepository.Prefix("xmi") + "id")!.Value).ToList();
-
-        return new List<CodeSet>();
-    }
-
-    private async Task<IList<CodeSet>> LocateExternalsWithBaseCodes(IList<XElement> externalCandidates, Dictionary<string,CodeSet> externalCodeSets)
-    {
-        return await Task.Run(async () =>
+        foreach(var codeSet in c1d0t1e1)
         {
-            var externalsWithBaseCodes = (from c in externalCandidates
-                                          where
-                                              c.Descendants("code")?.FirstOrDefault() is not null &&
-                                              c.Attribute("derivation")?.Value is null
-                                          select c).ToList();
-
-
-            return await EnrichWithExternalCodeSets(externalsWithBaseCodes, externalCodeSets);
-        });
-    }
-
-    private async Task<IList<CodeSet>> EnrichWithExternalCodeSets(IList<XElement> externalCandidates, Dictionary<string, CodeSet> externalCodeSets)
-    {
-        return await Task.Run(() =>
-        {
-            var list = new List<CodeSet>();
-
-            foreach(XElement c in externalCandidates)
+            if(!extCodeSets.TryGetValue(codeSet.Name, out var externalCodeSet))
             {
-                var candidate = new ExternalCodeSet
-                {
-                    Id = c.Attribute(ERepository.Prefix("xmi") + "id")!.Value,
-                    Name = c.Attribute("name")!.Value,
-                    Definition = c.Attribute("definition")!.Value,
-                    Requirements = new CodeSetRequirements
-                    {
-                        Pattern = c.Attribute("pattern")?.Value,
-                        MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
-                        MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
-                    },
-                };
-                var codes = (from i in c.Descendants("code")
-                             select i.Attribute("name")!.Value).ToHashSet();
-
-                var externalCodes = externalCodeSets[candidate.Name].Codes;
-                foreach(var code in externalCodes)
-                {
-                    (code as Code)!.DirectReferenced = codes.Contains(code.Name);
-
-                }
-
-                candidate.Codes = externalCodes;
+                ((ExternalCodeSet)codeSet).WasExternallyFound = false;
+                continue;
             }
 
-            return list;
-        });
+            ((ExternalCodeSet)codeSet).WasExternallyFound = true;
+
+            foreach(var code in codeSet.Codes)
+            {
+                var externalCode = externalCodeSet.Codes.FirstOrDefault(x => x.Name == code.Name);
+                switch (externalCode)
+                {
+                    case not null:
+                        externalCode.ExternallyReferenced = true;
+                        break;
+                    default:
+                        externalCodeSet.Codes.Add(code);
+                        break;
+                }
+            }
+
+            codeSet.Codes = externalCodeSet.Codes;
+        }
+
+        return c1d0t1e1;
+
+        async Task<IEnumerable<CodeSet>> GetERepositoryCodeSets()
+        {
+            return await Task.Run(() =>
+            {
+                return (from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
+                     .Descendants("dataDictionary")
+                     .Descendants("topLevelDictionaryEntry")
+                        where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                              && c.Descendants("code").Any()
+                              && c.Attribute("derivation") is null
+                              && c.Attribute("trace") is not null
+                              && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is true
+                        select (new ExternalCodeSet
+                        {
+                            Id = c.Attribute(eRepository.Prefix("xmi") + "id")!.Value,
+                            Name = c.Attribute("name")!.Value,
+                            Definition = c.Attribute("definition")!.Value,
+                            Requirements = new CodeSetRequirements
+                            {
+                                Pattern = c.Attribute("pattern")?.Value,
+                                MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+                                MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+                            },
+                            Codes = (from j in (from i in elements
+                                                where i.Attribute(eRepository.Prefix("xmi") + "id")!.Value == c.Attribute("trace")!.Value
+                                                select i).Descendants("code")
+                                     select (new Code
+                                     {
+                                         Name = j.Attribute("name")!.Value,
+                                         Definition = j.Attribute("definition")!.Value,
+                                         CodeName = j.Attribute("codeName")!.Value,
+                                         DirectReferenced = c.Descendants("code").Any(k => k.Attribute("name")!.Value == j.Attribute("name")!.Value),
+                                         InheritedReferenced = true
+                                     }
+                                     )).ToList()
+                        })).Cast<CodeSet>();
+            });
+        }
+        async Task<IDictionary<string,CodeSet>> GetExternalCodeSets()
+        {
+            return await Task.Run(() =>
+            {
+                var externalCandidates = (from c in elements
+                                          where
+                                              c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value == "ExternalCodeSetAttribute"
+                                          select c).ToList();
+
+                return (from c in externalCodeSets.Doc.Descendants(externalCodeSets.Prefix("xs") + "schema")
+                                .Descendants(externalCodeSets.Prefix("xs") + "simpleType")
+                                   select (new CodeSet
+                                   {
+                                       Name =
+                                               (
+                                                   from i in c.Descendants(externalCodeSets.Prefix("xs") + "documentation")
+                                                   where i.Attribute("source")!.Value == "Name"
+                                                   select i.Value
+                                               ).First(),
+                                       Definition =
+                                               (
+                                                   from i in c.Descendants(externalCodeSets.Prefix("xs") + "documentation")
+                                                   where i.Attribute("source")!.Value == "Definition"
+                                                   select i.Value
+                                               ).First(),
+                                       Codes =
+                                               (
+                                                   from i in c.Descendants(externalCodeSets.Prefix("xs") + "enumeration")
+                                                   select (new Code
+                                                   {
+                                                       Name =
+                                                               (
+                                                                   from j in i.Descendants(externalCodeSets.Prefix("xs") + "documentation")
+                                                                   where j.Attribute("source")!.Value == "Name"
+                                                                   select j.Value
+                                                               ).First(),
+                                                       Definition =
+                                                               (
+                                                                   from j in i.Descendants(externalCodeSets.Prefix("xs") + "documentation")
+                                                                   where j.Attribute("source")!.Value == "Definition"
+                                                                   select j.Value
+                                                               ).First(),
+                                                       CodeName = i.Attribute("value")!.Value,
+                                                       ExternallyReferenced = true
+                                                   }
+                                               ) as Code).ToList()
+                                   })).ToDictionary(x => x.Name);
+            });
+
+        }
     }
 
-    private async Task<IList<CodeSet>> ExtractTracedEnumerableCodeSets(IList<XElement> elements)
+    private static async Task<IEnumerable<CodeSet>> ExtractTracedEnumerableCodeSets(BluePrint eRepository, IList<XElement> elements)
     {
         return await Task.Run(() =>
         {
-            return (from c in elements
-                    where 
-                        c.Descendants("code")?.FirstOrDefault() is not null &&
-                        c.Attribute("trace")?.Value is not null &&
-                        c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
-                    select (new CodeSet
-                    {
-                        Id = c.Attribute(ERepository.Prefix("xmi") + "id")!.Value,
-                        Name = c.Attribute("name")!.Value,
-                        Definition = c.Attribute("definition")!.Value,
-                        Requirements = new CodeSetRequirements
-                        {
-                            Pattern = c.Attribute("pattern")?.Value,
-                            MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
-                            MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
-                        },
-                        Codes = (from j in (from i in elements
-                                            where 
-                                                i.Attribute(ERepository.Prefix("xmi") + "id")!.Value == c.Attribute("trace")!.Value
-                                            select i).Descendants("code")
-                                 where c.Descendants("code").Any(k => k.Attribute("name")!.Value == j.Attribute("name")!.Value)
-                                 select (new Code
-                                 {
-                                     Name = j.Attribute("name")!.Value,
-                                     Definition = j.Attribute("definition")!.Value,
-                                     CodeName = j.Attribute("codeName")!.Value
-                                 })).ToList()
-                    })).ToList();
+            #region c1d0t1e0 & c1d1t0e0 "real enum"
+            // child with code (standalone) internal
+            var c1d0t1e0 = from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
+                     .Descendants("dataDictionary")
+                     .Descendants("topLevelDictionaryEntry")
+                            where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                                  && c.Descendants("code").Any()
+                                  && c.Attribute("derivation") is null
+                                  && c.Attribute("trace") is not null
+                                  && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+                            select (new CodeSet
+                            {
+                                Id = c.Attribute(eRepository.Prefix("xmi") + "id")!.Value,
+                                Name = c.Attribute("name")!.Value,
+                                Definition = c.Attribute("definition")!.Value,
+                                Requirements = new CodeSetRequirements
+                                {
+                                    Pattern = c.Attribute("pattern")?.Value,
+                                    MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+                                    MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+                                },
+                                Codes = (from j in (from i in elements
+                                         where i.Attribute(eRepository.Prefix("xmi") + "id")!.Value == c.Attribute("trace")!.Value
+                                                    select i).Descendants("code")
+                                         select (new Code
+                                         {
+                                             Name = j.Attribute("name")!.Value,
+                                             Definition = j.Attribute("definition")!.Value,
+                                             CodeName = j.Attribute("codeName")!.Value,
+                                             DirectReferenced = c.Descendants("code").Any(k => k.Attribute("name")!.Value == j.Attribute("name")!.Value),
+                                             InheritedReferenced = true
+                                         }
+                                         )).ToList()
+                            });
+            #endregion
+            return c1d0t1e0;
         });
     }
 
-    private async Task<IList<CodeSet>> ExtractStandaloneEnumerableCodeSets(IList<XElement> elements)
+    private static async Task<IEnumerable<CodeSet>> ExtractStandaloneEnumerableCodeSets(BluePrint eRepository, IList<XElement> elements)
     {
         return await Task.Run(() =>
         {
-            return (from c in elements
-                    where
-                        c.Descendants("code")?.FirstOrDefault() is not null &&
-                        c.Attribute("trace")?.Value is null &&
-                        c.Descendants("semanticMarkup")?.FirstOrDefault()?.Attribute("type")?.Value != "ExternalCodeSetAttribute"
-                    select (new CodeSet
-                    {
-                        Id = c.Attribute(ERepository.Prefix("xmi") + "id")!.Value,
-                        Name = c.Attribute("name")!.Value,
-                        Definition = c.Attribute("definition")!.Value,
-                        Requirements = new CodeSetRequirements
-                        {
-                            Pattern = c.Attribute("pattern")?.Value,
-                            MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
-                            MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
+            #region c1d0t0e0 "real enums"
+            // Original with code (standalone) internal
+            var c1d0t0e0 = from c in eRepository.Doc.Descendants(eRepository.Prefix("iso20022") + "Repository")
+                     .Descendants("dataDictionary")
+                     .Descendants("topLevelDictionaryEntry")
+                            where c.Attribute(eRepository.Prefix("xsi") + "type")!.Value == "iso20022:CodeSet"
+                                  && c.Descendants("code").Any()
+                                  && c.Attribute("derivation") is null
+                                  && c.Attribute("trace") is null
+                                  && c.Descendants("semanticMarkup")?.Any(x => x.Attribute("type")?.Value == "ExternalCodeSetAttribute") is false
+                            select (new CodeSet
+                            {
+                                Id = c.Attribute(eRepository.Prefix("xmi") + "id")!.Value,
+                                Name = c.Attribute("name")!.Value,
+                                Definition = c.Attribute("definition")!.Value,
+                                Requirements = new CodeSetRequirements
+                                {
+                                    Pattern = c.Attribute("pattern")?.Value,
+                                    MinLength = int.TryParse(c.Attribute("minLength")?.Value, out var v1) ? v1 : null,
+                                    MaxLength = int.TryParse(c.Attribute("maxLength")?.Value, out var v2) ? v2 : null,
 
-                        },
-                        Codes = (from i in c.Descendants("code")
-                                 select (new Code
-                                 {
-                                     Name = i.Attribute("name")!.Value,
-                                     Definition = i.Attribute("definition")!.Value,
-                                     CodeName = i.Attribute("codeName")!.Value
-                                 })).ToList()
-                    })).ToList();
+                                },
+                                Codes = (from i in c.Descendants("code")
+                                         select (new Code
+                                         {
+                                             Name = i.Attribute("name")!.Value,
+                                             Definition = i.Attribute("definition")!.Value,
+                                             CodeName = i.Attribute("codeName")!.Value,
+                                             DirectReferenced = true
+                                         })).ToList()
+                            });
+            #endregion
+            return c1d0t0e0;
         });
     }
 
-    //private async Task<Dictionary<string, CodeSet>> GetExternalDictionaryTask()
-    //{
-    //    return await Task.Run(() =>
-    //    {
-    //        return 
-    //    });
-    //}
-
-    public static IEnumerable<T> Concatenate<T>(params IEnumerable<T>[] lists)
+    public static IList<T> Concatenate<T>(params IEnumerable<T>[] lists)
     {
-        return lists.SelectMany(x => x);
+        return lists.SelectMany(x => x).ToList();
     }
 
     public MasterData Parse(Func<string> modelVersion, params string[] schemas)
     {
+        foreach (var schema in schemas)
+            ParseRootElement(schema);
         return new MasterData();
+    }
+
+    public void ParseRootElement(string schema)
+    {
+        var a = IsoMessages[schema];
     }
 
     //public static void Parse(MasterData master, params string[] schemas)

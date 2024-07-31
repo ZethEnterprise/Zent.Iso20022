@@ -31,5 +31,5 @@ public class Code
 
 public class ExternalCodeSet : CodeSet
 {
-    public bool CanBeEnumerable { get; set; }
+    public bool WasExternallyFound { get; set; }
 }
