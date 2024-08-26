@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	  <Version>0.2.1-alpha.1</Version>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Templates\V2\ClassTemplateV2.cs" />
+    <Compile Remove="Templates\V2\ClassTemplateV2Partial.cs" />
+    <Compile Remove="Templates\V2\RootClassTemplateV2.cs" />
+    <Compile Remove="Templates\V2\RootClassTemplateV2Partial.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Templates\V2\ClassTemplateV2.tt" />
+    <None Remove="Templates\V2\RootClassTemplateV2.tt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CodeDom" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Templates\ClassTemplate.cs">
+      <DependentUpon>ClassTemplate.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\V2\ClassTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ClassTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\V2\IInheritedClassTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IInheritedClassTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\V2\InheritorClassTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InheritorClassTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\V2\RootClassTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RootClassTemplate.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Templates\ClassTemplate.tt">
+      <LastGenOutput>ClassTemplate.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\V2\ClassTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ClassTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\V2\IInheritedClassTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>IInheritedClassTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\V2\InheritorClassTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>InheritorClassTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\V2\RootClassTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>RootClassTemplate.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+</Project>

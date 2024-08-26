@@ -1,0 +1,32 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Zent.Iso20022.ModelGeneration.Models.Interfaces" #>
+
+namespace <#= Namespace #>;
+
+<# if(RootClassElement.Description is not null){ #>
+/// <summary>
+<# var classSummaryLines = RootClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
+<# var lastsummary = classSummaryLines.Last(); #>
+<# foreach(var line in classSummaryLines ){ #>
+/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
+<# } #>
+<# } #>
+
+/// </summary>
+<# } #>
+[System.CodeDom.Compiler.GeneratedCodeAttribute("<#= Generator #>", "<#= SoftwareVersion #>")]
+[System.ComponentModel.Description("This has been generated on the Model version: <#= ModelVersion #>")]
+[System.SerializableAttribute()]
+[System.Diagnostics.DebuggerStepThroughAttribute()]
+[System.ComponentModel.DesignerCategoryAttribute("code")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>")]
+[System.Xml.Serialization.XmlRootAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>", IsNullable=false)]
+public partial class <#= RootClassElement.RootName #>
+{
+	[System.Xml.Serialization.XmlElementAttribute("<#= RootClassElement.XmlTag #>")]
+	public <#= RootClassElement.ClassName #> <#= RootClassElement.RootPropertyName #> { get; set; }
+}

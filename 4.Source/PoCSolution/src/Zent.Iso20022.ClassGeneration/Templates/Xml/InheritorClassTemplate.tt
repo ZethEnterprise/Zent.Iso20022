@@ -1,0 +1,53 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Zent.Iso20022.ModelGeneration.Models.Interfaces" #>
+
+namespace <#= Namespace #>;
+
+<# if(ClassElement.Description is not null){ #>
+/// <summary>
+<# var classSummaryLines = ClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
+<# var lastsummary = classSummaryLines.Last(); #>
+<# foreach(var line in classSummaryLines ){ #>
+/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
+<# } #>
+<# } #>
+
+/// </summary>
+<# } #>
+[System.CodeDom.Compiler.GeneratedCodeAttribute("<#= Generator #>", "<#= SoftwareVersion #>")]
+[System.ComponentModel.Description("This has been generated on the Model version: <#= ModelVersion #>")]
+[System.SerializableAttribute()]
+[System.Diagnostics.DebuggerStepThroughAttribute()]
+[System.ComponentModel.DesignerCategoryAttribute("code")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>")]
+public partial class <#= ClassElement.ClassName #> : <#= ClassElement.BaseClassName #>
+{
+<# foreach(var thisProperty in ClassElement.Properties){ #>
+<# if(thisProperty.Description is not null){ #>
+	/// <summary>
+<# var lines = thisProperty.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
+<# var last = lines.Last(); #>
+<# foreach(var line in lines ){ #>
+	/// <#= line #> <# if(!line.Equals(last)){ #> <br/>
+<# } #>
+<# } #>
+
+	/// </summary>
+<# } #>
+<# if(thisProperty is not IChoicePropertyElement) { #>
+	[System.Xml.Serialization.XmlElementAttribute("<#= thisProperty.XmlTag #>")]
+	public <#= thisProperty.Type #> <#=  thisProperty.Name #> { get; set; }
+	
+<# } else { #>
+<# var choiceProperty = (IChoicePropertyElement)thisProperty; #>
+<# foreach(var choice in choiceProperty.Choices) { #>
+	[System.Xml.Serialization.XmlElementAttribute("<#= choice.XmlTag #>", typeof(<#= choice.ClassName #>)]
+<# } #>
+	public <#= thisProperty.Type #> <#=  thisProperty.Name #> { get; set; }
+<# } #>
+<# } #>
+}

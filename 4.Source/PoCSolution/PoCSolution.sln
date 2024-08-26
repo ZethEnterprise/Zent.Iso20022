@@ -3,11 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoC", "PoC\PoC.csproj", "{440027E9-D985-4C62-837F-A6F510555D7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoC", "src\PoC\PoC.csproj", "{440027E9-D985-4C62-837F-A6F510555D7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zent.Iso20022.ModelGeneration", "Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj", "{E27CD047-A150-417B-AA91-DEF6A4E0A722}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zent.Iso20022.ModelGeneration", "src\Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj", "{E27CD047-A150-417B-AA91-DEF6A4E0A722}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zent.Iso20022.ClassGeneration", "Zent.Iso20022.ClassGeneration\Zent.Iso20022.ClassGeneration.csproj", "{2A83B409-CA68-424A-925D-D9A5953D45F4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zent.Iso20022.ClassGeneration", "src\Zent.Iso20022.ClassGeneration\Zent.Iso20022.ClassGeneration.csproj", "{2A83B409-CA68-424A-925D-D9A5953D45F4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B0989C6E-DE8A-4F73-8C5C-8382465EF01D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{DD33E420-C3BF-410B-9BAE-710E9F131379}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zent.Iso20022.ClassGeneration.Test", "test\Zent.Iso20022.ClassGeneration.Test\Zent.Iso20022.ClassGeneration.Test.csproj", "{B236BCFD-1B8D-4BAE-B95D-AC4BEFC1AAE3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,9 +33,19 @@ Global
 		{2A83B409-CA68-424A-925D-D9A5953D45F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A83B409-CA68-424A-925D-D9A5953D45F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2A83B409-CA68-424A-925D-D9A5953D45F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B236BCFD-1B8D-4BAE-B95D-AC4BEFC1AAE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B236BCFD-1B8D-4BAE-B95D-AC4BEFC1AAE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B236BCFD-1B8D-4BAE-B95D-AC4BEFC1AAE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B236BCFD-1B8D-4BAE-B95D-AC4BEFC1AAE3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{440027E9-D985-4C62-837F-A6F510555D7F} = {B0989C6E-DE8A-4F73-8C5C-8382465EF01D}
+		{E27CD047-A150-417B-AA91-DEF6A4E0A722} = {B0989C6E-DE8A-4F73-8C5C-8382465EF01D}
+		{2A83B409-CA68-424A-925D-D9A5953D45F4} = {B0989C6E-DE8A-4F73-8C5C-8382465EF01D}
+		{B236BCFD-1B8D-4BAE-B95D-AC4BEFC1AAE3} = {DD33E420-C3BF-410B-9BAE-710E9F131379}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DEA21141-1A9B-4567-B428-2EEEF87592D5}
