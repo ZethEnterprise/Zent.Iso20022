@@ -120,3 +120,18 @@ Hello fellow code hunters... Yeah. The last couple of days I got a bit annoyed a
 Hello fellow coders! So... Fun fact: "pain.001.001.02 has its message definition identifier as xml tag. So does pain.001.001.01, but this version is not injected into the eRepository."
 
 So... How 'bout that? Isn't that weird? This just means there is another weird edge case to take care of.
+
+# 2024-09-01
+Hello fellow Night Owls! A small update. I've been having fun with my code generator. Lost sight of it all for a bit. Well... I wanted to make it nice and complete at the same time, while I needed to make changes in my model AND in my templates. So I tried to stay focus on multiple points at the same time. You all know what that's like, right? You lose yourself in the details and gets nothing done.
+
+That is why I've introduced my first test class in this project!!! (Also because it was always my intension to try out Sonarcloud as a free version for this thing - but I had to have something worthy of Almighty Sonar!)
+
+Anywho - that's not important right now. What is important is that I've actually shifted my focus! I focused on what I actually wanted as an end result. Running everything (though it is quite fast with the threading'n'all) I don't want to run it every time to cherrypick a few cases/classes for proof of my work is correct. Therefore I have now created a test case of each template I have, so I can actually simulate what I have done and make small changes and see them right away. Furthermore it actually provided me with the contract between the class generator and the model generator. So I will more easily be able to make my model so it adheres to the interface specified/requested by the consumer. I'm always preaching at work about the importance of making clear cuts in order to distribute workload across multiple developers so everyone can help at any given point in time. That's a story for another time - just like the time I had a colleague telling me that some system I was taking over was like Command & Conquer - "You have a black map and can only see this. When you slowly work with the system you'll explore more and more very slowly". I personally like that reference and it actually tought me to address my systems in a specific way:
+
+1. Always be curious and explore
+2. Don't limit yourself to your own system (explore the allied's or enemy's territory)
+3. Explore the business domain, but also the other connected business domains
+
+Those three golden rules will actually give you insight in your client's world and provide the best help - whether it is merely being able to tell them "Oh, that thing there, that's in this system, this is your vendor maintaining it. Here let me give you my contact person for them.". The more you know about your client/own company the more valuable you'll get in terms of service you can provide and guidance you can give as you know how everything interconnects. Now - there are probably someone out there, who will say: "Well, that is a generalistic or an architect profile. I want to be a specialist within a small area." - to that I'll say. "So? Why is that erasing you path towards a specialist? A specialist only focuses on a small area, but knowing what is talking to your small target area will also help you know how to focus/direct your skills to a problem for the best solution - not just 'good' solution."
+
+So. Just to round it up. I think the only template we are missing at this point is the fuzzy Enums - the ones that are sort of enums-BUT-NOTs. The ones where we will have external lists and yet internal lists of enums, but the XSDs are always describing them as Strings with RegEx Patterns etc. That is for another time.

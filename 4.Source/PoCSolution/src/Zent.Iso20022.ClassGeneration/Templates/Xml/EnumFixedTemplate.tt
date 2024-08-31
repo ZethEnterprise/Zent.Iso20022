@@ -1,0 +1,47 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Zent.Iso20022.ModelGeneration.Models.Interfaces" #>
+namespace <#= Namespace #>;
+
+<# if(FixedEnumList.Description is not null){ #>
+/// <summary>
+<# var enumListSummaryLines = FixedEnumList.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
+<# var lastsummary = enumListSummaryLines.Last(); #>
+<# foreach(var line in enumListSummaryLines ){ #>
+/// <#= line #><# if(!line.Equals(lastsummary)){ #><br/>
+<# } #>
+<# } #>
+
+/// </summary>
+<# } #>
+[System.CodeDom.Compiler.GeneratedCodeAttribute("<#= Generator #>", "<#= SoftwareVersion #>")]
+[System.ComponentModel.Description("This has been generated on the Model version: <#= ModelVersion #>")]
+[System.SerializableAttribute()]
+[System.Diagnostics.DebuggerStepThroughAttribute()]
+[System.ComponentModel.DesignerCategoryAttribute("code")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>")]
+public enum <#= FixedEnumList.Name #>
+{
+<# var lastEnumElement = FixedEnumList.EnumElements.Last(); #>
+<# foreach( var enumElement in FixedEnumList.EnumElements){ #>
+<# if(enumElement.Description is not null){ #>
+	/// <summary>
+<# var enumSummaryLines = enumElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
+<# var lastsummary = enumSummaryLines.Last(); #>
+<# foreach(var line in enumSummaryLines ){ #>
+	/// <#= line #><# if(!line.Equals(lastsummary)){ #><br/>
+<# } #>
+<# } #>
+
+	/// </summary>
+<# } #>
+	[System.Xml.Serialization.XmlEnum(Name = "<#= enumElement.PayloadCode #>")]
+	<#= enumElement.Name #>
+<# if(enumElement != lastEnumElement) { #>
+	
+<# } #>
+<# } #>
+}

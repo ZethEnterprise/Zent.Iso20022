@@ -1,6 +1,6 @@
 ﻿using Zent.Iso20022.ModelGeneration.Models.Interfaces;
 
-namespace Zent.Iso20022.ClassGeneration.Templates.V2;
+namespace Zent.Iso20022.ClassGeneration.Templates.Xml;
 
 public partial class InheritorClassTemplate
 {

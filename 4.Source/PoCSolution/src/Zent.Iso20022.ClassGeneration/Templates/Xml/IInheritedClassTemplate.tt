@@ -4,7 +4,6 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="Zent.Iso20022.ModelGeneration.Models.Interfaces" #>
-
 namespace <#= Namespace #>;
 
 <# if(ClassElement.Description is not null){ #>
@@ -12,7 +11,7 @@ namespace <#= Namespace #>;
 <# var classSummaryLines = ClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
 <# var lastsummary = classSummaryLines.Last(); #>
 <# foreach(var line in classSummaryLines ){ #>
-/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
+/// <#= line #><# if(!line.Equals(lastsummary)){ #><br/>
 <# } #>
 <# } #>
 
@@ -26,7 +25,7 @@ namespace <#= Namespace #>;
 [System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>")]
 <# foreach(var heir in ClassElement.Heirs) #>
 <#{#>
-[System.Xml.Serialization.XmlInclude(typeof(heir))]
+[System.Xml.Serialization.XmlInclude(typeof(<#= heir #>))]
 <#}#>
 public partial abstract class <#= ClassElement.ClassName #>
 { }

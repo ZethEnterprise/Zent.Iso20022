@@ -2,21 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-	  <Version>0.2.1-alpha.1</Version>
+	  <Version>0.4.1-alpha.1</Version>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Templates\V2\ClassTemplateV2.cs" />
-    <Compile Remove="Templates\V2\ClassTemplateV2Partial.cs" />
-    <Compile Remove="Templates\V2\RootClassTemplateV2.cs" />
-    <Compile Remove="Templates\V2\RootClassTemplateV2Partial.cs" />
+    <Compile Remove="Templates\Xml\ClassTemplateV2.cs" />
+    <Compile Remove="Templates\Xml\ClassTemplateV2Partial.cs" />
+    <Compile Remove="Templates\Xml\RootClassTemplateV2.cs" />
+    <Compile Remove="Templates\Xml\RootClassTemplateV2Partial.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Templates\V2\ClassTemplateV2.tt" />
-    <None Remove="Templates\V2\RootClassTemplateV2.tt" />
+    <None Remove="Templates\Xml\ClassTemplateV2.tt" />
+    <None Remove="Templates\Xml\RootClassTemplateV2.tt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,22 +33,27 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Templates\V2\ClassTemplate.cs">
+    <Compile Update="Templates\Xml\ClassTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ClassTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Update="Templates\V2\IInheritedClassTemplate.cs">
+    <Compile Update="Templates\Xml\EnumFixedTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EnumFixedTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\Xml\IInheritedClassTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>IInheritedClassTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Update="Templates\V2\InheritorClassTemplate.cs">
+    <Compile Update="Templates\Xml\InheritorClassTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>InheritorClassTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Update="Templates\V2\RootClassTemplate.cs">
+    <Compile Update="Templates\Xml\RootClassTemplate.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>RootClassTemplate.tt</DependentUpon>
@@ -60,19 +65,23 @@
       <LastGenOutput>ClassTemplate.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
-    <None Update="Templates\V2\ClassTemplate.tt">
+    <None Update="Templates\Xml\ClassTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ClassTemplate.cs</LastGenOutput>
     </None>
-    <None Update="Templates\V2\IInheritedClassTemplate.tt">
+    <None Update="Templates\Xml\EnumFixedTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>EnumFixedTemplate.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Xml\IInheritedClassTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>IInheritedClassTemplate.cs</LastGenOutput>
     </None>
-    <None Update="Templates\V2\InheritorClassTemplate.tt">
+    <None Update="Templates\Xml\InheritorClassTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>InheritorClassTemplate.cs</LastGenOutput>
     </None>
-    <None Update="Templates\V2\RootClassTemplate.tt">
+    <None Update="Templates\Xml\RootClassTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>RootClassTemplate.cs</LastGenOutput>
     </None>

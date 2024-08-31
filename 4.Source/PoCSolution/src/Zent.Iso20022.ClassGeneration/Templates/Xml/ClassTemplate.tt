@@ -4,7 +4,6 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="Zent.Iso20022.ModelGeneration.Models.Interfaces" #>
-
 namespace <#= Namespace #>;
 
 <# if(ClassElement.Description is not null){ #>
@@ -12,7 +11,7 @@ namespace <#= Namespace #>;
 <# var classSummaryLines = ClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
 <# var lastsummary = classSummaryLines.Last(); #>
 <# foreach(var line in classSummaryLines ){ #>
-/// <#= line #> <# if(!line.Equals(lastsummary)){ #> <br/>
+/// <#= line #><# if(!line.Equals(lastsummary)){ #><br/>
 <# } #>
 <# } #>
 
@@ -26,28 +25,35 @@ namespace <#= Namespace #>;
 [System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:iso:std:iso:20022:tech:xsd:<#= SchemaVersion #>")]
 public partial class <#= ClassElement.ClassName #>
 {
+<# var lastProperty = ClassElement.Properties.Last(); #>
 <# foreach(var thisProperty in ClassElement.Properties){ #>
 <# if(thisProperty.Description is not null){ #>
 	/// <summary>
 <# var lines = thisProperty.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
 <# var last = lines.Last(); #>
 <# foreach(var line in lines ){ #>
-	/// <#= line #> <# if(!line.Equals(last)){ #> <br/>
+	/// <#= line #><# if(!line.Equals(last)){ #><br/>
 <# } #>
 <# } #>
 
 	/// </summary>
 <# } #>
-<# if(thisProperty is not IChoicePropertyElement) { #>
-	[System.Xml.Serialization.XmlElementAttribute("<#= thisProperty.XmlTag #>")]
-	public <#= thisProperty.Type #> <#=  thisProperty.Name #> { get; set; }
-	
-<# } else { #>
-<# var choiceProperty = (IChoicePropertyElement)thisProperty; #>
-<# foreach(var choice in choiceProperty.Choices) { #>
-	[System.Xml.Serialization.XmlElementAttribute("<#= choice.XmlTag #>", typeof(<#= choice.ClassName #>)]
+<# if(thisProperty.Type is ISimpleType thisSimpleType) { #>
+	[System.Xml.Serialization.XmlElementAttribute("<#= thisSimpleType.PayloadTag #>")]
+	public <#= thisSimpleType.Type.GetCSharpSyntax() #> <#=  thisProperty.Name #> { get; set; }
+<# } else if(thisProperty.Type is IChoiceType thisChoiceType) { #>
+<# foreach(var choice in thisChoiceType.Variances) { #>
+	[System.Xml.Serialization.XmlElementAttribute("<#= choice.PayloadTag #>", typeof(<#= choice.ClassName #>)]
 <# } #>
-	public <#= thisProperty.Type #> <#=  thisProperty.Name #> { get; set; }
+	public <#= thisChoiceType.BaseClassName #> <#=  thisProperty.Name #> { get; set; }
+<# } else if(thisProperty.Type is IClassType thisClassType) { #>
+	[System.Xml.Serialization.XmlElementAttribute("<#= thisClassType.PayloadTag #>")]
+	public <#= thisClassType.ClassName #> <#=  thisProperty.Name #> { get; set; }
+<# } else { #>
+	I will break your code...	
+<# } #>
+<# if(thisProperty != lastProperty) { #>
+	
 <# } #>
 <# } #>
 }

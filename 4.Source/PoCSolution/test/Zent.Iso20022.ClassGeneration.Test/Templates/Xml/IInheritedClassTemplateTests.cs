@@ -5,24 +5,18 @@ using Zent.Iso20022.ModelGeneration.Models.V2.Definitions;
 namespace Zent.Iso20022.ClassGeneration.test.Templates.Xml;
 
 [Collection("UnitTest")]
-public partial class RootClassTemplateTests
+public partial class IInheritedClassTemplateTests
 {
     private readonly ITestOutputHelper output;
 
-    private const string ClassName = "Document";
+    private const string ClassName = "MyNewClass";
+    private const string ChildClassName1 = "FirstBornClass";
+    private const string ChildClassName2 = "SecondBornClass";
     private const string ClassSummary = "This is the class summary.\r\nOn multiple lines...";
-    private const string PropertyName = "BaseElement";
-    private const string PropertySummary = "This is the base property summary.\r\nOn multiple lines...";
-    private const string PropertyType = "SomeClassName";
-    private const string PropertyXmlTag = "SmthTgd"; //wannabe Xml tag representation of "SomethingTagged"
     private const string AssertClassSummary = $@"/// <summary>
 /// This is the class summary.<br/>
 /// On multiple lines...
 /// </summary>";
-    private const string AssertPropertySummary = $@"/// <summary>
-{"\t"}/// This is the base property summary.<br/>
-{"\t"}/// On multiple lines...
-{"\t"}/// </summary>";
 
     #region Dynamic constants
     private const string Generator = "UnitTest";
@@ -38,10 +32,9 @@ public partial class RootClassTemplateTests
     private const string AssertDebuggerStepThrough = "[System.Diagnostics.DebuggerStepThroughAttribute()]";
     private const string AssertDesignerCategory = "[System.ComponentModel.DesignerCategoryAttribute(\"code\")]";
     private const string AssertXmlType = $"[System.Xml.Serialization.XmlTypeAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:{MasterDataSchema}\")]";
-    private const string AssertXmlRoot = $"[System.Xml.Serialization.XmlRootAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:{MasterDataSchema}\", IsNullable=false)]";
-    private const string AssertClassLine = $"public partial class {ClassName}";
-    private const string AssertPropertyXmlElement = $"[System.Xml.Serialization.XmlElementAttribute(\"{PropertyXmlTag}\")]";
-    private const string AssertPropertyLine = $"public {PropertyType} {PropertyName} {{ get; set; }}";
+    private const string AssertClassLine = $"public partial abstract class {ClassName}";
+    private const string AssertChild1Line = $"[System.Xml.Serialization.XmlInclude(typeof({ChildClassName1}))]";
+    private const string AssertChild2Line = $"[System.Xml.Serialization.XmlInclude(typeof({ChildClassName2}))]";
 
     private const string AssertPayload = 
 $@"{AssertNamespace}
@@ -53,50 +46,41 @@ $@"{AssertNamespace}
 {AssertDebuggerStepThrough}
 {AssertDesignerCategory}
 {AssertXmlType}
-{AssertXmlRoot}
+{AssertChild1Line}
+{AssertChild2Line}
 {AssertClassLine}
-{{
-{"\t"}{AssertPropertySummary}
-{"\t"}{AssertPropertyXmlElement}
-{"\t"}{AssertPropertyLine}
-{"\t"}
-}}";
+{{ }}";
     #endregion
 
-    public RootClassTemplateTests(ITestOutputHelper output)
+    public IInheritedClassTemplateTests(ITestOutputHelper output)
     {
         this.output = output;
     }
 
     [Fact]
-    public void GivenSimpleExample_WhenTransformingRootClassTemplate_ThenPayloadIsAsExpected()
+    public void GivenSimpleExample_WhenTransformingInheritedClassTemplate_ThenPayloadIsAsExpected()
     {
         // Arrange
-        var mockedRoot = new RootElement
+        var mockedClass = new InheritedClassElement
         {
             ClassName = ClassName,
             Description = ClassSummary,
-            Properties = [new PropertyElement 
-            {
-                Name = PropertyName,
-                Description = PropertySummary,
-                Type = new ClassType
-                {
-                    ClassName = PropertyType,
-                    PayloadTag = PropertyXmlTag
-                }
-            }]
+            Heirs =
+            [
+                ChildClassName1,
+                ChildClassName2
+            ]
         };
 
         var target =
-                new RootClassTemplate()
+                new IInheritedClassTemplate()
                 {
                     Generator = Generator,
                     SoftwareVersion = MasterDataModelVersion,
                     ModelVersion = MasterDataModelVersion,
                     SchemaVersion = MasterDataSchema,
                     Namespace = GeneratedNamespace,
-                    RootClassElement = mockedRoot
+                    ClassElement = mockedClass
                 };
 
         // Act

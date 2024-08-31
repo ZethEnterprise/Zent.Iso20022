@@ -658,8 +658,11 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
         {
             Name = xElement.Attribute("name")!.Value,
             Description = xElement.Attribute("definition")!.Value,
-            XmlTag = xElement.Attribute("xmlTag")!.Value,
-            Type = propertyType
+            Type = new ClassType
+            {
+                PayloadTag = xElement.Attribute("xmlTag")!.Value,
+                ClassName = propertyType
+            }
         };
         return element;
     }

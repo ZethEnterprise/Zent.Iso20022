@@ -29,83 +29,82 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("\r\nnamespace ");
+            this.Write("namespace ");
             
-            #line 8 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 7 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Namespace));
             
             #line default
             #line hidden
             this.Write(";\r\n\r\n");
             
-            #line 10 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 9 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  if(ClassElement.Description is not null){ 
             
             #line default
             #line hidden
             this.Write("/// <summary>\r\n");
             
-            #line 12 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 11 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  var classSummaryLines = ClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
             
             #line default
             #line hidden
             
-            #line 13 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 12 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  var lastsummary = classSummaryLines.Last(); 
             
             #line default
             #line hidden
             
-            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 13 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  foreach(var line in classSummaryLines ){ 
             
             #line default
             #line hidden
             this.Write("/// ");
             
-            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(line));
             
             #line default
             #line hidden
-            this.Write(" ");
             
-            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  if(!line.Equals(lastsummary)){ 
             
             #line default
             #line hidden
-            this.Write(" <br/>\r\n");
+            this.Write("<br/>\r\n");
+            
+            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ } 
+            
+            #line default
+            #line hidden
             
             #line 16 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  } 
             
             #line default
             #line hidden
-            
-            #line 17 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
- } 
-            
-            #line default
-            #line hidden
             this.Write("\r\n/// </summary>\r\n");
             
-            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 19 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("[System.CodeDom.Compiler.GeneratedCodeAttribute(\"");
             
-            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Generator));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SoftwareVersion));
             
             #line default
@@ -113,7 +112,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             this.Write("\")]\r\n[System.ComponentModel.Description(\"This has been generated on the Model ver" +
                     "sion: ");
             
-            #line 22 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ModelVersion));
             
             #line default
@@ -122,26 +121,32 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
                     "ribute()]\r\n[System.ComponentModel.DesignerCategoryAttribute(\"code\")]\r\n[System.Xm" +
                     "l.Serialization.XmlTypeAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:");
             
-            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SchemaVersion));
             
             #line default
             #line hidden
             this.Write("\")]\r\npublic partial class ");
             
-            #line 27 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClassElement.ClassName));
             
             #line default
             #line hidden
             this.Write(" : ");
             
-            #line 27 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ClassElement.BaseClassName));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
+            
+            #line 28 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ var lastProperty = ClassElement.Properties.Last(); 
+            
+            #line default
+            #line hidden
             
             #line 29 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  foreach(var thisProperty in ClassElement.Properties){ 
@@ -180,14 +185,13 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             
             #line default
             #line hidden
-            this.Write(" ");
             
             #line 35 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  if(!line.Equals(last)){ 
             
             #line default
             #line hidden
-            this.Write(" <br/>\r\n");
+            this.Write("<br/>\r\n");
             
             #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  } 
@@ -209,21 +213,21 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             #line hidden
             
             #line 41 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
- if(thisProperty is not IChoicePropertyElement) { 
+ if(thisProperty.Type is ISimpleType thisSimpleType) { 
             
             #line default
             #line hidden
             this.Write("\t[System.Xml.Serialization.XmlElementAttribute(\"");
             
             #line 42 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.XmlTag));
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisSimpleType.PayloadTag));
             
             #line default
             #line hidden
             this.Write("\")]\r\n\tpublic ");
             
             #line 43 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Type));
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisSimpleType.Type.GetCSharpSyntax()));
             
             #line default
             #line hidden
@@ -234,69 +238,111 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             
             #line default
             #line hidden
-            this.Write(" { get; set; }\r\n\t\r\n");
+            this.Write(" { get; set; }\r\n");
+            
+            #line 44 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ } else if(thisProperty.Type is IChoiceType thisChoiceType) { 
+            
+            #line default
+            #line hidden
             
             #line 45 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
- } else { 
-            
-            #line default
-            #line hidden
-            
-            #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
- var choiceProperty = (IChoicePropertyElement)thisProperty; 
-            
-            #line default
-            #line hidden
-            
-            #line 47 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
- foreach(var choice in choiceProperty.Choices) { 
+ foreach(var choice in thisChoiceType.Variances) { 
             
             #line default
             #line hidden
             this.Write("\t[System.Xml.Serialization.XmlElementAttribute(\"");
             
-            #line 48 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(choice.XmlTag));
+            #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(choice.PayloadTag));
             
             #line default
             #line hidden
             this.Write("\", typeof(");
             
-            #line 48 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(choice.ClassName));
             
             #line default
             #line hidden
             this.Write(")]\r\n");
             
-            #line 49 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 47 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\tpublic ");
             
-            #line 50 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Type));
+            #line 48 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisChoiceType.BaseClassName));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 50 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 48 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
             
             #line default
             #line hidden
             this.Write(" { get; set; }\r\n");
             
+            #line 49 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ } else if(thisProperty.Type is IClassType thisClassType) { 
+            
+            #line default
+            #line hidden
+            this.Write("\t[System.Xml.Serialization.XmlElementAttribute(\"");
+            
+            #line 50 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisClassType.PayloadTag));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\n\tpublic ");
+            
             #line 51 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisClassType.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write(" ");
+            
+            #line 51 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
+            
+            #line default
+            #line hidden
+            this.Write(" { get; set; }\r\n");
+            
+            #line 52 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            this.Write("\tI will break your code...\t\r\n");
+            
+            #line 54 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 52 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+            #line 55 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ if(thisProperty != lastProperty) { 
+            
+            #line default
+            #line hidden
+            this.Write("\t\r\n");
+            
+            #line 57 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
+ } 
+            
+            #line default
+            #line hidden
+            
+            #line 58 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\InheritorClassTemplate.tt"
  } 
             
             #line default

@@ -7,22 +7,21 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Zent.Iso20022.ClassGeneration.Templates
+namespace Zent.Iso20022.ClassGeneration.Templates.Xml
 {
     using System.Linq;
     using System.Text;
     using System.Collections.Generic;
-    using Zent.Iso20022.ModelGeneration.Model.V1;
-    using Zent.Iso20022.ModelGeneration.Model.V1.Iso20022.Properties;
+    using Zent.Iso20022.ModelGeneration.Models.Interfaces;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+    #line 1 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class ClassTemplate : ClassTemplateBase
+    public partial class EnumFixedTemplate : EnumFixedTemplateBase
     {
 #line hidden
         /// <summary>
@@ -30,83 +29,82 @@ namespace Zent.Iso20022.ClassGeneration.Templates
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("\r\nnamespace ");
+            this.Write("namespace ");
             
-            #line 9 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 7 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Namespace));
             
             #line default
             #line hidden
             this.Write(";\r\n\r\n");
             
-            #line 11 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- if(ClassObject.Description is not null){ 
+            #line 9 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ if(FixedEnumList.Description is not null){ 
             
             #line default
             #line hidden
             this.Write("/// <summary>\r\n");
             
-            #line 13 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- var classSummaryLines = ClassObject.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
+            #line 11 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ var enumListSummaryLines = FixedEnumList.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
             
             #line default
             #line hidden
             
-            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- var lastsummary = classSummaryLines.Last(); 
+            #line 12 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ var lastsummary = enumListSummaryLines.Last(); 
             
             #line default
             #line hidden
             
-            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- foreach(var line in classSummaryLines ){ 
+            #line 13 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ foreach(var line in enumListSummaryLines ){ 
             
             #line default
             #line hidden
             this.Write("/// ");
             
-            #line 16 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(line));
             
             #line default
             #line hidden
-            this.Write(" ");
             
-            #line 16 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  if(!line.Equals(lastsummary)){ 
             
             #line default
             #line hidden
-            this.Write(" <br/>\r\n");
+            this.Write("<br/>\r\n");
             
-            #line 17 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 18 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 16 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\r\n/// </summary>\r\n");
             
-            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 19 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("[System.CodeDom.Compiler.GeneratedCodeAttribute(\"");
             
-            #line 22 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Generator));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 22 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SoftwareVersion));
             
             #line default
@@ -114,7 +112,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates
             this.Write("\")]\r\n[System.ComponentModel.Description(\"This has been generated on the Model ver" +
                     "sion: ");
             
-            #line 23 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ModelVersion));
             
             #line default
@@ -123,212 +121,124 @@ namespace Zent.Iso20022.ClassGeneration.Templates
                     "ribute()]\r\n[System.ComponentModel.DesignerCategoryAttribute(\"code\")]\r\n[System.Xm" +
                     "l.Serialization.XmlTypeAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:");
             
-            #line 27 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SchemaVersion));
             
             #line default
             #line hidden
-            this.Write("\")]\r\n");
+            this.Write("\")]\r\npublic enum ");
             
-            #line 28 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- if(ClassObject.IsRoot){ 
-            
-            #line default
-            #line hidden
-            this.Write("[System.Xml.Serialization.XmlRootAttribute(Namespace=\"urn:iso:std:iso:20022:tech:" +
-                    "xsd:");
-            
-            #line 29 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(SchemaVersion));
-            
-            #line default
-            #line hidden
-            this.Write("\", IsNullable=false)]\r\n");
-            
-            #line 30 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- } 
-            
-            #line default
-            #line hidden
-            this.Write("public class ");
-            
-            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(ClassObject.Name));
+            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(FixedEnumList.Name));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 33 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- foreach(var thisProperty in ClassObject.Properties){ 
+            #line 28 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ var lastEnumElement = FixedEnumList.EnumElements.Last(); 
             
             #line default
             #line hidden
             
-            #line 34 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- if(thisProperty.Description is not null){ 
+            #line 29 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ foreach( var enumElement in FixedEnumList.EnumElements){ 
+            
+            #line default
+            #line hidden
+            
+            #line 30 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ if(enumElement.Description is not null){ 
             
             #line default
             #line hidden
             this.Write("\t/// <summary>\r\n");
             
-            #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- var lines = thisProperty.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
+            #line 32 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ var enumSummaryLines = enumElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
             
             #line default
             #line hidden
             
-            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- var last = lines.Last(); 
+            #line 33 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ var lastsummary = enumSummaryLines.Last(); 
             
             #line default
             #line hidden
             
-            #line 38 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- foreach(var line in lines ){ 
+            #line 34 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ foreach(var line in enumSummaryLines ){ 
             
             #line default
             #line hidden
             this.Write("\t/// ");
             
-            #line 39 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 35 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(line));
             
             #line default
             #line hidden
-            this.Write(" ");
             
-            #line 39 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- if(!line.Equals(last)){ 
+            #line 35 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ if(!line.Equals(lastsummary)){ 
             
             #line default
             #line hidden
-            this.Write(" <br/>\r\n");
+            this.Write("<br/>\r\n");
             
-            #line 40 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 41 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\r\n\t/// </summary>\r\n");
             
-            #line 44 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 40 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
-            this.Write("\t[System.Xml.Serialization.XmlElementAttribute(\"< # = thisProperty.XmlTag # >\")]\r" +
-                    "\n");
+            this.Write("\t[System.Xml.Serialization.XmlEnum(Name = \"");
             
-            #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- if(thisProperty is Iso20022IdentifierSet) { 
-            
-            #line default
-            #line hidden
-            this.Write("\t[System.ComponentModel.DataAnnotations.RegularExpression(@\"");
-            
-            #line 47 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(((Iso20022IdentifierSet)thisProperty).Pattern));
+            #line 41 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(enumElement.PayloadCode));
             
             #line default
             #line hidden
-            this.Write("\", ErrorMessage = \"Invalid format of field ");
+            this.Write("\")]\r\n\t");
             
-            #line 47 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" (xmlTag: < # = thisProperty.XmlTag # >). It did not adhere to pattern: \\\"\"+@\"");
-            
-            #line 47 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(((Iso20022IdentifierSet)thisProperty).Pattern));
+            #line 42 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(enumElement.Name));
             
             #line default
             #line hidden
-            this.Write("\"+\"\\\"\")]\r\n\tpublic string ");
+            this.Write("\r\n");
             
-            #line 48 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" { get; set; }\r\n\t\r\n");
-            
-            #line 50 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- } else if(thisProperty is Iso20022Text) { 
+            #line 43 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
+ if(enumElement != lastEnumElement) { 
             
             #line default
             #line hidden
-            this.Write("\tpublic string ");
+            this.Write("\t\r\n");
             
-            #line 51 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" { get; set; }\r\n\r\n");
-            
-            #line 53 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- } else if(thisProperty is Iso20022Date) { 
-            
-            #line default
-            #line hidden
-            this.Write("\tpublic DateTime ");
-            
-            #line 54 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" { get; set; }\r\n\r\n");
-            
-            #line 56 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- } else if(thisProperty is Iso20022DateTime) { 
-            
-            #line default
-            #line hidden
-            this.Write("\tpublic DateTime ");
-            
-            #line 57 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" { get; set; }\r\n\r\n");
-            
-            #line 59 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
- } else { 
-            
-            #line default
-            #line hidden
-            this.Write("\tpublic < # = thisProperty.Type # > ");
-            
-            #line 60 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" { get; set; }\r\n\r\n");
-            
-            #line 62 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 45 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 63 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\ClassTemplate.tt"
+            #line 46 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\EnumFixedTemplate.tt"
  } 
             
             #line default
             #line hidden
-            this.Write("}\r\n");
+            this.Write("}");
             return this.GenerationEnvironment.ToString();
         }
     }
@@ -340,7 +250,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class ClassTemplateBase
+    public class EnumFixedTemplateBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

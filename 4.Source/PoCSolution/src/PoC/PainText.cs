@@ -46,8 +46,8 @@ internal static class PainText
 
         TextWriter writer = new StreamWriter(Path.Combine(Environment.CurrentDirectory, "pain.001.001.03.xml"));
         xmlSerializer.Serialize(writer, painFile);
-        var wr = new StringWriter();
-        xmlSerializer.Serialize(wr,o);
+        //var wr = new StringWriter();
+        //xmlSerializer.Serialize(wr,o);
 
         writer.Close();
 

@@ -8,7 +8,7 @@ public abstract class PropertyObject : XObject, IPropertyElement
     public string XmlTag;
 
     public string Definition { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
-    public string Type { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
+    public IType Type { get => throw new NotImplementedException(); init => throw new NotImplementedException(); }
 
     public abstract string MyStringbasedKind();
 }

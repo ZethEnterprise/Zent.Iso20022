@@ -42,9 +42,9 @@ public class <#= ClassObject.Name #>
 
 	/// </summary>
 <# } #>
-	[System.Xml.Serialization.XmlElementAttribute("<#= thisProperty.XmlTag #>")]
+	[System.Xml.Serialization.XmlElementAttribute("< # = thisProperty.XmlTag # >")]
 <# if(thisProperty is Iso20022IdentifierSet) { #>
-	[System.ComponentModel.DataAnnotations.RegularExpression(@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>", ErrorMessage = "Invalid format of field <#= thisProperty.Name #> (xmlTag: <#= thisProperty.XmlTag #>). It did not adhere to pattern: \""+@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>"+"\"")]
+	[System.ComponentModel.DataAnnotations.RegularExpression(@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>", ErrorMessage = "Invalid format of field <#= thisProperty.Name #> (xmlTag: < # = thisProperty.XmlTag # >). It did not adhere to pattern: \""+@"<#= ((Iso20022IdentifierSet)thisProperty).Pattern #>"+"\"")]
 	public string <#=  thisProperty.Name #> { get; set; }
 	
 <# } else if(thisProperty is Iso20022Text) { #>
@@ -57,7 +57,7 @@ public class <#= ClassObject.Name #>
 	public DateTime <#=  thisProperty.Name #> { get; set; }
 
 <# } else { #>
-	public <#= thisProperty.MyStringbasedKind() #> <#=  thisProperty.Name #> { get; set; }
+	public < # = thisProperty.Type # > <#=  thisProperty.Name #> { get; set; }
 
 <# } #>
 <# } #>

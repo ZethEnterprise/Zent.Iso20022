@@ -1,15 +1,71 @@
-﻿namespace Zent.Iso20022.ModelGeneration.Models.Interfaces;
+﻿using System.ComponentModel;
+using System.Reflection;
+
+namespace Zent.Iso20022.ModelGeneration.Models.Interfaces;
+
+public enum SimpleTypes
+{
+    [CodeSyntax("string")]
+    String,
+    [CodeSyntax("decimal")]
+    Decimal,
+    [CodeSyntax("DateTime")]
+    DateTime
+}
+
+[AttributeUsage(AttributeTargets.Field)]
+internal class CodeSyntax(string csharp) : Attribute
+{
+    public string CSharp { get; } = csharp;
+}
+
+public static class EnumExtentions
+{
+    public static string GetCSharpSyntax<T>(this T enumerationValue) where T : struct
+    {
+        Type type = enumerationValue.GetType();
+        if (!type.IsEnum)
+            throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
+
+        MemberInfo[] memberInfos = type.GetMember(enumerationValue.ToString()!);
+        if(memberInfos?.Length > 0)
+        {
+            var attributes = memberInfos[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+            if(attributes?.Length > 0)
+            {
+                return ((CodeSyntax)attributes[0]).CSharp;
+            }
+        }
+
+        return enumerationValue.ToString()!;
+    }
+}
 
 public interface IPropertyElement
 {
     public string Name { get; init; }
     public string Description { get; init; }
-    public string XmlTag { get; init; }
-    public string Type { get; init; }
-    public string MyStringbasedKind();
+    public IType Type { get; init; }
 }
 
-public interface IChoicePropertyElement : IPropertyElement
+public interface IType
+{ }
+
+public interface ISimpleType : IType
 {
-    public IList<(string ClassName, string XmlTag)> Choices { get; init; }
+    public string PayloadTag { get; init; }
+    public SimpleTypes Type { get; init; }
+}
+
+public interface IClassType : IType
+{
+    public string PayloadTag { get; init; }
+    public string ClassName { get; init; }
+}
+
+public interface IChoiceType : IType
+{
+    public string BaseClassName { get; init; }
+    public IList<(string PayloadTag, string ClassName)> Variances { get; init; }
 }
