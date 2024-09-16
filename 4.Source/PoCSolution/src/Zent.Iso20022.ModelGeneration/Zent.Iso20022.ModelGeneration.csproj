@@ -8,9 +8,15 @@
   </PropertyGroup>
 	
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>Zent.Iso20022.ClassGeneration.Test</_Parameter1>
-    </AssemblyAttribute>
+	  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+		  <_Parameter1>Zent.Iso20022.ClassGeneration.Test</_Parameter1>
+	  </AssemblyAttribute>
+	  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+		  <_Parameter1>Zent.Iso20022.ModelGeneration.Test</_Parameter1>
+	  </AssemblyAttribute>
+	  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+		  <_Parameter1>Zent.Iso20022.InterfaceAgreement</_Parameter1>
+	  </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
     <None Remove="SourceFiles\1Q2024_ExternalCodeSets_v2.xsd" />

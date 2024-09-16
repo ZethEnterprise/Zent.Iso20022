@@ -6,17 +6,6 @@
 <#@ import namespace="Zent.Iso20022.ModelGeneration.Models.Interfaces" #>
 namespace <#= Namespace #>;
 
-<# if(RootClassElement.Description is not null){ #>
-/// <summary>
-<# var classSummaryLines = RootClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); #>
-<# var lastsummary = classSummaryLines.Last(); #>
-<# foreach(var line in classSummaryLines ){ #>
-/// <#= line #><# if(!line.Equals(lastsummary)){ #><br/>
-<# } #>
-<# } #>
-
-/// </summary>
-<# } #>
 [System.CodeDom.Compiler.GeneratedCodeAttribute("<#= Generator #>", "<#= SoftwareVersion #>")]
 [System.ComponentModel.Description("This has been generated on the Model version: <#= ModelVersion #>")]
 [System.SerializableAttribute()]

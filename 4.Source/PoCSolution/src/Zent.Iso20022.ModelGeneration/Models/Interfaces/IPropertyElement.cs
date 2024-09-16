@@ -10,7 +10,11 @@ public enum SimpleTypes
     [CodeSyntax("decimal")]
     Decimal,
     [CodeSyntax("DateTime")]
-    DateTime
+    DateTime,
+    [CodeSyntax("DateOnly")]
+    Date,
+    [CodeSyntax("bool")]
+    Boolean,
 }
 
 [AttributeUsage(AttributeTargets.Field)]

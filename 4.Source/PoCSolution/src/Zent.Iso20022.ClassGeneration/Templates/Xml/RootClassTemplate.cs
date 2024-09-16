@@ -36,75 +36,16 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             
             #line default
             #line hidden
-            this.Write(";\r\n\r\n");
+            this.Write(";\r\n\r\n[System.CodeDom.Compiler.GeneratedCodeAttribute(\"");
             
             #line 9 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- if(RootClassElement.Description is not null){ 
-            
-            #line default
-            #line hidden
-            this.Write("/// <summary>\r\n");
-            
-            #line 11 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- var classSummaryLines = RootClassElement.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
-            
-            #line default
-            #line hidden
-            
-            #line 12 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- var lastsummary = classSummaryLines.Last(); 
-            
-            #line default
-            #line hidden
-            
-            #line 13 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- foreach(var line in classSummaryLines ){ 
-            
-            #line default
-            #line hidden
-            this.Write("/// ");
-            
-            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(line));
-            
-            #line default
-            #line hidden
-            
-            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- if(!line.Equals(lastsummary)){ 
-            
-            #line default
-            #line hidden
-            this.Write("<br/>\r\n");
-            
-            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- } 
-            
-            #line default
-            #line hidden
-            
-            #line 16 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- } 
-            
-            #line default
-            #line hidden
-            this.Write("\r\n/// </summary>\r\n");
-            
-            #line 19 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
- } 
-            
-            #line default
-            #line hidden
-            this.Write("[System.CodeDom.Compiler.GeneratedCodeAttribute(\"");
-            
-            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Generator));
             
             #line default
             #line hidden
             this.Write("\", \"");
             
-            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 9 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SoftwareVersion));
             
             #line default
@@ -112,7 +53,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             this.Write("\")]\r\n[System.ComponentModel.Description(\"This has been generated on the Model ver" +
                     "sion: ");
             
-            #line 21 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 10 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ModelVersion));
             
             #line default
@@ -121,7 +62,7 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
                     "ribute()]\r\n[System.ComponentModel.DesignerCategoryAttribute(\"code\")]\r\n[System.Xm" +
                     "l.Serialization.XmlTypeAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:");
             
-            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 14 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SchemaVersion));
             
             #line default
@@ -129,113 +70,113 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             this.Write("\")]\r\n[System.Xml.Serialization.XmlRootAttribute(Namespace=\"urn:iso:std:iso:20022:" +
                     "tech:xsd:");
             
-            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 15 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(SchemaVersion));
             
             #line default
             #line hidden
             this.Write("\", IsNullable=false)]\r\npublic partial class ");
             
-            #line 27 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 16 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(RootClassElement.ClassName));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n");
             
-            #line 29 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 18 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  foreach(var thisProperty in RootClassElement.Properties){ 
             
             #line default
             #line hidden
             
-            #line 30 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 19 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  var thisType = (IClassType)thisProperty.Type; 
             
             #line default
             #line hidden
             
-            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 20 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  if(thisProperty.Description is not null){ 
             
             #line default
             #line hidden
             this.Write("\t/// <summary>\r\n");
             
-            #line 33 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 22 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  var lines = thisProperty.Description.Split(new[] { "Environment.NewLine", "\r\n", "\n" }, StringSplitOptions.None); 
             
             #line default
             #line hidden
             
-            #line 34 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 23 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  var last = lines.Last(); 
             
             #line default
             #line hidden
             
-            #line 35 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 24 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  foreach(var line in lines ){ 
             
             #line default
             #line hidden
             this.Write("\t/// ");
             
-            #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(line));
             
             #line default
             #line hidden
             
-            #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 25 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  if(!line.Equals(last)){ 
             
             #line default
             #line hidden
             this.Write("<br/>\r\n");
             
-            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 26 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             
-            #line 38 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 27 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\r\n\t/// </summary>\r\n");
             
-            #line 41 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 30 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  } 
             
             #line default
             #line hidden
             this.Write("\t[System.Xml.Serialization.XmlElementAttribute(\"");
             
-            #line 42 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisType.PayloadTag));
             
             #line default
             #line hidden
             this.Write("\")]\r\n\tpublic ");
             
-            #line 43 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 32 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisType.ClassName));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 43 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 32 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(thisProperty.Name));
             
             #line default
             #line hidden
             this.Write(" { get; set; }\r\n\t\r\n");
             
-            #line 45 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
+            #line 34 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\RootClassTemplate.tt"
  } 
             
             #line default

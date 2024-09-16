@@ -11,7 +11,7 @@ using Zent.Iso20022.ModelGeneration.Models.V2;
 
 namespace Zent.Iso20022.ModelGeneration;
 
-public class Architect
+public sealed class Architect
 {
     internal static string GetAssemblyVersion()
     {
@@ -66,9 +66,6 @@ public class Architect
     }
     public IList<V2Iso20022.MasterData> BuildModelV2(string[] schemas)
     {
-        XDocument doc;
-        XmlNamespaceManager xnm;
-
         var names = Assembly
             .GetExecutingAssembly()
             .GetManifestResourceNames();
@@ -95,6 +92,7 @@ public class Architect
         {
             var reader = new XmlTextReader(streamReader);
             var doc = XDocument.Load(reader);
+            
             XmlNameTable table = reader.NameTable;
             var xnm = new XmlNamespaceManager(table);
 

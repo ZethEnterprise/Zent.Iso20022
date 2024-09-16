@@ -2,7 +2,7 @@
 
 namespace Zent.Iso20022.ModelGeneration.Models.V2.Definitions;
 
-internal class ClassElement : IClassElement
+internal class ClassElement : IBasicClassElement
 {
     public string? ParentClassName { get; init; }
     public required string ClassName { get; init; }

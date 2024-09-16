@@ -1,6 +1,6 @@
 using Xunit.Abstractions;
 using Zent.Iso20022.ClassGeneration.Templates.Xml;
-using Zent.Iso20022.ModelGeneration.Models.V2.Definitions;
+using Zent.Iso20022.InterfaceAgreement.Models.RootClassElementAgreement;
 
 namespace Zent.Iso20022.ClassGeneration.test.Templates.Xml;
 
@@ -9,16 +9,6 @@ public partial class RootClassTemplateTests
 {
     private readonly ITestOutputHelper output;
 
-    private const string ClassName = "Document";
-    private const string ClassSummary = "This is the class summary.\r\nOn multiple lines...";
-    private const string PropertyName = "BaseElement";
-    private const string PropertySummary = "This is the base property summary.\r\nOn multiple lines...";
-    private const string PropertyType = "SomeClassName";
-    private const string PropertyXmlTag = "SmthTgd"; //wannabe Xml tag representation of "SomethingTagged"
-    private const string AssertClassSummary = $@"/// <summary>
-/// This is the class summary.<br/>
-/// On multiple lines...
-/// </summary>";
     private const string AssertPropertySummary = $@"/// <summary>
 {"\t"}/// This is the base property summary.<br/>
 {"\t"}/// On multiple lines...
@@ -39,14 +29,13 @@ public partial class RootClassTemplateTests
     private const string AssertDesignerCategory = "[System.ComponentModel.DesignerCategoryAttribute(\"code\")]";
     private const string AssertXmlType = $"[System.Xml.Serialization.XmlTypeAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:{MasterDataSchema}\")]";
     private const string AssertXmlRoot = $"[System.Xml.Serialization.XmlRootAttribute(Namespace=\"urn:iso:std:iso:20022:tech:xsd:{MasterDataSchema}\", IsNullable=false)]";
-    private const string AssertClassLine = $"public partial class {ClassName}";
-    private const string AssertPropertyXmlElement = $"[System.Xml.Serialization.XmlElementAttribute(\"{PropertyXmlTag}\")]";
-    private const string AssertPropertyLine = $"public {PropertyType} {PropertyName} {{ get; set; }}";
+    private const string AssertClassLine = $"public partial class {Agreements.Root.ClassName}";
+    private const string AssertPropertyXmlElement = $"[System.Xml.Serialization.XmlElementAttribute(\"{Agreements.Root.PropertyXmlTag}\")]";
+    private const string AssertPropertyLine = $"public {Agreements.Root.PropertyType} {Agreements.Root.PropertyName} {{ get; set; }}";
 
     private const string AssertPayload = 
 $@"{AssertNamespace}
 
-{AssertClassSummary}
 {AssertGeneratedCode}
 {AssertDescription}
 {AssertSerializable}
@@ -72,21 +61,7 @@ $@"{AssertNamespace}
     public void GivenSimpleExample_WhenTransformingRootClassTemplate_ThenPayloadIsAsExpected()
     {
         // Arrange
-        var mockedRoot = new RootElement
-        {
-            ClassName = ClassName,
-            Description = ClassSummary,
-            Properties = [new PropertyElement 
-            {
-                Name = PropertyName,
-                Description = PropertySummary,
-                Type = new ClassType
-                {
-                    ClassName = PropertyType,
-                    PayloadTag = PropertyXmlTag
-                }
-            }]
-        };
+        var mockedRoot = Agreements.RootClassElement;
 
         var target =
                 new RootClassTemplate()

@@ -576,28 +576,48 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
 
     public RootElement ParseRootElement(string schema, MasterData masterData)
     {
-        var element = IsoMessages[schema];
-        if(!element.IncludedInSchema.Contains(schema))
-            element.IncludedInSchema.Add(schema);
+        var (Xml, IncludedInSchema) = IsoMessages[schema];
+        if(!IncludedInSchema.Contains(schema))
+            ImmutableInterlocked.Update(ref IncludedInSchema,
+                            (collection, item) => collection.Add(item),
+                            schema);
 
+        #region (root): Root-part of the element
+        var root = new RootElement 
+        {
+            ClassName = Xml.Attribute("rootElement")!.Value,
+            Properties =
+            [
+                new PropertyElement
+                {
+                    Name = PrettifyPropertyName(Xml.Attribute("name")!.Value),
+                    Description = Xml.Attribute("definition")!.Value,
+                    Type = new ClassType
+                    {
+                        PayloadTag = Xml.Attribute("xmlTag")!.Value,
+                        ClassName = PrettifyClassName(Xml.Attribute("name")!.Value)
+                    }
+                }
+            ]
+        };
+        #endregion
+        #region (initialClass): Initial-class of the root element
         List<IPropertyElement> properties = new List<IPropertyElement>();
 
-        foreach(var property in element.Xml.Descendants("messageBuildingBlock"))
+        foreach (var property in Xml.Descendants("messageBuildingBlock"))
         {
             properties.Add(ParseProperty(property, masterData));
         }
 
-        var root = new RootElement 
+        var initialClass = new ClassElement
         {
-            Id = schema,
-            Description = element.Xml.Attribute("definition")!.Value,
-            XmlTag = element.Xml.Attribute("xmlTag")!.Value,
-            RootName = element.Xml.Attribute("rootElement")!.Value,
-            RootPropertyName = PrettifyPropertyName(element.Xml.Attribute("name")!.Value),
-            ClassName = PrettifyClassName(element.Xml.Attribute("name")!.Value),
+            Description = Xml.Attribute("definition")!.Value,
+            ClassName = PrettifyClassName(Xml.Attribute("name")!.Value),
             Properties = properties
         };
+        #endregion
 
+        masterData.ClassesToGenerate.Add(initialClass);
         masterData.ClassesToGenerate.Add(root);
 
         return root;
@@ -609,7 +629,7 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
                name.Replace('.', '_') : 
                name;
     }
-    private static string PrettifyPropertyName(string name)
+    internal static string PrettifyPropertyName(string name)
     {
         return name.Contains('.') ?
                name.Replace('.', '_') :
@@ -618,13 +638,18 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
 
     private IPropertyElement ParseProperty(XElement xElement, MasterData masterData, string? parentClassName = null)
     {
-        string? propertyType;
+        IType? propertyType;
+        string payloadTag = xElement.Attribute("xmlTag")!.Value;
         if (xElement.Attribute("complexType")?.Value is not null ||
             xElement.Attribute("type")?.Value is not null)
         {
             var classToParse = xElement.Attribute("complexType")?.Value ??
                                xElement.Attribute("type")!.Value;
-            propertyType = ParseClassElement(classToParse, masterData, parentClassName);
+            propertyType = new ClassType
+            {
+                ClassName = ParseClassElement(classToParse, masterData, parentClassName),
+                PayloadTag = payloadTag
+            };
         }
         else if (xElement.Attribute("simpleType")?.Value is not null)
         {
@@ -639,52 +664,65 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
             {
 
                 if (!value.IncludedInSchema.Contains(masterData.Schema))
-                    value.IncludedInSchema.Add(masterData.Schema);
+                    ImmutableInterlocked.Update(ref value.IncludedInSchema,
+                                    (collection, item) => collection.Add(item),
+                                    masterData.Schema);
 
                 masterData.EnumsToGenerate.Add(value.Set);
-                propertyType = value.Set.Name;
+
+                propertyType = new ClassType
+                {
+                    ClassName = value.Set.Name,
+                    PayloadTag = payloadTag
+                };
             }
             else
             {
-                propertyType = ParseSimplePropertyType(isoType);
+                propertyType = new SimpleType
+                {
+                    Type = ParseSimplePropertyType(isoType),
+                    PayloadTag = payloadTag
+                };
             }
         }
         else
         {
-            propertyType = "";
+            propertyType = new ClassType
+            {
+                ClassName = "<null>",
+                PayloadTag = payloadTag
+            };
         }
 
         var element = new PropertyElement
         {
-            Name = xElement.Attribute("name")!.Value,
+            Name = xElement.Attribute("name")!.Value, //PrettifyPropertyName(xElement.Attribute("name")!.Value),
             Description = xElement.Attribute("definition")!.Value,
-            Type = new ClassType
-            {
-                PayloadTag = xElement.Attribute("xmlTag")!.Value,
-                ClassName = propertyType
-            }
+            Type = propertyType
         };
         return element;
     }
-    private string ParseSimplePropertyType(string value) => value switch
+    private SimpleTypes ParseSimplePropertyType(string value) => value switch
     {
-        "iso20022:Text" => "string",
-        "iso20022:CodeSet" => "string",
-        "iso20022:Amount" => "decimal",
-        "iso20022:Date" => "date",
-        "iso20022:DateTime" => "DateTime",
-        "iso20022:Rate" => "decimal",
-        "iso20022:Quantity" => "decimal",
-        "iso20022:Indicator" => "bool",
-        "iso20022:IdentifierSet" => "identifier",
-        _ => "null"
+        "iso20022:Text" => SimpleTypes.String,
+        "iso20022:CodeSet" => SimpleTypes.String,
+        "iso20022:Amount" => SimpleTypes.Decimal,
+        "iso20022:Date" => SimpleTypes.Date,
+        "iso20022:DateTime" => SimpleTypes.DateTime,
+        "iso20022:Rate" => SimpleTypes.Decimal,
+        "iso20022:Quantity" => SimpleTypes.Decimal,
+        "iso20022:Indicator" => SimpleTypes.Boolean,
+        "iso20022:IdentifierSet" => SimpleTypes.String, // "identifier",
+        _ => SimpleTypes.String // "null"
     };
 
     private string ParseAbstractClassElement(string id, MasterData masterData, string? parentClassName = null)
     {
         var element = DataEntries[id];
         if (!element.IncludedInSchema.Contains(masterData.Schema))
-            element.IncludedInSchema.Add(masterData.Schema);
+            ImmutableInterlocked.Update(ref element.IncludedInSchema,
+                            (collection, item) => collection.Add(item),
+                            masterData.Schema);
 
         var className = PrettifyClassName(element.Xml.Attribute("name")!.Value);
         var properties = new List<IPropertyElement>();
@@ -714,7 +752,9 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
     {
         var element = DataEntries[id];
         if (!element.IncludedInSchema.Contains(masterData.Schema))
-            element.IncludedInSchema.Add(masterData.Schema);
+            ImmutableInterlocked.Update(ref element.IncludedInSchema,
+                            (collection, item) => collection.Add(item),
+                            masterData.Schema);
 
         string? abstractClassName = null;
         if (element.Xml.Attribute(ERepository.Prefix("xsi") + "type")!.Value == "iso20022:ChoiceComponent")

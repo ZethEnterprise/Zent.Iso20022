@@ -10,6 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="IsoSourceFileExamples\1Q2024_ExternalCodeSets_v2.xsd" />
+    <None Remove="IsoSourceFileExamples\20240411_ISO20022_2013_eRepository.iso20022" />
+    <None Remove="IsoSourceFileExamples\pain.001.001.03_version_eRepository_Extended.iso20022" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="IsoSourceFileExamples\1Q2024_ExternalCodeSets_v2.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IsoSourceFileExamples\pain.001.001.03_version_eRepository_Extended.iso20022" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
@@ -17,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Zent.Iso20022.ClassGeneration\Zent.Iso20022.ClassGeneration.csproj" />
+    <ProjectReference Include="..\..\src\Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj" />
     <ProjectReference Include="..\..\Zent.Iso20022.InterfaceAgreement\Zent.Iso20022.InterfaceAgreement.csproj" />
   </ItemGroup>
 
