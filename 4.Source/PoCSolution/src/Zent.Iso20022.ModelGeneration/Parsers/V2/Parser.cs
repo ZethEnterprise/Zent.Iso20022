@@ -748,7 +748,7 @@ internal partial class Parser(BluePrint eRepository, BluePrint externalCodeSets,
         return parentPropertyType;
     }
 
-    private string ParseClassElement(string id, MasterData masterData, string? parentClassName = null)
+    internal string ParseClassElement(string id, MasterData masterData, string? parentClassName = null)
     {
         var element = DataEntries[id];
         if (!element.IncludedInSchema.Contains(masterData.Schema))

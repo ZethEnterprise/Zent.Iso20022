@@ -6,6 +6,7 @@ using Zent.Iso20022.ModelGeneration.Model.V2.Iso20022;
 using Zent.Iso20022.ModelGeneration.Models.Interfaces;
 using Root = Zent.Iso20022.InterfaceAgreement.Models.RootClassElementAgreement;
 using Poly = Zent.Iso20022.InterfaceAgreement.Models.ClassElementAgreement;
+using Zent.Iso20022.ModelGeneration.Models.V2.Definitions;
 
 namespace Zent.Iso20022.ModelGeneration.Test;
 
@@ -25,6 +26,9 @@ public class ParserTests
         Assert.InRange(target.IsoMessages.Count, 2816, 2816);
         Assert.InRange(target.DefinedEnums.Count, 2597, 2597);
         Assert.InRange(target.DataEntries.Count, 22144, 22144);
+        var m = new MasterData();
+        var e = target.ParseClassElement("_PdwzpNp-Ed-ak6NoX_4Aeg_2060838761", m); //Abstract class tester
+        e = e;
     }
 
     [Fact]
@@ -34,7 +38,7 @@ public class ParserTests
         var theArchitect = new Architect();
         var schema = "pain.001.001.01";
         var masterData = new MasterData();
-        var bp = BlueprintRootDocument(Agreements.RootClassElement);
+        var bp = BlueprintRootDocument(Root.Agreements.RootClassElement);
         Parser target = new Parser(bp, theArchitect.LocateExternalCodeSets(), default);
         // Act
         target.ParseRootElement(schema, masterData);
@@ -42,7 +46,7 @@ public class ParserTests
         // Assert
         IRootClassElement? targetRoot = masterData.ClassesToGenerate.FirstOrDefault(e => e is IRootClassElement) as IRootClassElement;
         Assert.NotNull(targetRoot);
-        Assert.Equivalent(Agreements.RootClassElement, targetRoot);
+        Assert.Equivalent(Root.Agreements.RootClassElement, targetRoot);
         Assert.InRange(target.IsoMessages.Count, 1, 1);
         Assert.InRange(target.DefinedEnums.Count, 0, 0);
         Assert.InRange(target.DataEntries.Count, 2, 2);
@@ -111,8 +115,10 @@ public class ParserTests
         if (classElement is not IRootClassElement or IBasicClassElement)
             throw new ArgumentException($"This method cannot be called with {classElement.GetType()}");
 
-        var xdoc = CreateRootDocument(classElement);
-
+        var xdoc = IZentDocument.Instance()
+            .WithRootElement(classElement)
+            .ToXDocument();
+        
         return BlueprintwithBareMinimum(xdoc);
     }
 
@@ -125,10 +131,11 @@ public class ParserTests
         if (secondElement is not IInheritor)
             throw new ArgumentException($"This method cannot be called with {secondElement.GetType()}");
 
-        var xdoc = CreateRootDocument()
-            .WithClassElement(Poly.Agreements.ParentClassElement);
-
-
+        var xdoc = IZentDocument.Instance()
+            .WithRootElement()
+            .WithPolymorphicElement(Poly.Agreements.ParentClassElement)
+            .EndPolymorphism()
+            .ToXDocument();
 
         return BlueprintwithBareMinimum(xdoc);
     }

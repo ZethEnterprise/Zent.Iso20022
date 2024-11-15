@@ -28,4 +28,17 @@ namespace <#= Namespace #>;
 [System.Xml.Serialization.XmlInclude(typeof(<#= heir #>))]
 <#}#>
 public partial abstract class <#= ClassElement.ClassName #>
+<# if(ClassElement.AtomicHeirs.Count == 0) { #>
 { }
+<# } else { #>
+{
+<# var lastInner = ClassElement.AtomicHeirs.Last(); #>
+<# foreach(var atomicHeir in ClassElement.AtomicHeirs) { #>
+	public class <#= atomicHeir.Name #> : <#= ClassElement.ClassName #>
+	{
+		[System.Xml.Serialization.XmlElementAttribute("<#= atomicHeir.AtomicType.PayloadTag #>")]
+		public < # = atomicHeir.AtomicType.GetCSharpSyntax() # > Value { get; set; }
+	}
+<# } #>
+}
+<# } #>

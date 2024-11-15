@@ -37,5 +37,6 @@ public interface IInheritor : IClassElement
 /// </summary>
 public interface IInherited : IMinimalClassElement
 {
-    public IList<string> Heirs {  get; init; }
+    public IList<string> Heirs { get; init; }
+    public IList<IInnerClassPropertyElement> AtomicHeirs { get; init; }
 }

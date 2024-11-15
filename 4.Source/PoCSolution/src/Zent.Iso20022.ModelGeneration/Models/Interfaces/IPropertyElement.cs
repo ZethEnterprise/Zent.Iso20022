@@ -53,13 +53,29 @@ public interface IPropertyElement
     public IType Type { get; init; }
 }
 
+public interface IInnerClassPropertyElement
+{
+    public string Name { get; init; }
+    public string Description { get; init; }
+    public IAtomicType AtomicType { get; init; }
+}
+
 public interface IType
 { }
 
-public interface ISimpleType : IType
+public interface IAtomicType : IType
 {
     public string PayloadTag { get; init; }
+}
+
+public interface ISimpleType : IAtomicType
+{
     public SimpleTypes Type { get; init; }
+}
+
+public interface IEnumType : IAtomicType
+{
+    public string EnumName { get; init; }
 }
 
 public interface IClassType : IType

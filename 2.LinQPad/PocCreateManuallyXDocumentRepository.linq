@@ -7,7 +7,9 @@ XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
 var xdoc = new XDocument
 (
-    new XDeclaration("1.0", "utf-8", null),
+    new XDeclaration("1.0", "utf-8", null)
+);
+xdoc.Add(
     new XElement
 	(
 		iso20022 + "Repository",

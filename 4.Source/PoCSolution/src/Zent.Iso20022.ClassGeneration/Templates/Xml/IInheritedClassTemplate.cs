@@ -160,7 +160,69 @@ namespace Zent.Iso20022.ClassGeneration.Templates.Xml
             
             #line default
             #line hidden
-            this.Write("\r\n{ }");
+            this.Write("\r\n");
+            
+            #line 31 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+ if(ClassElement.AtomicHeirs.Count == 0) { 
+            
+            #line default
+            #line hidden
+            this.Write("{ }\r\n");
+            
+            #line 33 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+ } else { 
+            
+            #line default
+            #line hidden
+            this.Write("{\r\n");
+            
+            #line 35 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+ var lastInner = ClassElement.AtomicHeirs.Last(); 
+            
+            #line default
+            #line hidden
+            
+            #line 36 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+ foreach(var atomicHeir in ClassElement.AtomicHeirs) { 
+            
+            #line default
+            #line hidden
+            this.Write("\tpublic class ");
+            
+            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(atomicHeir.Name));
+            
+            #line default
+            #line hidden
+            this.Write(" : ");
+            
+            #line 37 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(ClassElement.ClassName));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n\t{\r\n\t\t[System.Xml.Serialization.XmlElementAttribute(\"");
+            
+            #line 39 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(atomicHeir.AtomicType.PayloadTag));
+            
+            #line default
+            #line hidden
+            this.Write("\")]\r\n\t\tpublic < # = atomicHeir.AtomicType.GetCSharpSyntax() # > Value { get; set;" +
+                    " }\r\n\t}\r\n");
+            
+            #line 42 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+ } 
+            
+            #line default
+            #line hidden
+            this.Write("}\r\n");
+            
+            #line 44 "C:\Source\Zent.Iso20022\4.Source\PoCSolution\src\Zent.Iso20022.ClassGeneration\Templates\Xml\IInheritedClassTemplate.tt"
+ } 
+            
+            #line default
+            #line hidden
             return this.GenerationEnvironment.ToString();
         }
     }

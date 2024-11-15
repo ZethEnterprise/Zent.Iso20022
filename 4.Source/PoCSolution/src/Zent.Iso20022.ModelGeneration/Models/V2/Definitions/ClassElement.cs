@@ -21,6 +21,7 @@ internal class InheritorClassElement : IInheritor
 internal class InheritedClassElement : IInherited
 {
     public required IList<string> Heirs { get; init; }
+    public IList<IInnerClassPropertyElement> AtomicHeirs { get; init; } = [];
     public required string ClassName { get; init; }
     public required string Description { get; init; }
 }

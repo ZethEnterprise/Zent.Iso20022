@@ -11,10 +11,23 @@ internal class PropertyElement : IPropertyElement
     public required IType Type { get; init; }
 }
 
+internal class InnerClassPropertyElement : IInnerClassPropertyElement
+{
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required IAtomicType AtomicType { get; init; }
+}
+
 internal class SimpleType : ISimpleType
 {
     public required string PayloadTag { get; init; }
     public required SimpleTypes Type { get; init; }
+}
+
+internal class EnumType : IEnumType
+{
+    public required string PayloadTag { get; init; }
+    public required string EnumName { get; init; }
 }
 
 internal class ClassType : IClassType
