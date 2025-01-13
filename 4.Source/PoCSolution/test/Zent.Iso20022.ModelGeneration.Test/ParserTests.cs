@@ -133,8 +133,7 @@ public class ParserTests
 
         var xdoc = IZentDocument.Instance()
             .WithRootElement()
-            .WithPolymorphicElement(Poly.Agreements.ParentClassElement)
-            .EndPolymorphism()
+            .WithPolymorphicPackage(Poly.Agreements.PolymorphicWithBothPackage)
             .ToXDocument();
 
         return BlueprintwithBareMinimum(xdoc);

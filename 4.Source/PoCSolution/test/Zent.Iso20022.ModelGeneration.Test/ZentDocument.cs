@@ -1,4 +1,5 @@
 ﻿using System.Xml.Linq;
+using Zent.Iso20022.InterfaceAgreement.Expansion.Models.Interfaces;
 using Zent.Iso20022.ModelGeneration.Models.Interfaces;
 
 namespace Zent.Iso20022.ModelGeneration.Test;
@@ -17,6 +18,7 @@ internal interface IZentDocumentBuilder
 internal interface IZentDocumentRoot : IZentDocument
 {
     IZentDocumentPolymorphic WithPolymorphicElement(IInherited baseElement);
+    IZentDocumentRoot WithPolymorphicPackage(IPolymorphicParentPackage package);
 }
 
 internal interface IZentDocumentPolymorphic
@@ -236,6 +238,8 @@ internal class ZentDocument : IZentDocumentBuilder, IZentDocumentRoot, IZentDocu
         if(_linkClass is null)
             throw new NullReferenceException("Cannot perform polymorphic parent addition without a link element present.");
 
+        _currentTargetClass = baseElement;
+
         var choiceId = $"_choice_{Incrementor}_";
         var msgBuildBlockId = $"_block_{Incrementor}_";
         var messageElementId = $"_melement_{Incrementor}";
@@ -340,6 +344,7 @@ internal class ZentDocument : IZentDocumentBuilder, IZentDocumentRoot, IZentDocu
         new XAttribute("registrationStatus", "Obsolete"),
         new XAttribute("removalDate", "2018-09-09T00:00:00.000+0200"),
         new XAttribute("messageBuildingBlock", "_block_1_"),
+        new XAttribute("complexType", polyElementId),
         new XElement
         (
             "messageElement",
@@ -363,7 +368,7 @@ internal class ZentDocument : IZentDocumentBuilder, IZentDocumentRoot, IZentDocu
             .Descendants(_iso20022 + "Repository")
                               .Descendants("dataDictionary")
                               .Last()
-                              .AddAfterSelf(element);
+                              .AddAfterSelf(polyElement);
 
         return this;
     }
@@ -373,6 +378,19 @@ internal class ZentDocument : IZentDocumentBuilder, IZentDocumentRoot, IZentDocu
         _currentTargetElement = null;
         _currentTargetClass = null;
         _linkClass = null;
+
+        return this;
+    }
+
+    IZentDocumentRoot IZentDocumentRoot.WithPolymorphicPackage(IPolymorphicParentPackage package)
+    {
+        ((IZentDocumentRoot)this).WithPolymorphicElement(package.Inherited);
+
+        foreach(var child in package.Inheritors)
+        {
+            ((IZentDocumentPolymorphic)this).WithChildElement(child);
+        }
+        ((IZentDocumentPolymorphic)this).EndPolymorphism();
 
         return this;
     }

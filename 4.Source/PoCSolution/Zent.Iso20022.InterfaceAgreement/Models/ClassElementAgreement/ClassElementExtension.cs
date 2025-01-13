@@ -216,8 +216,21 @@ public static class Agreements
     public readonly static IPolymorphicParentPackage PolymorphicWithBothPackage = new PolymorphicParentPackage
     {
         Inherited = ParentClassElement,
-        SimpleTypedChildClasses = null,
-        Inheritors = null
+        SimpleTypedChildClasses =
+        [
+            new PolymorphicSimpleTypedChildPackage
+            {
+                AtomicType = WildParentClassElement.AtomicHeirs[0].AtomicType,
+                Name = "smth",
+                Description = "smth",
+                PayloadTag = "smth"
+            }
+        ],
+        Inheritors =
+        [
+            FirstBornClassElement,
+            SecondBornClassElement,
+        ]
     };
     #endregion
     #endregion
