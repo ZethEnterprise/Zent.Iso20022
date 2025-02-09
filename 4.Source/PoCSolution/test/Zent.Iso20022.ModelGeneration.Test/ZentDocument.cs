@@ -24,6 +24,7 @@ internal interface IZentDocumentRoot : IZentDocument
 internal interface IZentDocumentPolymorphic
 {
     IZentDocumentPolymorphic WithChildElement(IInheritor childElement);
+    IZentDocumentPolymorphic WithChildElement(IPolymorphicSimpleTypedChildPackage childElement);
     IZentDocumentRoot EndPolymorphism();
 }
 
@@ -361,14 +362,65 @@ internal class ZentDocument : IZentDocumentBuilder, IZentDocumentRoot, IZentDocu
         )
     );
 
-        _currentTargetElement!.Add(element);
-
+        _currentTargetElement!.Add(polyElement);
 
         _document
             .Descendants(_iso20022 + "Repository")
                               .Descendants("dataDictionary")
                               .Last()
-                              .AddAfterSelf(polyElement);
+                              .AddAfterSelf(element);
+
+        return this;
+    }
+
+    IZentDocumentPolymorphic IZentDocumentPolymorphic.WithChildElement(IPolymorphicSimpleTypedChildPackage childElement)
+    {
+        var parentClass = _currentTargetClass as IInherited;
+        if (_currentTargetElement is null || parentClass is null)
+            throw new NullReferenceException("Cannot perform polymorphic child addition without a parent element present.");
+
+        var polyElementId = $"_melement_{Incrementor}_";
+
+        var type = childElement.AtomicType switch
+        {
+            ISimpleType => "simpleType",
+            IEnumType => "complexType",
+            _ => "unknownType"
+        };
+
+        var elementId = $"_tyoe_{Incrementor}_";
+
+        XElement polyElement = new
+            (
+                "messageElement",
+                new XAttribute(_xsi + "type", "iso20022:MessageAttribute"),
+                new XAttribute(_xmi + "id", polyElementId),
+                new XAttribute("name", childElement.Name),
+                new XAttribute(type, elementId)
+
+            );
+
+
+
+        XElement element = new
+    (
+        "topLevelDictionaryEntry",
+        new XAttribute(_xsi + "type", "iso20022:ChoiceComponent"),
+        new XAttribute("name", childElement.Name),
+        new XAttribute("definition", "Some interesting information of it"),
+        new XAttribute("registrationStatus", "Obsolete"),
+        new XAttribute("removalDate", "2018-09-09T00:00:00.000+0200"),
+        new XAttribute("messageBuildingBlock", "_block_1_"),
+        new XAttribute("complexType", polyElementId)
+    );
+
+        _currentTargetElement!.Add(polyElement);
+
+        _document
+            .Descendants(_iso20022 + "Repository")
+                              .Descendants("dataDictionary")
+                              .Last()
+                              .AddAfterSelf(element);
 
         return this;
     }
@@ -390,6 +442,11 @@ internal class ZentDocument : IZentDocumentBuilder, IZentDocumentRoot, IZentDocu
         {
             ((IZentDocumentPolymorphic)this).WithChildElement(child);
         }
+        foreach(var child in package.SimpleTypedChildClasses)
+        {
+            ((IZentDocumentPolymorphic)this).WithChildElement(child);
+        }
+
         ((IZentDocumentPolymorphic)this).EndPolymorphism();
 
         return this;
