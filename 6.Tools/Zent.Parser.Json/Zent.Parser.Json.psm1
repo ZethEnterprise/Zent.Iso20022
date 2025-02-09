@@ -99,7 +99,6 @@ class Token
     }
 }
 
-
 class AST
 {
     AST()
@@ -121,7 +120,7 @@ class Identifier : Terminal
     Identifier([string] $spelling) : base($spelling)
     { }
     
-    [string] Encode()
+    [string] Decode()
     {
         return $this.Spelling
     }
@@ -132,7 +131,7 @@ class IntegerLiteral : Terminal
     IntegerLiteral([string] $spelling) : base($spelling)
     { }
     
-    [int] Encode()
+    [int] Decode()
     {
         return [int]$this.Spelling
     }
@@ -143,7 +142,7 @@ class DoubleLiteral : Terminal
     DoubleLiteral([string] $spelling) : base($spelling)
     { }
     
-    [double] Encode()
+    [double] Decode()
     {
         return [double]$this.Spelling;
     }
@@ -154,9 +153,9 @@ class BoolLiteral : Terminal
     BoolLiteral([string] $spelling) : base($spelling)
     { }
     
-    [bool] Encode()
+    [bool] Decode()
     {
-        return [bool]$this.Spelling
+        return [bool]::Parse($this.Spelling)
     }
 }
 
@@ -165,7 +164,7 @@ class StringLiteral : Terminal
     StringLiteral([string] $spelling) : base($spelling)
     { }
 
-    [string] Encode()
+    [string] Decode()
     {
         return $this.Spelling
     }
@@ -180,46 +179,41 @@ class JsonObject : AST
         $this.Properties = $p
     }
 
-    [PSObject] Encode()
+    [PSObject] Decode()
     {
-        #Write-Host "JsonObject Encode has been called"
+        Write-Verbose "Decoding JsonObject..."
         $obj = New-Object psobject
 
         foreach($p in $this.properties)
         {
-            $id = $p.PropertyName.Encode()
+            $id = $p.PropertyName.Decode()
             switch ($p) 
             {
                 {$_ -is [PropertyObject]} 
                 {    
-                    $value = $p.PropertyValue.Encode()
-                    # if($id -eq "packageFolders")
-                    # {
-                    #     Write-Host $p.PropertyValue
-                    #     Write-Host $value
-                    # }
+                    $value = $p.PropertyValue.Decode()
+                    
                     $obj | Add-Member -MemberType NoteProperty -Name $id -Value $value
                  }
                  {$_ -is [PropertyListObject]} 
                  {
-                    #$value = $p.PropertyValue.Encode()
                     $value = [System.Collections.ArrayList]::new()
 
                     foreach($v in $p.PropertyValues)
                     {
-                        #Write-Host $v
-                        $value.Add($v.Encode())
+                        $value.Add($v.Decode())
                     }
 
                     $obj | Add-Member -MemberType NoteProperty -Name $id -Value $value
                  }
                 Default 
                 {
-                    throw "Unknown scenario in the encoder"
+                    throw "Unknown scenario in the decoder"
                 }
             }
         }
-        # Write-Host @obj
+        Write-Verbose "JsonObject decoded..."
+
         return $obj
     }
 }
@@ -244,6 +238,12 @@ class PropertyListObject : AST
     PropertyListObject([string] $n) : base()
     {
         $this.PropertyName = [Identifier]::new($n)
+    }
+    
+    PropertyListObject([string] $n, [System.Collections.Generic.List[AST]] $v) : base()
+    {
+        $this.PropertyName = [Identifier]::new($n)
+        $this.PropertyValues = $v
     }
 }
 
@@ -285,7 +285,12 @@ class SourceFile
             }
             catch
             {
-                Write-Host "Error has been caught"
+                write-host ($_.exception.StackTrace)
+                write-host ($_.exception.ErrorRecord)
+                write-host ($_.exception.GetType())
+                write-host ($_.CategoryInfo )
+                write-host ($_.exception.innerexception)
+                throw "Error has been caught"
             }
         }
         else 
@@ -320,7 +325,7 @@ class SourceFile
     
                 if(($c -eq -1))
                 {
-                    #Write-Host "file has ended..."
+                    Write-Verbose "file has ended..."
                     $this.Source.Close()
                     return [char]([Convert]::ToChar([SourceFile]::EOT))
                 }
@@ -340,6 +345,7 @@ class SourceFile
         }
     }
 }
+
 class Scanner
 {
     hidden [string] $currentChar
@@ -368,11 +374,26 @@ class Scanner
         $this.currentChar = $this.sourceFile.GetSource()
     }
 
+    hidden [void] ScanElementSeparator()
+    {
+        while ($this.currentChar -match '[\r|\n|\| |\t]')
+        {
+            $this.ScanSeparator()
+        }
+
+        $this.Accept([TokenType]::COMMA)
+
+        while ($this.currentChar -match '[\r|\n|\| |\t]')
+        {
+            $this.ScanSeparator()
+        }
+    }
+
     hidden [void] ScanSeparator()
     {
         switch -regex ($this.currentChar)
         {
-            '( |,|\n|\r|\t)'  { $this.TakeIt() }
+            '( |\n|\r|\t)'  { $this.TakeIt() }
             '\\'  
             { 
                 $this.TakeIt()
@@ -644,7 +665,7 @@ class Scanner
     [Token] Scan()
     {
         $this.currentlyScanningToken = $false
-        while ($this.currentChar -match '[\r|\n|\| |\t|,]')
+        while($this.currentChar -match '[\r|\n|\| |\t]')
         {
             $this.ScanSeparator()
         }
@@ -657,15 +678,18 @@ class Scanner
         $spelling = $this.currentSpelling.ToString()
         try
         {
-        $returner = [Token]::new(([TokenType]$kind), ([string]$spelling))
-        }catch{
-        write-host ($_.exception.StackTrace)
-        write-host ($_.exception.ErrorRecord)
-        write-host ($_.exception.GetType())
-        write-host ($_.CategoryInfo )
-        write-host ($_.exception.innerexception)
-        throw "An Exception was caught"
+            $returner = [Token]::new(([TokenType]$kind), ([string]$spelling))
         }
+        catch
+        {
+            write-host ($_.exception.StackTrace)
+            write-host ($_.exception.ErrorRecord)
+            write-host ($_.exception.GetType())
+            write-host ($_.CategoryInfo )
+            write-host ($_.exception.innerexception)
+            throw "An Exception was caught"
+        }
+        Write-Debug ("1"+($returner.Kind)+"1")
         return $returner
     }
 }
@@ -692,7 +716,7 @@ class Parser
             Write-Host ".."$this.currentToken.kind".."
             Write-Host ".."$expectedToken".."
             Write-Host ".."$this.currentToken.Spelling".."
-            Write-Host "Error: "$this.currentToken.Spell($expectedToken)" expected but "$this.currentToken.Spell($this.currentToken.kind)" found"
+            Write-Host "Error: '"$this.currentToken.Spell($expectedToken)"' expected but '"$this.currentToken.Spell($this.currentToken.kind)"' found"
             $ok = $false
         }
 
@@ -705,7 +729,8 @@ class Parser
     }
 
     hidden [PropertyListObject] ParseListProperty($propertyName)
-    {
+    {        
+        Write-Verbose "Parsing a list property..."
         $this.Accept([TokenType]::LSQUARE)
 
         [PropertyListObject] $list = [PropertyListObject]::new($propertyName)
@@ -714,115 +739,112 @@ class Parser
         {
             ([TokenType]::STRLITERAL)
             {
-                $value = [StringLiteral]::new($this.currentToken.Spelling)
-                $list.PropertyValues.Add($value)
+                $multipleProperties = $false
 
-                $this.AcceptIt()
-                while ($this.currentToken.Kind -ne [TokenType]::RSQUARE)
+                do
                 {
-                    if ($this.currentToken.Kind -eq [TokenType]::STRLITERAL)
+                    if($multipleProperties)
                     {
-                        $value = [StringLiteral]::new($this.currentToken.Spelling)
-                        $list.PropertyValues.Add($value)
+                        $this.Accept([TokenType]::COMMA)
+                    }
+                    else 
+                    {
+                        $multipleProperties = $true
+                    }
 
-                        $this.AcceptIt()
-                    }
-                    else
-                    {
-                        throw "This is not the same type"
-                    }
+                    $value = [StringLiteral]::new($this.currentToken.Spelling)
+                    $list.PropertyValues.Add($value)
+
+                    $this.AcceptIt()
                 }
-
-                $this.AcceptIt()
+                while($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
             ([TokenType]::BOOLLITERAL)
             {
-                $value = [BoolLiteral]::new($this.currentToken.Spelling)
-                $list.PropertyValues.Add($value)
+                $multipleProperties = $false
 
-                $this.AcceptIt()
-                while ($this.currentToken.Kind -ne [TokenType]::RSQUARE)
+                do
                 {
-                    if ($this.currentToken.Kind -eq [TokenType]::BOOLLITERAL)
+                    if($multipleProperties)
                     {
-                        $value = [BoolLiteral]::new($this.currentToken.Spelling)
-                        $list.PropertyValues.Add($value)
+                        $this.Accept([TokenType]::COMMA)
+                    }
+                    else 
+                    {
+                        $multipleProperties = $true
+                    }
 
-                        $this.AcceptIt()
-                    }
-                    else
-                    {
-                        throw "This is not the same type"
-                    }
+                    $value = [BoolLiteral]::new($this.currentToken.Spelling)
+                    $list.PropertyValues.Add($value)
+
+                    $this.AcceptIt()
                 }
-
-                $this.AcceptIt()
+                while($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
             ([TokenType]::INTLITERAL)
             {
-                $value = [IntegerLiteral]::new($this.currentToken.Spelling)
-                $list.PropertyValues.Add($value)
+                $multipleProperties = $false
 
-                $this.AcceptIt()
-                while ($this.currentToken.Kind -ne [TokenType]::RSQUARE)
+                do
                 {
-                    if ($this.currentToken.Kind -eq [TokenType]::INTLITERAL)
+                    if($multipleProperties)
                     {
-                        $value = [IntegerLiteral]::new($this.currentToken.Spelling)
-                        $list.PropertyValues.Add($value)
+                        $this.Accept([TokenType]::COMMA)
+                    }
+                    else 
+                    {
+                        $multipleProperties = $true
+                    }
 
-                        $this.AcceptIt()
-                    }
-                    else
-                    {
-                        throw "This is not the same type"
-                    }
+                    $value = [IntegerLiteral]::new($this.currentToken.Spelling)
+                    $list.PropertyValues.Add($value)
+
+                    $this.AcceptIt()
                 }
-
-                $this.AcceptIt()
+                while($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
             ([TokenType]::DECLITERAL)
             {
-                $value = [DoubleLiteral]::new($this.currentToken.Spelling)
-                $list.PropertyValues.Add($value)
+                $multipleProperties = $false
 
-                $this.AcceptIt()
-                while ($this.currentToken.Kind -ne [TokenType]::RSQUARE)
+                do
                 {
-                    if ($this.currentToken.Kind -eq [TokenType]::DECLITERAL)
+                    if($multipleProperties)
                     {
-                        $value = [DoubleLiteral]::new($this.currentToken.Spelling)
-                        $list.PropertyValues.Add($value)
+                        $this.Accept([TokenType]::COMMA)
+                    }
+                    else 
+                    {
+                        $multipleProperties = $true
+                    }
 
-                        $this.AcceptIt()
-                    }
-                    else
-                    {
-                        throw "This is not the same type"
-                    }
+                    $value = [DoubleLiteral]::new($this.currentToken.Spelling)
+                    $list.PropertyValues.Add($value)
+
+                    $this.AcceptIt()
                 }
-
-                $this.AcceptIt()
+                while($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
             ([TokenType]::LCURLY)
             {
-                $value = $this.ParseJsonObject()
-                $list.PropertyValues.Add($value)
+                $multipleProperties = $false
 
-                while ($this.currentToken.Kind -ne [TokenType]::RSQUARE)
+                do
                 {
-                    if ($this.currentToken.Kind -eq [TokenType]::LCURLY)
+                    if($multipleProperties)
                     {
-                        $value = $this.ParseJsonObject()
-                        $list.PropertyValues.Add($value)
+                        $this.Accept([TokenType]::COMMA)
                     }
-                    else
+                    else 
                     {
-                        throw "This is not the same type"
+                        $multipleProperties = $true
                     }
-                }
 
-                $this.AcceptIt()
+                    $value = $this.ParseJsonObject()
+                    $list.PropertyValues.Add($value)
+
+                }
+                while($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
             ([TokenType]::RSQUARE)
             {
@@ -834,11 +856,15 @@ class Parser
             }
         }
 
+        $this.Accept([TokenType]::RSQUARE)
+        Write-Verbose "List Property parsed..."
+
         return $list
     }
 
     hidden [PropertyObject] ParseSingleProperty([string] $propertyName)
     {
+        Write-Verbose "Parsing a single property..."
         [PropertyObject] $obj = $null
 
         switch ($this.currentToken.Kind)
@@ -874,12 +900,14 @@ class Parser
         }
 
         $this.AcceptIt()
+        
+        Write-Verbose "Single Property parsed..."
         return $obj
     }
 
     hidden [ParseResult] ParseProperty()
     {
-        #Write-Host "Parsing a property..."
+        Write-Verbose "Parsing a property..."
 
         switch ($this.currentToken.Kind)
         {
@@ -948,7 +976,6 @@ class Parser
             }
             ([TokenType]::RCURLY)
             {
-                #Write-Host "Property has ended!"
                 return [ParseResult]::new($null, $true)
             }
             ([TokenType]::EOT)
@@ -957,19 +984,20 @@ class Parser
             }
             default
             {
+                Write-Debug (".."+($this.currentToken.Spelling)+"..")
                 throw "No property found!"
                 return [ParseResult]::new($null, $false)
             }
         }
 
-        #Write-Host "Property parsed..."
+        Write-Verbose "Property parsed..."
         return [ParseResult]::new($null, $false)
     }
 
     hidden [System.Collections.Generic.List[AST]] ParseProperties()
     {
-        #write-host "Parsing Properties..."
-        [bool] $done = $false
+        Write-Verbose "Parsing Properties..."
+
         [int] $recursiveBreaker = 0
         [Parser]::recursiveDepthBreaker++
         [System.Collections.Generic.List[AST]] $obj = @()
@@ -979,19 +1007,27 @@ class Parser
             throw "Too many recursive calls have been made..."
         }
 
-        while (-not $done)
+        $multipleProperties = $false
+        do
         {
             $recursiveBreaker++
 
-            #Write-Host "property no: "$recursiveBreaker
+            if($multipleProperties)
+            {
+                $this.Accept([TokenType]::COMMA)
+            }
+            else
+            {
+                $multipleProperties = $true
+            }
+            
+            Write-Verbose ("property no: "+$recursiveBreaker)
             if ($recursiveBreaker -gt 1000)
             {
                 throw "nothing real was found"
             }
 
             [ParseResult] $res = $this.ParseProperty()
-
-            $done = $res.IsDone
             $prop = $res.Ast
 
             if($prop)
@@ -999,30 +1035,30 @@ class Parser
                 $obj.Add($prop)
             }
         }
+        while($this.currentToken.Kind -eq [TokenType]::COMMA)
 
         [Parser]::recursiveDepthBreaker--
 
-        #Write-Host "Properties parsed..."
+        Write-Verbose "Properties parsed..."
         return $obj
     }
 
     hidden [JsonObject] ParseJsonObject()
     {
-        #Write-Host "Parsing a JSON obejct"
+        Write-Verbose "Parsing a JSON obejct"
 
         $this.Accept([TokenType]::LCURLY)
 
         $properties = $this.ParseProperties()
-        #write-host "number of properties: "($properties.Count)
         $this.Accept([TokenType]::RCURLY)
 
-        #Write-Host "JSON object parsed..."
+        Write-Verbose "JSON object parsed..."
         return [JsonObject]::new($properties)
     }
 
     [JsonObject] Parse([Scanner] $l)
     {
-        #Write-Host "Beginning to parse..."
+        Write-Verbose "Beginning to parse..."
         $this.lexicalAnalyser = $l
         $this.currentToken = $this.lexicalAnalyser.Scan()
         [Parser]::recursiveDepthBreaker = 0
@@ -1030,47 +1066,336 @@ class Parser
         $json = $this.ParseJsonObject()
 
         $this.Accept([TokenType]::EOT)
-        #Write-Host "Parse completed..."
+        Write-Verbose "Parse completed..."
         return $json
     }
 }
+
+class Transformer
+{
+    hidden [PSCustomObject] $Obj
+    hidden [int] $IndentStep
+
+    hidden [string] $CurrentPayload
+    hidden [int] $CurrentIndent
+
+    Transformer([PSCustomObject] $psObject, [int] $indentSpaces)
+    {
+        $this.Obj = $psObject
+        $this.IndentStep = $indentSpaces
+        $this.CurrentIndent = 0
+        $this.CurrentPayload = ""
+    }
+
+    hidden [string] Indent()
+    {
+        return (' ' * $this.CurrentIndent)
+    }
+
+    hidden [void] EncodeProperty([PropertyListObject] $property)
+    {
+        $this.CurrentPayload += $this.Indent() + '"' + $property.PropertyName.Spelling.Replace('\','\\') + '": [' + [System.Environment]::NewLine
+        $this.CurrentIndent += $this.IndentStep
+        
+        $last = $property.PropertyValues[$property.PropertyValues.Count - 1]
+        foreach($p in $property.PropertyValues)
+        {
+            $this.CurrentPayload += $this.Indent()
+            switch ($p)
+            {
+                IntegerLiteral
+                {
+                    $this.CurrentPayload += ([int]$p.Spelling).ToString()
+                }
+                DoubleLiteral
+                {
+                    $value = (([double]$p.Spelling).ToString("0.0",[System.Globalization.CultureInfo]::InvariantCulture))
+                    $this.CurrentPayload += $value
+                }
+                StringLiteral
+                {
+                    $this.CurrentPayload += '"' + $p.Spelling.Replace('\','\\') + '"'
+                }
+                BoolLiteral
+                {
+                    $this.CurrentPayload += $p.Spelling.ToLower()
+                }
+                JsonObject
+                {
+                    $this.EncodeJsonObject($p)
+                }
+                default
+                {
+                    Write-Debug ("What are you? "+($p.GetType()))
+                }
+            }
+
+            if(-not $p.Equals($last))
+            {
+                $this.CurrentPayload += ','
+            }
+            $this.CurrentPayload += [System.Environment]::NewLine
+        }
+
+        $this.CurrentIndent -= $this.IndentStep
+        $this.CurrentPayload += $this.Indent() + "]"
+    }
+    
+    hidden [void] EncodeProperty([PropertyObject] $property)
+    {
+        $this.CurrentPayload += $this.Indent() + '"' + $property.PropertyName.Spelling.Replace('\','\\') + '": '
+        
+        switch ($property.PropertyValue)
+        {
+            IntegerLiteral
+            {
+                $this.CurrentPayload += ([int]$property.PropertyValue.Spelling).ToString()
+            }
+            DoubleLiteral
+            {
+                $value = (([double]$property.PropertyValue.Spelling).ToString("0.0",[System.Globalization.CultureInfo]::InvariantCulture))
+                $this.CurrentPayload += $value
+            }
+            StringLiteral
+            {
+                $this.CurrentPayload += '"' + ($property.PropertyValue.Spelling.Replace('\','\\')) + '"'
+            }
+            BoolLiteral
+            {
+                $this.CurrentPayload += $property.PropertyValue.Spelling.ToLower()
+            }
+            JsonObject
+            {
+                $this.EncodeJsonObject($property.PropertyValue)
+            }
+            default
+            {
+                Write-Debug("What are you? "+($property.PropertyValue.GetType()))
+            }
+        }
+    }
+
+    hidden [void] EncodeJsonObject([JsonObject] $obj)
+    {
+        $this.CurrentPayload += "{" + [System.Environment]::NewLine
+
+        $this.CurrentIndent += $this.IndentStep
+        $last = $obj.Properties[$obj.Properties.Count-1]
+
+        foreach($p in $obj.Properties)
+        {
+            $this.EncodeProperty($p)
+            if(-not $p.Equals($last))
+            {
+                $this.CurrentPayload += ","
+            }
+            $this.CurrentPayload += [System.Environment]::NewLine
+        }
+
+        $this.CurrentIndent -= $this.IndentStep
+        $this.CurrentPayload +=  $this.Indent() + "}"
+    }
+
+    [string] Encode()
+    {
+        $json = $this.Transform()
+        
+        $this.EncodeJsonObject($json)
+
+        Write-Debug $this.CurrentPayload
+        return $this.CurrentPayload
+    }
+
+    [JsonObject] Transform()
+    {
+        return $this.TransforJsonObject($this.Obj)
+    }
+
+    hidden [JsonObject] TransforJsonObject([PSCustomObject] $obj)
+    {
+        $jsonObject = [JsonObject]::new(@())
+        foreach($p in $obj.psobject.properties)
+        {
+            $propertyName = $p.Name
+            $propertyType = (($obj.($p.Name))).GetType().Name
+            $propertyValue = (($obj.($p.Name)))
+    
+            $jsonObject.Properties.Add($this.TransformProperty($propertyName, $propertyType, $propertyValue))
+        }
+        return $jsonObject
+    }
+
+    hidden [AST] TransformProperty([string] $name, [string] $type, $object)
+    {
+        switch ($type)
+        {
+            "ArrayList"
+            {
+                [System.Collections.Generic.List[AST]] $asts = @()
+                foreach($e in $object)
+                {
+                    $eType = $e.GetType()
+                    switch ($eType)
+                    {
+                        "ArrayList"
+                        {
+                            throw "NOT YET IMPLEMENTED!"
+                        }
+                        default
+                        {
+                            $asts.Add($this.TransformAST($eType, $e))
+                        }
+                    }
+                }
+
+                return [PropertyListObject]::new($name, $asts)
+            }
+            default
+            {
+                $ast = $this.TransformAST($type, $object)
+                return [PropertyObject]::new($name, $ast)
+            }
+        }
+        throw "Nothing to transform!"
+    }
+
+    hidden [AST] TransformAST([string] $type, $object)
+    {
+        switch -Regex ($type)
+        {
+            "([D|d]ouble)"
+            {
+                return [DoubleLiteral]::new($object.ToString())
+            }
+            "((I|i)nt($|32$))"
+            {
+                return [IntegerLiteral]::new($object.ToString())
+            }
+            "([S|s]tring)"
+            {
+                return [StringLiteral]::new($object)
+            }
+            "([B|b]ool((ean$)|($)))"
+            {
+                return [BoolLiteral]::new($object.ToString())
+            }
+            "ArrayList"
+            {
+                foreach($e in $object)
+                {
+                    Write-Host ("hey! "+$e.GetType())
+                }
+
+                throw "here"
+            }
+            "PSCustomObject"
+            {
+                return $this.TransforJsonObject($object)
+            }
+            default
+            {
+                write-host ("hey! "+$type)
+            }
+        }
+        throw "Oh no!"
+    }
+}
 #endregion
+
+#region Private functions
+function Step-Property([PSCustomObject] $obj, [System.Collections.Queue] $elements, [bool] $addToLast)
+{
+    $newObj = New-Object psobject
+
+    $currentProperty = $elements.Dequeue()
+    $movingProperty = $null
+
+    if($elements.Count -eq 0)
+    {
+        Write-Verbose "Looking for the property to move"
+        $movingProperty = $obj.psobject.properties | Where-Object {$_.Name.ToLower() -eq $currentProperty.ToLower()}
+
+        if($null -eq $movingProperty)
+        {
+            throw "'$currentProperty' cannot be located!"
+        }
+    }
+
+    if(-not $addToLast -and $movingProperty)
+    {
+        Write-Verbose "Adding property as the last property"
+        $newObj.psobject.properties.Add($movingProperty)
+    }
+
+    foreach($p in $obj.psobject.properties)
+    {
+        if($movingProperty -ne $p)
+        {
+            if($p.Name.ToLower() -eq $currentProperty.ToLower())
+            {
+                Write-Verbose "Next property step has been located ($currentProperty)..."
+                if($p.TypeNameOfValue -ne "System.Management.Automation.PSCustomObject")
+                {
+                    throw "'$currentProperty' is not a PSCustomObject"
+                }
+
+                $value = Step-Property ($p.Value) -elements $elements -addToLast $addToLast
+                $newObj | Add-Member -MemberType NoteProperty -Name ($p.Name) -Value $value
+            }
+            else 
+            {
+                $newObj.psobject.properties.Add($p)
+            }
+        }
+    }
+
+    if($movingProperty -and $addToLast)
+    {
+        Write-Verbose "Adding property as the last property"
+        $newObj.psobject.properties.Add($movingProperty)
+    }
+
+    return $newObj
+}
+#endregion
+
 #region Public functions
 
 <#
  .Synopsis
- Switches raw json input into a PowerShell based object.
+ Switches raw Json input into a PowerShell based object.
 
  .Description
- This function can take a path to a jsonbased file or the string based representation of a json object. 
+ This function can take a path to a Json-based file or the string based representation of a Json object. 
 
  .Parameter Path
-  Path to a file, which content is in a Json syntax.
+  Path to a file, which content is in a Json syntax. This is not a recomended solution as it may use the
+  wrong encoding.
 
  .Parameter Content
   String content in a Json syntax. This parameter is pipeline usable.
 
  .Example
    # Get Powershell based Json Object from a file
-   Switch-ToJson -Path 'C:\myFile.json'
+   PS > Switch-JsonToObject -Path 'C:\myFile.json'
 
  .Example
    # Get Powershell based Json Object from a string
-   Switch-ToJson -Content '{ "aProperty": true }'
+   PS > Switch-JsonToObject -Content '{ "aProperty": true }'
 
  .Example
    # Get Powershell based Json Object from a string
-   Switch-ToJson -Content "{ `"aProperty`": true }"
+   PS > Switch-JsonToObject -Content "{ `"aProperty`": true }"
 
  .Example
    # Get Powershell based Json Object from a string via pipeline
-   '{ "aProperty": true }' | Switch-ToJson
+   PS > '{ "aProperty": true }' | Switch-JsonToObject
 
  .Example
    # Get Powershell based Json Object from a string via pipeline
-   "{ `"aProperty`": true }" | Switch-ToJson
+   PS > "{ `"aProperty`": true }" | Switch-JsonToObject
 #>
-function Switch-ToJson
+function Switch-JsonToObject
 {
     [CmdletBinding()]
     param
@@ -1086,8 +1411,234 @@ function Switch-ToJson
     $s = [SourceFile]::new($Path, $Content)
 
     $ast =  $p.Parse($s)
-    $json = $ast.Encode()
+    $json = $ast.Decode()
 
     return $json
+}
+
+<#
+ .Synopsis
+ Exports PowerShell based object Json input into Json based text.
+
+ .Description
+ This function takes a Json object and transforms it into Json in text form. 
+
+ .Parameter PSObject
+  The PowerShell Object, which needs to be translated into Json text.
+
+ .Parameter Indent
+  Integer to indicate how many spaces the Json text shall have for indentation representation.
+
+ .Example
+   $object = Switch-JsonToObject -Content '{ "aProperty": true }'
+   PS > $jsonText = Switch-ObjectToJson -PSObject $object
+   {
+     "aProperty": true
+   }
+
+ .Example
+   $object = Switch-JsonToObject -Content '{ "aProperty": true }'
+   PS > $jsonText = Switch-ObjectToJson -PSObject $object -Indent 4
+   {
+       "aProperty": true
+   }
+
+ .Example
+   $object = Switch-JsonToObject -Content '{ "aProperty": true }' |  $jsonText = Switch-ObjectToJson -Indent 4
+   {
+       "aProperty": true
+   }
+#>
+function Switch-ObjectToJson
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [PSCustomObject] $PSObject,
+        [Parameter(Mandatory=$false)]
+        [PSDefaultValue(Help='2')]
+        [int] $Indent = 2
+    )
+
+    if(-not $PSObject)
+    {
+        throw "Cannot call function without a PSObject to export to JSON text"
+    }
+
+    $encoder = [Transformer]::new($PSObject, $Indent)
+    return $encoder.Encode()
+}
+
+<#
+ .Synopsis
+ This function can move a Json property to be in the beginning of a Json object (in PSCustomObject representation).
+
+ .Description
+ This function can move a Json property to be in the beginning of a Json object (in PSCustomObject representation).
+ The functionality may come in handy when working with settings.json files in cases where there are a need for
+ a specific field being read first. It supports multiple properties with the same name present in the overall
+ Json payload, as the specific path into the target property will need to be provided.
+
+ .Parameter PSObject
+  The PowerShell Object, which contains a property that needs to be moved.
+
+ .Parameter Path
+  The Path to the specific property that needs to be moved. This is XPath inspired. Syntax: 
+  1. '/targetProperty'
+  2. '/propertyOfJsonObject1/targetProperty'
+  2. '/propertyOfJsonObject1/propertyOfJsonObject2/targetProperty'
+
+ .Example
+   $object = '{ "aProperty": true, "bPositive": { "Active": true, "Percentage": 100}, "Percentage":100 }' | Switch-JsonToObject
+   PS > $object = Move-PropertyToFirst -PSObject $object -Path '/bPositive'
+   PS > $object | Switch-ObjectToJson
+   {
+     "bPositive": {
+       "Active": true,
+       "Percentage": 100
+     },
+     "aProperty": true,
+     "Percentage":100
+   }
+
+ .Example
+   $object = '{ "aProperty": true, "bPositive": { "Active": true, "Percentage": 100} }' | Switch-JsonToObject
+   PS > $object = Move-PropertyToFirst -Path '/bPositive'
+   PS > $object | Switch-ObjectToJson
+   {
+     "bPositive": {
+       "Active": true,
+       "Percentage": 100
+     },
+     "aProperty": true
+   }
+
+ .Example
+   $object = '{ "aProperty": true, "bPositive": { "Active": true, "Percentage": 100} }' | Switch-JsonToObject
+   PS > $object = Move-PropertyToFirst -Path '/bPositive/Percentage'
+   PS > $object | Switch-ObjectToJson
+   {
+     "aProperty": true,
+     "bPositive": {
+       "Percentage": 100,
+       "Active": true
+     }
+   }
+#>
+function Move-PropertyToFirst
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [PSCustomObject]
+        $PSObject,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Path
+    )
+    if(-not $PSObject)
+    {
+        throw "Cannot call function without a PSObject to perform move action to"
+    }
+
+    if(-not $Path)
+    {
+        throw "Cannot call function without a Path to a target property"
+    }
+
+    [System.Collections.Queue]$elements = [System.Collections.Queue]::new(@($Path.Trim('/').Split('/')))
+
+    $returner = Step-Property -obj $psObject -elements $elements -addToLast $false
+
+    return $returner
+}
+
+<#
+ .Synopsis
+ This function can move a Json property to be in the end of a Json object (in PSCustomObject representation).
+
+ .Description
+ This function can move a Json property to be in the end of a Json object (in PSCustomObject representation).
+ The functionality may come in handy when working with settings.json files in cases where there are a need for
+ a specific field being read last. It supports multiple properties with the same name present in the overall
+ Json payload, as the specific path into the target property will need to be provided.
+
+ .Parameter PSObject
+  The PowerShell Object, which contains a property that needs to be moved.
+
+ .Parameter Path
+  The Path to the specific property that needs to be moved. This is XPath inspired. Syntax: 
+  1. '/targetProperty'
+  2. '/propertyOfJsonObject1/targetProperty'
+  2. '/propertyOfJsonObject1/propertyOfJsonObject2/targetProperty'
+
+ .Example
+   $object = '{ "aProperty": true, "bPositive": { "Active": true, "Percentage": 100}, "Percentage":100 }' | Switch-JsonToObject
+   PS > $object = Move-PropertyToLast -PSObject $object -Path '/bPositive'
+   PS > $object | Switch-ObjectToJson
+   {
+     "aProperty": true,
+     "Percentage":100,     
+     "bPositive": {
+       "Active": true,
+       "Percentage": 100
+     }
+   }
+
+ .Example
+   $object = '{ "aProperty": true, "bPositive": { "Active": true, "Percentage": 100} }' | Switch-JsonToObject
+   PS > $object = Move-PropertyToLast -Path '/aProperty'
+   PS > $object | Switch-ObjectToJson
+   {
+     "bPositive": {
+       "Active": true,
+       "Percentage": 100
+     },
+     "aProperty": true
+   }
+
+ .Example
+   $object = '{ "aProperty": true, "bPositive": { "Active": true, "Percentage": 100} }' | Switch-JsonToObject
+   PS > $object = Move-PropertyToLast -Path '/bPositive/Active'
+   PS > $object | Switch-ObjectToJson
+   {
+     "aProperty": true,
+     "bPositive": {
+       "Percentage": 100,
+       "Active": true
+     }
+   }
+#>
+function Move-PropertyToLast
+{
+    [CmdletBinding()]
+    param 
+    (
+        [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+        [PSCustomObject]
+        $PSObject,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Path
+    )
+    if(-not $PSObject)
+    {
+        throw "Cannot call function without a PSObject to perform move action to"
+    }
+
+    if(-not $Path)
+    {
+        throw "Cannot call function without a Path to a target property"
+    }
+    
+    [System.Collections.Queue]$elements = [System.Collections.Queue]::new(@($Path.Trim('/').Split('/')))
+
+    $returner = Step-Property -obj $psObject -elements $elements -addToLast $true
+
+    return $returner
 }
 #endregion
