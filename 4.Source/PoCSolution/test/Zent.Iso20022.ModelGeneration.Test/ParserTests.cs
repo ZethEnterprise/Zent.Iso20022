@@ -7,6 +7,7 @@ using Zent.Iso20022.ModelGeneration.Models.Interfaces;
 using Root = Zent.Iso20022.InterfaceAgreement.Models.RootClassElementAgreement;
 using Poly = Zent.Iso20022.InterfaceAgreement.Models.ClassElementAgreement;
 using Zent.Iso20022.ModelGeneration.Models.V2.Definitions;
+using Zent.Iso20022.InterfaceAgreement.Models.CodeSetAgreement;
 
 namespace Zent.Iso20022.ModelGeneration.Test;
 
@@ -116,6 +117,7 @@ public class ParserTests
             throw new ArgumentException($"This method cannot be called with {classElement.GetType()}");
 
         var xdoc = IZentDocument.Instance()
+            .InitializeDocument([Agreements.CodeSetStatusDirect])
             .WithRootElement(classElement)
             .ToXDocument();
         
@@ -132,6 +134,7 @@ public class ParserTests
             throw new ArgumentException($"This method cannot be called with {secondElement.GetType()}");
 
         var xdoc = IZentDocument.Instance()
+            .InitializeDocument([Agreements.CodeSetStatusDirect])
             .WithRootElement()
             .WithPolymorphicPackage(Poly.Agreements.PolymorphicWithBothPackage)
             .ToXDocument();

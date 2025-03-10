@@ -224,3 +224,6 @@ Hello fellow Nerdies. Jeeeeeez! Long time since last commit (and update in the R
 
 # 2024-11-18
 Boy... I never thought I would write a "book". But this feels almost like one - or a diary at least. Anywho... Thought it would be better to keep all this "soft talks" in one place, so you wouldn't have to flip through the many folders I've created for a quite simple problem (but not so simple to translate into reality).
+
+# 2025-03-11
+Jeez! This is not easy. How to make the perfect class to contain the needed data for generating a mock XML.iso20022 file and still having it as the class object of what we <i>should</i> expect...? This is one of the attempt and I am getting pretty close. You do know, what happens when you are close? You think of another way, which might be more correct instead of trying to custom something to fit something that does not make sense. A lot of the information that "my" result classes have are what we are getting from the XML file, BUT! (because there is a but) there is also a lot of information that the XML has, which is needed in order to generate object from these self defined classes. I think I need to make a class-based representation of the XML.iso20022. So... In other words.. Making classes after the PlantUML generated diagram of the structure in the ISO file (I should have done that from the beginning).

@@ -12,6 +12,9 @@ public class CodeSet : IFixedEnumList
     public IList<Code> Codes { get; set; }
     public IList<IEnumElement> EnumElements { get { return Codes.Cast<IEnumElement>().ToList(); } init { return; } }
     public CodeSetRequirements Requirements { get; set; }
+    public bool DirectReferenced { get; set; }
+    public bool InheritedReferenced { get; set; }
+    public bool ExternallyReferenced { get; set; }
 }
 
 public class CodeSetRequirements

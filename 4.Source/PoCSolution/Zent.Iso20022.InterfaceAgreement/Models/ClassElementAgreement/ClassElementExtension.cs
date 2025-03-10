@@ -63,7 +63,7 @@ public static class Agreements
         public const string Name = "Choice2";
         public const string Description = "I came last!";
         public const string TypePayloadTag = "choices";
-        public const string EnumName = "Woopaah";
+        public const string EnumName = "Status";
     }
     #endregion
 
@@ -221,9 +221,16 @@ public static class Agreements
             new PolymorphicSimpleTypedChildPackage
             {
                 AtomicType = WildParentClassElement.AtomicHeirs[0].AtomicType,
-                Name = "smth",
-                Description = "smth",
-                PayloadTag = "smth"
+                Name = WildParentClassElement.AtomicHeirs[0].Name,
+                Description = WildParentClassElement.AtomicHeirs[0].Description,
+                PayloadTag = WildParentClassElement.AtomicHeirs[0].AtomicType.PayloadTag
+            },
+            new PolymorphicSimpleTypedChildPackage
+            {
+                AtomicType = WildParentClassElement.AtomicHeirs[1].AtomicType,
+                Name = WildParentClassElement.AtomicHeirs[1].Name,
+                Description = WildParentClassElement.AtomicHeirs[1].Description,
+                PayloadTag = WildParentClassElement.AtomicHeirs[1].AtomicType.PayloadTag
             }
         ],
         Inheritors =

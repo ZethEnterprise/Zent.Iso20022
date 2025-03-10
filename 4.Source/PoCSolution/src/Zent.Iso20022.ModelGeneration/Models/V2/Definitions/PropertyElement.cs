@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Zent.Iso20022.ModelGeneration.Models.Interfaces;
-using static Zent.Iso20022.ModelGeneration.Models.V2.Definitions.ClassType;
+﻿using Zent.Iso20022.ModelGeneration.Models.Interfaces;
 
 namespace Zent.Iso20022.ModelGeneration.Models.V2.Definitions;
 
