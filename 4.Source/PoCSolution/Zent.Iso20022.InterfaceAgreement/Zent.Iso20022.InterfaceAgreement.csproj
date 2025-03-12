@@ -20,4 +20,9 @@
     <ProjectReference Include="..\src\Zent.Iso20022.ModelGeneration\Zent.Iso20022.ModelGeneration.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="IsoModel\Iso20022\Message\" />
+    <Folder Include="IsoModel\Iso20022\Properties\" />
+  </ItemGroup>
+
 </Project>
