@@ -5,11 +5,13 @@
 #
 # Generated on: 09/02/2025
 #
+# This is licensed under the Apache License 2.0
+#
 
 @{
 
 # Script module or binary module file associated with this manifest.
-# RootModule = 'Zent.Parser.Json.psm1'
+RootModule = 'Zent.Parser.Json.psm1'
 
 # Version number of this module.
 ModuleVersion = '1.0.0'
@@ -69,10 +71,10 @@ Copyright = '(c) Zeth Enterprise. All rights reserved.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @()
+FunctionsToExport = @('Switch-JsonToObject','Switch-ObjectToJson','Move-PropertyToFirst','Move-PropertyToLast')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @('Switch-JsonToObject','Switch-ObjectToJson','Move-PropertyToFirst','Move-PropertyToLast')
+CmdletsToExport = @()
 
 # Variables to export from this module
 VariablesToExport = '*'
