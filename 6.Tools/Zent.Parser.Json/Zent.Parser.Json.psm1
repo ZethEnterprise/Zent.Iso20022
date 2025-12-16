@@ -4,6 +4,7 @@ enum TokenType
     INTLITERAL
     DECLITERAL
     BOOLLITERAL
+    NULLLITERAL
     STRLITERAL
     IDENTIFIER
     COMMENTLITERAL
@@ -37,6 +38,7 @@ class Token
             [Token]::tokenTable.Add([TokenType]::INTLITERAL,"<int>")
             [Token]::tokenTable.Add([TokenType]::DECLITERAL,"<double>")
             [Token]::tokenTable.Add([TokenType]::BOOLLITERAL,"<bool>")
+            [Token]::tokenTable.Add([TokenType]::NULLLITERAL,"<null>")
             [Token]::tokenTable.Add([TokenType]::STRLITERAL,"""")
             [Token]::tokenTable.Add([TokenType]::IDENTIFIER,"<identifier>")
             [Token]::tokenTable.Add([TokenType]::COMMENTLITERAL,"<comment>")
@@ -156,6 +158,17 @@ class BoolLiteral : Terminal
     [bool] Decode()
     {
         return [bool]::Parse($this.Spelling)
+    }
+}
+
+class NullLiteral : Terminal
+{
+    NullLiteral([string] $spelling) : base($spelling)
+    { }
+    
+    [string] Decode()
+    {
+        return "null"
     }
 }
 
@@ -302,6 +315,11 @@ class SourceFile
 
     }
 
+    [void] Cleanup()
+    {
+        $this.Source.Close()
+    }
+
     [char] GetSource()
     {
         if($this.UseContent)
@@ -357,6 +375,11 @@ class Scanner
     {
         $this.sourceFile = $source
         $this.currentChar = $this.sourceFile.GetSource()
+    }
+
+    [void] Cleanup()
+    {
+        $this.sourceFile.Cleanup()
     }
 
     hidden [void] IgnoreIt()
@@ -506,6 +529,39 @@ class Scanner
                 }
 
                 return [TokenType]::STRLITERAL
+            }
+            '[n]'
+            {
+                $this.TakeIt()
+                if ($this.currentChar -match '[u]')
+                {
+                    $this.TakeIt()
+                }
+                else
+                {
+                    $this.TakeIt()
+                    return [TokenType]::ERROR
+                }
+                if ($this.currentChar -match '[l]')
+                {
+                    $this.TakeIt()
+                }
+                else
+                {
+                    $this.TakeIt()
+                    return [TokenType]::ERROR
+                }
+                if ($this.currentChar -match '[l]')
+                {
+                    $this.TakeIt()
+                }
+                else
+                {
+                    $this.TakeIt()
+                    return [TokenType]::ERROR
+                }
+
+                return [TokenType]::NULLLITERAL
             }
             '[f|F]'
             {
@@ -781,6 +837,28 @@ class Parser
                 }
                 while($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
+            ([TokenType]::NULLLITERAL)
+            {
+                $multipleProperties = $false
+
+                do
+                {
+                    if($multipleProperties)
+                    {
+                        $this.Accept([TokenType]::COMMA)
+                    }
+                    else 
+                    {
+                        $multipleProperties = $true
+                    }
+
+                    $value = [NullLiteral]::new($this.currentToken.Spelling)
+                    $list.PropertyValues.Add($value)
+
+                    $this.AcceptIt()
+                }
+                while($this.currentToken.Kind -eq [TokenType]::COMMA)
+            }
             ([TokenType]::INTLITERAL)
             {
                 $multipleProperties = $false
@@ -897,6 +975,13 @@ class Parser
 
                 $obj = [PropertyObject]::new($name, $value)
             }
+            ([TokenType]::NullLiteral)
+            {
+                $name = [Identifier]::new($propertyName)
+                $value = [NullLiteral]::new($this.currentToken.Spelling)
+
+                $obj = [PropertyObject]::new($name, $value)
+            }
         }
 
         $this.AcceptIt()
@@ -929,6 +1014,12 @@ class Parser
                                 return [ParseResult]::new($property, $false)
                             }
                             ([TokenType]::BOOLLITERAL)
+                            {
+                                $property = $this.ParseSingleProperty($propertyName)
+
+                                return [ParseResult]::new($property, $false)
+                            }
+                            ([TokenType]::NULLLITERAL)
                             {
                                 $property = $this.ParseSingleProperty($propertyName)
 
@@ -1059,13 +1150,25 @@ class Parser
     [JsonObject] Parse([Scanner] $l)
     {
         Write-Verbose "Beginning to parse..."
-        $this.lexicalAnalyser = $l
-        $this.currentToken = $this.lexicalAnalyser.Scan()
-        [Parser]::recursiveDepthBreaker = 0
-        
-        $json = $this.ParseJsonObject()
+        try
+        {
+            $this.lexicalAnalyser = $l
+            $this.currentToken = $this.lexicalAnalyser.Scan()
+            [Parser]::recursiveDepthBreaker = 0
+            
+            $json = $this.ParseJsonObject()
 
-        $this.Accept([TokenType]::EOT)
+            $this.Accept([TokenType]::EOT)
+        }
+        catch
+        {
+            throw $_
+        }
+        finally
+        {
+            $this.lexicalAnalyser.Cleanup()
+            Write-Verbose "Parse completed..."
+        }
         Write-Verbose "Parse completed..."
         return $json
     }
@@ -1120,6 +1223,10 @@ class Transformer
                 {
                     $this.CurrentPayload += $p.Spelling.ToLower()
                 }
+                NullLiteral
+                {
+                    $this.CurrentPayload += $p.Spelling.ToLower()
+                }
                 JsonObject
                 {
                     $this.EncodeJsonObject($p)
@@ -1161,6 +1268,10 @@ class Transformer
                 $this.CurrentPayload += '"' + ($property.PropertyValue.Spelling.Replace('\','\\')) + '"'
             }
             BoolLiteral
+            {
+                $this.CurrentPayload += $property.PropertyValue.Spelling.ToLower()
+            }
+            NullLiteral
             {
                 $this.CurrentPayload += $property.PropertyValue.Spelling.ToLower()
             }
@@ -1217,8 +1328,17 @@ class Transformer
         foreach($p in $obj.psobject.properties)
         {
             $propertyName = $p.Name
-            $propertyType = (($obj.($p.Name))).GetType().Name
-            $propertyValue = (($obj.($p.Name)))
+            write-Verbose  "-$(($obj.($p.Name)) -eq $null)-"
+            if(($obj.($p.Name)) -ne $null)
+            {
+                $propertyType = (($obj.($p.Name))).GetType().Name
+                $propertyValue = (($obj.($p.Name)))
+            }
+            else
+            {
+                $propertyType = "nullable"
+                $propertyValue = "null"
+            }
     
             $jsonObject.Properties.Add($this.TransformProperty($propertyName, $propertyType, $propertyValue))
         }
@@ -1279,6 +1399,10 @@ class Transformer
             {
                 return [BoolLiteral]::new($object.ToString())
             }
+            "nullable"
+            {
+                return [NullLiteral]::new($object.ToString())
+            }
             "ArrayList"
             {
                 foreach($e in $object)
@@ -1297,7 +1421,7 @@ class Transformer
                 write-host ("hey! "+$type)
             }
         }
-        throw "Oh no!"
+        throw "Oh no! $($type)"
     }
 }
 #endregion
@@ -1407,10 +1531,33 @@ function Switch-JsonToObject
         [PSDefaultValue(Help='null')]
         [string] $Content = $null
     )
-    $p = [Parser]::new()
-    $s = [SourceFile]::new($Path, $Content)
 
-    $ast =  $p.Parse($s)
+    if($Path)
+    {
+        # Resolve relative paths, ~, etc.
+        try
+        {
+            $resolvedPath = Resolve-Path -Path $Path -ErrorAction Stop
+        }
+        catch
+        {
+            Throw "The path '$Path' could not be resolved. $_"
+        }
+
+        # Convert from PathInfo to plain string
+        $resolvedPath = $resolvedPath.ProviderPath
+        # Optionally verify it's a file (not directory)
+        if(-not (Test-Path $resolvedPath -PathType Leaf))
+        {
+            Throw "The path '$resolvedPath' does not point to a validfile."
+        }
+    }
+
+    $p = [Parser]::new()
+    $s = [SourceFile]::new($resolvedPath, $Content)
+    $l = [Scanner]::new($s)
+
+    $ast =  $p.Parse($l)
     $json = $ast.Decode()
 
     return $json
