@@ -1,6 +1,7 @@
 ﻿Write-Host "Loading Zent.Parser.Json module..." -NoNewline
 #region basic classes
-enum TokenType {
+enum TokenType
+{
     INTLITERAL
     DECLITERAL
     BOOLLITERAL
@@ -21,17 +22,20 @@ enum TokenType {
     ERROR
 }
 
-class Token {
+class Token
+{
     hidden static [Collections.Generic.Dictionary[TokenType, string]] $tokenTable = @{}
 
     static [TokenType] $FirstReservedWord = [TokenType]::LCURLY
-    static [TokenType] $LastReservedWord = [TokenType]::RCURLY;
+    static [TokenType] $LastReservedWord = [TokenType]::RCURLY
 
     [TokenType] $Kind
     [string] $Spelling
 
-    hidden init() {
-        if (-not [Token]::tokenTable) {
+    hidden init()
+    {
+        if (-not [Token]::tokenTable)
+        {
             [Token]::tokenTable.Add([TokenType]::INTLITERAL, "<int>")
             [Token]::tokenTable.Add([TokenType]::DECLITERAL, "<double>")
             [Token]::tokenTable.Add([TokenType]::BOOLLITERAL, "<bool>")
@@ -53,138 +57,171 @@ class Token {
         }
     }
 
-    Token([TokenType] $kind, [string] $spelling) {
+    Token([TokenType] $kind, [string] $spelling)
+    {
         $this.init()
 
-        if ($kind -eq [TokenType]::IDENTIFIER) {
+        if ($kind -eq [TokenType]::IDENTIFIER)
+        {
             [TokenType] $currentKind = $this.FirstReservedWord
             [bool] $searching = $true
 
-            while ($searching) {
+            while ($searching)
+            {
                 [int] $comparison = [Token]::tokenTable[$currentKind].CompareTo($spelling)
-                if ($comparison -eq 0) {
+                if ($comparison -eq 0)
+                {
                     $this.Kind = $currentKind
                     $searching = $false
                 }
-                else {
-                    if ($comparison -lt 0 -or $currentKind -eq $this.lastReservedWord) {
+                else
+                {
+                    if ($comparison -lt 0 -or $currentKind -eq $this.lastReservedWord)
+                    {
                         $this.kind = [TokenType]::IDENTIFIER
                         $searching = $false
                     }
-                    else {
-                        $currentKind++;
+                    else
+                    {
+                        $currentKind++
                     }
                 }
             }
         }
-        else {
-            $this.Kind = $kind;
+        else
+        {
+            $this.Kind = $kind
         }
 
-        $this.Spelling = $spelling;
+        $this.Spelling = $spelling
     }
 
-    [string] spell([TokenType] $kind) {
+    [string] spell([TokenType] $kind)
+    {
         return [Token]::tokenTable[$kind]
     }
 }
 
-class AST {
+class AST
+{
     AST()
     { }
 }
 
-class Terminal : AST {
+class Terminal : AST
+{
     [string] $Spelling
 
-    Terminal([string] $spelling) {
+    Terminal([string] $spelling)
+    {
         $this.Spelling = $spelling.Replace("\\", "\")
     }
 }
 
-class Identifier : Terminal {
+class Identifier : Terminal
+{
     Identifier([string] $spelling) : base($spelling)
     { }
     
-    [string] Decode() {
+    [string] Decode()
+    {
         return $this.Spelling
     }
 }
 
-class IntegerLiteral : Terminal {
+class IntegerLiteral : Terminal
+{
     IntegerLiteral([string] $spelling) : base($spelling)
     { }
     
-    [int] Decode() {
+    [int] Decode()
+    {
         return [int]$this.Spelling
     }
 }
 
-class DoubleLiteral : Terminal {
+class DoubleLiteral : Terminal
+{
     DoubleLiteral([string] $spelling) : base($spelling)
     { }
     
-    [double] Decode() {
-        return [double]$this.Spelling;
+    [double] Decode()
+    {
+        return [double]$this.Spelling
     }
 }
 
-class BoolLiteral : Terminal {
+class BoolLiteral : Terminal
+{
     BoolLiteral([string] $spelling) : base($spelling)
     { }
     
-    [bool] Decode() {
+    [bool] Decode()
+    {
         return [bool]::Parse($this.Spelling)
     }
 }
 
-class NullLiteral : Terminal {
+class NullLiteral : Terminal
+{
     NullLiteral([string] $spelling) : base($spelling)
     { }
     
-    [string] Decode() {
+    [string] Decode()
+    {
         return "null"
     }
 }
 
-class StringLiteral : Terminal {
+class StringLiteral : Terminal
+{
     StringLiteral([string] $spelling) : base($spelling)
     { }
 
-    [string] Decode() {
+    [string] Decode()
+    {
         return $this.Spelling
     }
 }
 
-class JsonObject : AST {
+class JsonObject : AST
+{
     [System.Collections.Generic.List[AST]] $Properties = @()
 
-    JsonObject([System.Collections.Generic.List[AST]] $p) : base() {
+    JsonObject([System.Collections.Generic.List[AST]] $p) : base()
+    {
         $this.Properties = $p
     }
 
-    [PSObject] Decode() {
+    [PSObject] Decode()
+    {
         Write-Verbose "Decoding JsonObject..."
         $obj = New-Object psobject
 
-        foreach ($p in $this.properties) {
+        foreach ($p in $this.properties)
+        {
             $id = $p.PropertyName.Decode()
-            switch ($p) {
-                { $_ -is [PropertyObject] } {    
+            switch ($p)
+            {
+                { $_ -is [PropertyObject] }
+                {    
                     $value = $p.PropertyValue.Decode()
                     
                     $obj | Add-Member -MemberType NoteProperty -Name $id -Value $value
                 }
-                { $_ -is [PropertyListObject] } {
+                { $_ -is [PropertyListObject] }
+                {
                     $value = [System.Collections.ArrayList]::new()
 
-                    foreach ($v in $p.PropertyValues) {
+                    foreach ($v in $p.PropertyValues)
+                    {
                         $value.Add($v.Decode())
                     }
 
                     $obj | Add-Member -MemberType NoteProperty -Name $id -Value $value
                 }
-                Default {
+                Default
+                {
                     throw "Unknown scenario in the decoder"
                 }
             }
@@ -195,35 +232,42 @@ class JsonObject : AST {
     }
 }
 
-class PropertyObject : AST {
+class PropertyObject : AST
+{
     [Identifier] $PropertyName
     [AST] $PropertyValue
 
-    PropertyObject([Identifier] $n, [AST] $v) : base() {
+    PropertyObject([Identifier] $n, [AST] $v) : base()
+    {
         $this.PropertyName = $n
         $this.PropertyValue = $v
     }
 }
 
-class PropertyListObject : AST {
+class PropertyListObject : AST
+{
     [Identifier] $PropertyName
     [System.Collections.Generic.List[AST]] $PropertyValues = @()
 
-    PropertyListObject([string] $n) : base() {
+    PropertyListObject([string] $n) : base()
+    {
         $this.PropertyName = [Identifier]::new($n)
     }
     
-    PropertyListObject([string] $n, [System.Collections.Generic.List[AST]] $v) : base() {
+    PropertyListObject([string] $n, [System.Collections.Generic.List[AST]] $v) : base()
+    {
         $this.PropertyName = [Identifier]::new($n)
         $this.PropertyValues = $v
     }
 }
 
-class ParseResult {
+class ParseResult
+{
     [AST] $Ast
     [bool] $IsDone
 
-    ParseResult([AST] $ast, [bool] $isDone) {
+    ParseResult([AST] $ast, [bool] $isDone)
+    {
         $this.Ast = $ast
         $this.IsDone = $isDone
     }
@@ -231,7 +275,8 @@ class ParseResult {
 #endregion
 
 #region Complex classes
-class SourceFile {
+class SourceFile
+{
     static $EOT = [char]0x0000
 
     hidden [IO.FileStream] $Source
@@ -239,12 +284,16 @@ class SourceFile {
     hidden [int] $ContentIndex
     hidden [bool] $UseContent
 
-    SourceFile([string] $filename, [string] $content) {
-        if (-not $filename -and -not $content) {
+    SourceFile([string] $filename, [string] $content)
+    {
+        if (-not $filename -and -not $content)
+        {
             throw "Cannot initiate SourceFile without any data to process"
         }
-        if ($filename) {
-            try {
+        if ($filename)
+        {
+            try
+            {
                 Write-Debug "Opening $filename for reading..."
                 $this.Source = [System.IO.File]::OpenRead($filename)
 
@@ -255,10 +304,12 @@ class SourceFile {
                 if ($bytesRead -eq 3 -and `
                         $firstBytes[0] -eq 0xEF -and `
                         $firstBytes[1] -eq 0xBB -and `
-                        $firstBytes[2] -eq 0xBF) {
+                        $firstBytes[2] -eq 0xBF)
+                {
                     Write-Debug "BOM detected, skipping first three bytes..."
                 }
-                else {
+                else
+                {
                     Write-Debug "No BOM detected, resetting pointer..."
                     
                     $this.Source.Seek(0, [IO.SeekOrigin]::Begin) | Out-Null
@@ -267,7 +318,8 @@ class SourceFile {
                 $this.UseContent = $false
                 Write-Debug "File is open..."
             }
-            catch {
+            catch
+            {
                 write-host ($_.exception.StackTrace)
                 write-host ($_.exception.ErrorRecord)
                 write-host ($_.exception.GetType())
@@ -276,7 +328,8 @@ class SourceFile {
                 throw "Error has been caught"
             }
         }
-        else {
+        else
+        {
             $this.ContentIndex = 0
             $this.Content = $content
             $this.UseContent = $true
@@ -284,28 +337,37 @@ class SourceFile {
 
     }
 
-    [void] Cleanup() {
-        if ($this.Source) {
+    [void] Cleanup()
+    {
+        if ($this.Source)
+        {
             $this.Source.Close()
         }
     }
 
-    [char] GetSource() {
-        if ($this.UseContent) {
+    [char] GetSource()
+    {
+        if ($this.UseContent)
+        {
             [char]$currentChar = $this.Content[$this.ContentIndex++]
 
-            if ($currentChar) {
+            if ($currentChar)
+            {
                 return $currentChar
             }
-            else {
+            else
+            {
                 return [char]([Convert]::ToChar([SourceFile]::EOT))
             }
         }
-        else {
-            try {
+        else
+        {
+            try
+            {
                 [int]$c = $this.Source.ReadByte()
     
-                if (($c -eq -1)) {
+                if (($c -eq -1))
+                {
                     Write-Verbose "file has ended..."
                     $this.Source.Close()
                     return [char]([Convert]::ToChar([SourceFile]::EOT))
@@ -313,7 +375,8 @@ class SourceFile {
     
                 return [char]$c
             }
-            catch {
+            catch
+            {
                 write-host ($_.exception.StackTrace)
                 write-host ($_.exception.ErrorRecord)
                 write-host ($_.exception.GetType())
@@ -326,212 +389,274 @@ class SourceFile {
     }
 }
 
-class Scanner {
+class Scanner
+{
     hidden [string] $currentChar
     hidden [Text.StringBuilder] $currentSpelling
     hidden [bool] $currentlyScanningToken
     hidden [SourceFile] $sourceFile
 
-    Scanner([SourceFile] $source) {
+    Scanner([SourceFile] $source)
+    {
         $this.sourceFile = $source
         $this.currentChar = $this.sourceFile.GetSource()
     }
 
-    [void] Cleanup() {
+    [void] Cleanup()
+    {
         $this.sourceFile.Cleanup()
     }
 
-    hidden [void] IgnoreIt() {
+    hidden [void] IgnoreIt()
+    {
         $this.currentChar = $this.sourceFile.GetSource()
     }
 
-    hidden [void] TakeIt() {
-        if ($this.currentlyScanningToken) {
+    hidden [void] TakeIt()
+    {
+        if ($this.currentlyScanningToken)
+        {
             $this.currentSpelling.Append($this.currentChar)
         }
 
         $this.currentChar = $this.sourceFile.GetSource()
     }
 
-    hidden [void] ScanElementSeparator() {
-        while ($this.currentChar -match '[\r|\n|\| |\t]') {
+    hidden [void] ScanElementSeparator()
+    {
+        while ($this.currentChar -match '[\r|\n|\| |\t]')
+        {
             $this.ScanSeparator()
         }
 
         $this.Accept([TokenType]::COMMA)
 
-        while ($this.currentChar -match '[\r|\n|\| |\t]') {
+        while ($this.currentChar -match '[\r|\n|\| |\t]')
+        {
             $this.ScanSeparator()
         }
     }
 
-    hidden [void] ScanSeparator() {
-        switch -regex ($this.currentChar) {
+    hidden [void] ScanSeparator()
+    {
+        switch -regex ($this.currentChar)
+        {
             '( |\n|\r|\t)' { $this.TakeIt() }
-            '\\' { 
+            '\\'
+            { 
                 $this.TakeIt()
-                if ($this.currentChar -eq '\') {
+                if ($this.currentChar -eq '\')
+                {
                     $this.TakeIt()
                 }
-                else {
+                else
+                {
                     throw "This is not a comment."
                 }
 
-                while (($this.currentChar) -ne '`n') {
+                while (($this.currentChar) -ne '`n')
+                {
                     $this.TakeIt()
                 }
             }
         }
     }
 
-    hidden [TokenType] ScanToken() {
-        switch -regex ($this.currentChar) {
-            '"' {                
+    hidden [TokenType] ScanToken()
+    {
+        switch -regex ($this.currentChar)
+        {
+            '"'
+            {                
                 $this.IgnoreIt()
-                while ($this.currentChar -ne '"') {
-                    if (($this.currentChar -match "([A-z])|([0-9])|($@/.,:;\(\)\[\]\{\}&%-_#!?><*`´'| )")) {
+                while ($this.currentChar -ne '"')
+                {
+                    if (($this.currentChar -match "([A-z])|([0-9])|($@/.,:;\(\)\[\]\{\}&%-_#!?><*`´'| )"))
+                    {
                         $this.TakeIt()
                     }
-                    else {
-                        if ($this.currentChar -eq '\') {
+                    else
+                    {
+                        if ($this.currentChar -eq '\')
+                        {
                             $this.TakeIt()
-                            switch ($this.currentChar) {
-                                'r' {
+                            switch ($this.currentChar)
+                            {
+                                'r'
+                                {
                                     $this.TakeIt()
-                                    if ($this.currentChar -eq '\') {
+                                    if ($this.currentChar -eq '\')
+                                    {
                                         $this.TakeIt()
-                                        if ($this.currentChar -eq 'n') {
+                                        if ($this.currentChar -eq 'n')
+                                        {
                                             $this.TakeIt()
                                         }
-                                        else {
+                                        else
+                                        {
                                             return [TokenType]::ERROR
                                         }
                                     }
-                                    else {
+                                    else
+                                    {
                                         return [TokenType]::ERROR
                                     }
                                 }
-                                'n' {
+                                'n'
+                                {
                                     $this.TakeIt()
-                                    if ($this.currentChar -eq '\') {
+                                    if ($this.currentChar -eq '\')
+                                    {
                                         $this.TakeIt()
-                                        if ($this.currentChar -eq 'r') {
+                                        if ($this.currentChar -eq 'r')
+                                        {
                                             $this.TakeIt()
                                         }
-                                        else {
+                                        else
+                                        {
                                             return [TokenType]::ERROR
                                         }
                                     }
-                                    else {
+                                    else
+                                    {
                                         return [TokenType]::ERROR
                                     }
                                 }
-                                't' {
+                                't'
+                                {
                                     $this.TakeIt()
                                 }
-                                '\' {
+                                '\'
+                                {
                                     $this.TakeIt()
                                 }
-                                default {
+                                default
+                                {
                                     return [TokenType]::ERROR
                                 }
                             }
                         }
-                        else {
+                        else
+                        {
                             $this.TakeIt()
                         }
                     }
                 }
                 
-                if ($this.currentChar -eq '"') {
+                if ($this.currentChar -eq '"')
+                {
                     $this.IgnoreIt()
                 }
-                else {
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
 
                 return [TokenType]::STRLITERAL
             }
-            '[n]' {
+            '[n]'
+            {
                 $this.TakeIt()
-                if ($this.currentChar -match '[u]') {
+                if ($this.currentChar -match '[u]')
+                {
                     $this.TakeIt()
                 }
-                else {
-                    $this.TakeIt()
-                    return [TokenType]::ERROR
-                }
-                if ($this.currentChar -match '[l]') {
-                    $this.TakeIt()
-                }
-                else {
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
-                if ($this.currentChar -match '[l]') {
+                if ($this.currentChar -match '[l]')
+                {
                     $this.TakeIt()
                 }
-                else {
+                else
+                {
+                    $this.TakeIt()
+                    return [TokenType]::ERROR
+                }
+                if ($this.currentChar -match '[l]')
+                {
+                    $this.TakeIt()
+                }
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
 
                 return [TokenType]::NULLLITERAL
             }
-            '[f|F]' {
+            '[f|F]'
+            {
                 $this.TakeIt()
-                if ($this.currentChar -match '[a|A]') {
+                if ($this.currentChar -match '[a|A]')
+                {
                     $this.TakeIt()
                 }
-                else {
-                    $this.TakeIt()
-                    return [TokenType]::ERROR
-                }
-                if ($this.currentChar -match '[l|L]') {
-                    $this.TakeIt()
-                }
-                else {
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
-                if ($this.currentChar -match '[s|S]') {
+                if ($this.currentChar -match '[l|L]')
+                {
                     $this.TakeIt()
                 }
-                else {
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
-                if ($this.currentChar -match '[e|E]') {
+                if ($this.currentChar -match '[s|S]')
+                {
                     $this.TakeIt()
                 }
-                else {
+                else
+                {
+                    $this.TakeIt()
+                    return [TokenType]::ERROR
+                }
+                if ($this.currentChar -match '[e|E]')
+                {
+                    $this.TakeIt()
+                }
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
 
                 return [TokenType]::BOOLLITERAL
             }
-            '[t|T]' {
+            '[t|T]'
+            {
                 $this.TakeIt()
-                if ($this.currentChar -match '[r|R]') {
+                if ($this.currentChar -match '[r|R]')
+                {
                     $this.TakeIt()
                 }
-                else {
-                    $this.TakeIt()
-                    return [TokenType]::ERROR
-                }
-                if ($this.currentChar -match '[u|U]') {
-                    $this.TakeIt()
-                }
-                else {
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
-                if ($this.currentChar -match '[e|E]') {
+                if ($this.currentChar -match '[u|U]')
+                {
                     $this.TakeIt()
                 }
-                else {
+                else
+                {
+                    $this.TakeIt()
+                    return [TokenType]::ERROR
+                }
+                if ($this.currentChar -match '[e|E]')
+                {
+                    $this.TakeIt()
+                }
+                else
+                {
                     $this.TakeIt()
                     return [TokenType]::ERROR
                 }
@@ -539,15 +664,19 @@ class Scanner {
                 return [TokenType]::BOOLLITERAL
 
             }
-            '[0-9]' {
+            '[0-9]'
+            {
                 $this.TakeIt()
-                while ($this.currentChar -match '[0-9]') {
+                while ($this.currentChar -match '[0-9]')
+                {
                     $this.TakeIt()
                 }
                 
-                if ($this.currentChar -eq '.') {
+                if ($this.currentChar -eq '.')
+                {
                     $this.TakeIt()
-                    while ($this.currentChar -match '[0-9]') {
+                    while ($this.currentChar -match '[0-9]')
+                    {
                         $this.TakeIt()
                     }
 
@@ -555,46 +684,57 @@ class Scanner {
                 }
                 return [TokenType]::INTLITERAL
             }
-            ';' {
+            ';'
+            {
                 $this.TakeIt()
                 return [TokenType]::SEMICOLON
             }
-            ',' {
+            ','
+            {
                 $this.TakeIt()
                 return [TokenType]::COMMA
             }
-            ':' {
+            ':'
+            {
                 $this.TakeIt()
                 return [TokenType]::COLON
             }
-            '\(' {
+            '\('
+            {
                 $this.TakeIt()
                 return [TokenType]::LPAREN
             }
-            '\)' {
+            '\)'
+            {
                 $this.TakeIt()
                 return [TokenType]::RPAREN
             }
-            '\{' {
+            '\{'
+            {
                 $this.TakeIt()
                 return [TokenType]::LCURLY
             }
-            '\}' {
+            '\}'
+            {
                 $this.TakeIt()
                 return [TokenType]::RCURLY
             }
-            '\[' {
+            '\['
+            {
                 $this.TakeIt()
                 return [TokenType]::LSQUARE
             }
-            '\]' {
+            '\]'
+            {
                 $this.TakeIt()
                 return [TokenType]::RSQUARE
             }
-            default {
+            default
+            {
                 Write-Debut "We are at an end '$($this.currentChar)'."
 
-                if ($this.currentChar -eq ([SourceFile]::EOT)) {
+                if ($this.currentChar -eq ([SourceFile]::EOT))
+                {
                     return [TokenType]::EOT
                 }
                 $this.TakeIt()
@@ -605,9 +745,11 @@ class Scanner {
         return [TokenType]::ERROR
     }
 
-    [Token] Scan() {
+    [Token] Scan()
+    {
         $this.currentlyScanningToken = $false
-        while ($this.currentChar -match '[\r|\n|\| |\t]') {
+        while ($this.currentChar -match '[\r|\n|\| |\t]')
+        {
             $this.ScanSeparator()
         }
         
@@ -617,10 +759,12 @@ class Scanner {
         [Token] $returner = $null
         $kind = $this.ScanToken()
         $spelling = $this.currentSpelling.ToString()
-        try {
+        try
+        {
             $returner = [Token]::new(([TokenType]$kind), ([string]$spelling))
         }
-        catch {
+        catch
+        {
             write-host ($_.exception.StackTrace)
             write-host ($_.exception.ErrorRecord)
             write-host ($_.exception.GetType())
@@ -633,7 +777,8 @@ class Scanner {
     }
 }
 
-class Parser {
+class Parser
+{
     hidden[Scanner] $lexicalAnalyser
     hidden[Token] $currentToken 
     hidden static [int] $recursiveDepthBreaker = 0
@@ -641,13 +786,16 @@ class Parser {
     Parser()
     { }
 
-    hidden [bool] Accept([TokenType] $expectedToken) {
+    hidden [bool] Accept([TokenType] $expectedToken)
+    {
         [bool] $ok = $true
         
-        if ($this.currentToken.Kind -eq $expectedToken) {
+        if ($this.currentToken.Kind -eq $expectedToken)
+        {
             $this.currentToken = $this.lexicalAnalyser.Scan()
         }
-        else {
+        else
+        {
             Write-Host ".."$this.currentToken.kind".."
             Write-Host ".."$expectedToken".."
             Write-Host ".."$this.currentToken.Spelling".."
@@ -658,25 +806,32 @@ class Parser {
         return $ok
     }
 
-    hidden [void] AcceptIt() {
+    hidden [void] AcceptIt()
+    {
         $this.currentToken = $this.lexicalAnalyser.Scan()
     }
 
-    hidden [PropertyListObject] ParseListProperty($propertyName) {        
+    hidden [PropertyListObject] ParseListProperty($propertyName)
+    {        
         Write-Verbose "Parsing a list property..."
         $this.Accept([TokenType]::LSQUARE)
 
         [PropertyListObject] $list = [PropertyListObject]::new($propertyName)
 
-        switch ($this.currentToken.Kind) {
-            ([TokenType]::STRLITERAL) {
+        switch ($this.currentToken.Kind)
+        {
+            ([TokenType]::STRLITERAL)
+            {
                 $multipleProperties = $false
 
-                do {
-                    if ($multipleProperties) {
+                do
+                {
+                    if ($multipleProperties)
+                    {
                         $this.Accept([TokenType]::COMMA)
                     }
-                    else {
+                    else
+                    {
                         $multipleProperties = $true
                     }
 
@@ -687,14 +842,18 @@ class Parser {
                 }
                 while ($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
-            ([TokenType]::BOOLLITERAL) {
+            ([TokenType]::BOOLLITERAL)
+            {
                 $multipleProperties = $false
 
-                do {
-                    if ($multipleProperties) {
+                do
+                {
+                    if ($multipleProperties)
+                    {
                         $this.Accept([TokenType]::COMMA)
                     }
-                    else {
+                    else
+                    {
                         $multipleProperties = $true
                     }
 
@@ -705,14 +864,18 @@ class Parser {
                 }
                 while ($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
-            ([TokenType]::NULLLITERAL) {
+            ([TokenType]::NULLLITERAL)
+            {
                 $multipleProperties = $false
 
-                do {
-                    if ($multipleProperties) {
+                do
+                {
+                    if ($multipleProperties)
+                    {
                         $this.Accept([TokenType]::COMMA)
                     }
-                    else {
+                    else
+                    {
                         $multipleProperties = $true
                     }
 
@@ -723,14 +886,18 @@ class Parser {
                 }
                 while ($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
-            ([TokenType]::INTLITERAL) {
+            ([TokenType]::INTLITERAL)
+            {
                 $multipleProperties = $false
 
-                do {
-                    if ($multipleProperties) {
+                do
+                {
+                    if ($multipleProperties)
+                    {
                         $this.Accept([TokenType]::COMMA)
                     }
-                    else {
+                    else
+                    {
                         $multipleProperties = $true
                     }
 
@@ -741,14 +908,18 @@ class Parser {
                 }
                 while ($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
-            ([TokenType]::DECLITERAL) {
+            ([TokenType]::DECLITERAL)
+            {
                 $multipleProperties = $false
 
-                do {
-                    if ($multipleProperties) {
+                do
+                {
+                    if ($multipleProperties)
+                    {
                         $this.Accept([TokenType]::COMMA)
                     }
-                    else {
+                    else
+                    {
                         $multipleProperties = $true
                     }
 
@@ -759,14 +930,18 @@ class Parser {
                 }
                 while ($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
-            ([TokenType]::LCURLY) {
+            ([TokenType]::LCURLY)
+            {
                 $multipleProperties = $false
 
-                do {
-                    if ($multipleProperties) {
+                do
+                {
+                    if ($multipleProperties)
+                    {
                         $this.Accept([TokenType]::COMMA)
                     }
-                    else {
+                    else
+                    {
                         $multipleProperties = $true
                     }
 
@@ -776,10 +951,12 @@ class Parser {
                 }
                 while ($this.currentToken.Kind -eq [TokenType]::COMMA)
             }
-            ([TokenType]::RSQUARE) {
+            ([TokenType]::RSQUARE)
+            {
                 $this.AcceptIt()
             }
-            default {
+            default
+            {
                 throw "Something went wrong..."
             }
         }
@@ -790,36 +967,43 @@ class Parser {
         return $list
     }
 
-    hidden [PropertyObject] ParseSingleProperty([string] $propertyName) {
+    hidden [PropertyObject] ParseSingleProperty([string] $propertyName)
+    {
         Write-Verbose "Parsing a single property..."
         [PropertyObject] $obj = $null
 
-        switch ($this.currentToken.Kind) {
-            ([TokenType]::STRLITERAL) {
+        switch ($this.currentToken.Kind)
+        {
+            ([TokenType]::STRLITERAL)
+            {
                 $name = [Identifier]::new($propertyName)
                 $value = [StringLiteral]::new($this.currentToken.Spelling)
 
                 $obj = [PropertyObject]::new($name, $value)
             }
-            ([TokenType]::INTLITERAL) {
+            ([TokenType]::INTLITERAL)
+            {
                 $name = [Identifier]::new($propertyName)
                 $value = [IntegerLiteral]::new($this.currentToken.Spelling)
 
                 $obj = [PropertyObject]::new($name, $value)
             }
-            ([TokenType]::DECLITERAL) {
+            ([TokenType]::DECLITERAL)
+            {
                 $name = [Identifier]::new($propertyName)
                 $value = [DoubleLiteral]::new($this.currentToken.Spelling)
 
                 $obj = [PropertyObject]::new($name, $value)
             }
-            ([TokenType]::BOOLLITERAL) {
+            ([TokenType]::BOOLLITERAL)
+            {
                 $name = [Identifier]::new($propertyName)
                 $value = [BoolLiteral]::new($this.currentToken.Spelling)
 
                 $obj = [PropertyObject]::new($name, $value)
             }
-            ([TokenType]::NullLiteral) {
+            ([TokenType]::NullLiteral)
+            {
                 $name = [Identifier]::new($propertyName)
                 $value = [NullLiteral]::new($this.currentToken.Spelling)
 
@@ -833,43 +1017,55 @@ class Parser {
         return $obj
     }
 
-    hidden [ParseResult] ParseProperty() {
+    hidden [ParseResult] ParseProperty()
+    {
         Write-Verbose "Parsing a property..."
 
-        switch ($this.currentToken.Kind) {
-            ([TokenType]::STRLITERAL) {   
+        switch ($this.currentToken.Kind)
+        {
+            ([TokenType]::STRLITERAL)
+            {   
                 $propertyName = $this.currentToken.Spelling
                 $this.AcceptIt()
-                switch ($this.currentToken.Kind) {
-                    ([TokenType]::COLON) {
+                switch ($this.currentToken.Kind)
+                {
+                    ([TokenType]::COLON)
+                    {
                         $this.AcceptIt()
-                        switch ($this.currentToken.Kind) {
-                            ([TokenType]::STRLITERAL) {
+                        switch ($this.currentToken.Kind)
+                        {
+                            ([TokenType]::STRLITERAL)
+                            {
                                 $property = $this.ParseSingleProperty($propertyName)
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            ([TokenType]::BOOLLITERAL) {
+                            ([TokenType]::BOOLLITERAL)
+                            {
                                 $property = $this.ParseSingleProperty($propertyName)
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            ([TokenType]::NULLLITERAL) {
+                            ([TokenType]::NULLLITERAL)
+                            {
                                 $property = $this.ParseSingleProperty($propertyName)
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            ([TokenType]::INTLITERAL) {
+                            ([TokenType]::INTLITERAL)
+                            {
                                 $property = $this.ParseSingleProperty($propertyName)
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            ([TokenType]::DECLITERAL) {
+                            ([TokenType]::DECLITERAL)
+                            {
                                 $property = $this.ParseSingleProperty($propertyName)
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            ([TokenType]::LCURLY) {
+                            ([TokenType]::LCURLY)
+                            {
                                 $jsonValue = $this.ParseJsonObject()
                                 $name = [Identifier]::new($propertyName)
 
@@ -877,29 +1073,35 @@ class Parser {
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            ([TokenType]::LSQUARE) {
+                            ([TokenType]::LSQUARE)
+                            {
                                 $property = $this.ParseListProperty($propertyName)
 
                                 return [ParseResult]::new($property, $false)
                             }
-                            default {
+                            default
+                            {
                                 $this.AcceptIt()
                                 throw "Error parsing property"
                             }
                         }
                     }
-                    default {
+                    default
+                    {
                         throw "How did we get here?"
                     }
                 }
             }
-            ([TokenType]::RCURLY) {
+            ([TokenType]::RCURLY)
+            {
                 return [ParseResult]::new($null, $true)
             }
-            ([TokenType]::EOT) {
+            ([TokenType]::EOT)
+            {
                 throw "File did not end propperly"
             }
-            default {
+            default
+            {
                 Write-Debug (".." + ($this.currentToken.Spelling) + "..")
                 throw "No property found!"
                 return [ParseResult]::new($null, $false)
@@ -910,37 +1112,44 @@ class Parser {
         return [ParseResult]::new($null, $false)
     }
 
-    hidden [System.Collections.Generic.List[AST]] ParseProperties() {
+    hidden [System.Collections.Generic.List[AST]] ParseProperties()
+    {
         Write-Verbose "Parsing Properties..."
 
         [int] $recursiveBreaker = 0
         [Parser]::recursiveDepthBreaker++
         [System.Collections.Generic.List[AST]] $obj = @()
         
-        if ([Parser]::recursiveDepthBreaker -gt 10) {
+        if ([Parser]::recursiveDepthBreaker -gt 10)
+        {
             throw "Too many recursive calls have been made..."
         }
 
         $multipleProperties = $false
-        do {
+        do
+        {
             $recursiveBreaker++
 
-            if ($multipleProperties) {
+            if ($multipleProperties)
+            {
                 $this.Accept([TokenType]::COMMA)
             }
-            else {
+            else
+            {
                 $multipleProperties = $true
             }
             
             Write-Verbose ("property no: " + $recursiveBreaker)
-            if ($recursiveBreaker -gt 1000) {
+            if ($recursiveBreaker -gt 1000)
+            {
                 throw "nothing real was found"
             }
 
             [ParseResult] $res = $this.ParseProperty()
             $prop = $res.Ast
 
-            if ($prop) {
+            if ($prop)
+            {
                 $obj.Add($prop)
             }
         }
@@ -952,7 +1161,8 @@ class Parser {
         return $obj
     }
 
-    hidden [JsonObject] ParseJsonObject() {
+    hidden [JsonObject] ParseJsonObject()
+    {
         Write-Verbose "Parsing a JSON obejct"
 
         $this.Accept([TokenType]::LCURLY)
@@ -964,9 +1174,11 @@ class Parser {
         return [JsonObject]::new($properties)
     }
 
-    [JsonObject] Parse([Scanner] $l) {
+    [JsonObject] Parse([Scanner] $l)
+    {
         Write-Verbose "Beginning to parse..."
-        try {
+        try
+        {
             $this.lexicalAnalyser = $l
             $this.currentToken = $this.lexicalAnalyser.Scan()
             [Parser]::recursiveDepthBreaker = 0
@@ -977,10 +1189,12 @@ class Parser {
             $this.Accept([TokenType]::EOT)
             Write-Debug "We have accepted teh end"
         }
-        catch {
+        catch
+        {
             throw $_
         }
-        finally {
+        finally
+        {
             $this.lexicalAnalyser.Cleanup()
             Write-Verbose "Parse completed..."
         }
@@ -989,57 +1203,71 @@ class Parser {
     }
 }
 
-class Transformer {
+class Transformer
+{
     hidden [PSCustomObject] $Obj
     hidden [int] $IndentStep
 
     hidden [string] $CurrentPayload
     hidden [int] $CurrentIndent
 
-    Transformer([PSCustomObject] $psObject, [int] $indentSpaces) {
+    Transformer([PSCustomObject] $psObject, [int] $indentSpaces)
+    {
         $this.Obj = $psObject
         $this.IndentStep = $indentSpaces
         $this.CurrentIndent = 0
         $this.CurrentPayload = ""
     }
 
-    hidden [string] Indent() {
+    hidden [string] Indent()
+    {
         return (' ' * $this.CurrentIndent)
     }
 
-    hidden [void] EncodeProperty([PropertyListObject] $property) {
+    hidden [void] EncodeProperty([PropertyListObject] $property)
+    {
         $this.CurrentPayload += $this.Indent() + '"' + $property.PropertyName.Spelling.Replace('\', '\\') + '": [' + [System.Environment]::NewLine
         $this.CurrentIndent += $this.IndentStep
         
         $last = $property.PropertyValues[$property.PropertyValues.Count - 1]
-        foreach ($p in $property.PropertyValues) {
+        foreach ($p in $property.PropertyValues)
+        {
             $this.CurrentPayload += $this.Indent()
-            switch ($p) {
-                IntegerLiteral {
+            switch ($p)
+            {
+                IntegerLiteral
+                {
                     $this.CurrentPayload += ([int]$p.Spelling).ToString()
                 }
-                DoubleLiteral {
+                DoubleLiteral
+                {
                     $value = (([double]$p.Spelling).ToString("0.0", [System.Globalization.CultureInfo]::InvariantCulture))
                     $this.CurrentPayload += $value
                 }
-                StringLiteral {
+                StringLiteral
+                {
                     $this.CurrentPayload += '"' + $p.Spelling.Replace('\', '\\') + '"'
                 }
-                BoolLiteral {
+                BoolLiteral
+                {
                     $this.CurrentPayload += $p.Spelling.ToLower()
                 }
-                NullLiteral {
+                NullLiteral
+                {
                     $this.CurrentPayload += $p.Spelling.ToLower()
                 }
-                JsonObject {
+                JsonObject
+                {
                     $this.EncodeJsonObject($p)
                 }
-                default {
+                default
+                {
                     Write-Debug ("What are you? " + ($p.GetType()))
                 }
             }
 
-            if (-not $p.Equals($last)) {
+            if (-not $p.Equals($last))
+            {
                 $this.CurrentPayload += ','
             }
             $this.CurrentPayload += [System.Environment]::NewLine
@@ -1049,44 +1277,56 @@ class Transformer {
         $this.CurrentPayload += $this.Indent() + "]"
     }
     
-    hidden [void] EncodeProperty([PropertyObject] $property) {
+    hidden [void] EncodeProperty([PropertyObject] $property)
+    {
         $this.CurrentPayload += $this.Indent() + '"' + $property.PropertyName.Spelling.Replace('\', '\\') + '": '
         
-        switch ($property.PropertyValue) {
-            IntegerLiteral {
+        switch ($property.PropertyValue)
+        {
+            IntegerLiteral
+            {
                 $this.CurrentPayload += ([int]$property.PropertyValue.Spelling).ToString()
             }
-            DoubleLiteral {
+            DoubleLiteral
+            {
                 $value = (([double]$property.PropertyValue.Spelling).ToString("0.0", [System.Globalization.CultureInfo]::InvariantCulture))
                 $this.CurrentPayload += $value
             }
-            StringLiteral {
+            StringLiteral
+            {
                 $this.CurrentPayload += '"' + ($property.PropertyValue.Spelling.Replace('\', '\\')) + '"'
             }
-            BoolLiteral {
+            BoolLiteral
+            {
                 $this.CurrentPayload += $property.PropertyValue.Spelling.ToLower()
             }
-            NullLiteral {
+            NullLiteral
+            {
                 $this.CurrentPayload += $property.PropertyValue.Spelling.ToLower()
             }
-            JsonObject {
+            JsonObject
+            {
                 $this.EncodeJsonObject($property.PropertyValue)
             }
-            default {
+            default
+            {
                 Write-Debug("What are you? " + ($property.PropertyValue.GetType()))
             }
         }
     }
 
-    hidden [void] EncodeJsonObject([JsonObject] $obj) {
+    hidden [void] EncodeJsonObject([JsonObject] $obj)
+    {
         $this.CurrentPayload += "{" + [System.Environment]::NewLine
 
         $this.CurrentIndent += $this.IndentStep
         $last = $obj.Properties[$obj.Properties.Count - 1]
 
-        foreach ($p in $obj.Properties) {
+        foreach ($p in $obj.Properties)
+        {
             $this.EncodeProperty($p)
-            if (-not $p.Equals($last)) {
+            if (-not $p.Equals($last))
+            {
                 $this.CurrentPayload += ","
             }
             $this.CurrentPayload += [System.Environment]::NewLine
@@ -1096,7 +1336,8 @@ class Transformer {
         $this.CurrentPayload += $this.Indent() + "}"
     }
 
-    [string] Encode() {
+    [string] Encode()
+    {
         $json = $this.Transform()
         
         $this.EncodeJsonObject($json)
@@ -1105,20 +1346,25 @@ class Transformer {
         return $this.CurrentPayload
     }
 
-    [JsonObject] Transform() {
+    [JsonObject] Transform()
+    {
         return $this.TransforJsonObject($this.Obj)
     }
 
-    hidden [JsonObject] TransforJsonObject([PSCustomObject] $obj) {
+    hidden [JsonObject] TransforJsonObject([PSCustomObject] $obj)
+    {
         $jsonObject = [JsonObject]::new(@())
-        foreach ($p in $obj.psobject.properties) {
+        foreach ($p in $obj.psobject.properties)
+        {
             $propertyName = $p.Name
             write-Verbose  "-$(($obj.($p.Name)) -eq $null)-"
-            if (($obj.($p.Name)) -ne $null) {
+            if (($obj.($p.Name)) -ne $null)
+            {
                 $propertyType = (($obj.($p.Name))).GetType().Name
                 $propertyValue = (($obj.($p.Name)))
             }
-            else {
+            else
+            {
                 $propertyType = "nullable"
                 $propertyValue = "null"
             }
@@ -1128,17 +1374,24 @@ class Transformer {
         return $jsonObject
     }
 
-    hidden [AST] TransformProperty([string] $name, [string] $type, $object) {
-        switch ($type) {
-            "ArrayList" {
+    hidden [AST] TransformProperty([string] $name, [string] $type, $object)
+    {
+        switch ($type)
+        {
+            "ArrayList"
+            {
                 [System.Collections.Generic.List[AST]] $asts = @()
-                foreach ($e in $object) {
+                foreach ($e in $object)
+                {
                     $eType = $e.GetType()
-                    switch ($eType) {
-                        "ArrayList" {
+                    switch ($eType)
+                    {
+                        "ArrayList"
+                        {
                             throw "NOT YET IMPLEMENTED!"
                         }
-                        default {
+                        default
+                        {
                             $asts.Add($this.TransformAST($eType, $e))
                         }
                     }
@@ -1146,7 +1399,8 @@ class Transformer {
 
                 return [PropertyListObject]::new($name, $asts)
             }
-            default {
+            default
+            {
                 $ast = $this.TransformAST($type, $object)
                 return [PropertyObject]::new($name, $ast)
             }
@@ -1154,34 +1408,45 @@ class Transformer {
         throw "Nothing to transform!"
     }
 
-    hidden [AST] TransformAST([string] $type, $object) {
-        switch -Regex ($type) {
-            "([D|d]ouble)" {
+    hidden [AST] TransformAST([string] $type, $object)
+    {
+        switch -Regex ($type)
+        {
+            "([D|d]ouble)"
+            {
                 return [DoubleLiteral]::new($object.ToString())
             }
-            "((I|i)nt($|32$))" {
+            "((I|i)nt($|32$))"
+            {
                 return [IntegerLiteral]::new($object.ToString())
             }
-            "([S|s]tring)" {
+            "([S|s]tring)"
+            {
                 return [StringLiteral]::new($object)
             }
-            "([B|b]ool((ean$)|($)))" {
+            "([B|b]ool((ean$)|($)))"
+            {
                 return [BoolLiteral]::new($object.ToString())
             }
-            "nullable" {
+            "nullable"
+            {
                 return [NullLiteral]::new($object.ToString())
             }
-            "ArrayList" {
-                foreach ($e in $object) {
+            "ArrayList"
+            {
+                foreach ($e in $object)
+                {
                     Write-Host ("hey! " + $e.GetType())
                 }
 
                 throw "here"
             }
-            "PSCustomObject" {
+            "PSCustomObject"
+            {
                 return $this.TransforJsonObject($object)
             }
-            default {
+            default
+            {
                 write-host ("hey! " + $type)
             }
         }
@@ -1191,44 +1456,54 @@ class Transformer {
 #endregion
 
 #region Private functions
-function Step-Property([PSCustomObject] $obj, [System.Collections.Queue] $elements, [bool] $addToLast) {
+function Step-Property([PSCustomObject] $obj, [System.Collections.Queue] $elements, [bool] $addToLast)
+{
     $newObj = New-Object psobject
 
     $currentProperty = $elements.Dequeue()
     $movingProperty = $null
 
-    if ($elements.Count -eq 0) {
+    if ($elements.Count -eq 0)
+    {
         Write-Verbose "Looking for the property to move"
         $movingProperty = $obj.psobject.properties | Where-Object { $_.Name.ToLower() -eq $currentProperty.ToLower() }
 
-        if ($null -eq $movingProperty) {
+        if ($null -eq $movingProperty)
+        {
             throw "'$currentProperty' cannot be located!"
         }
     }
 
-    if (-not $addToLast -and $movingProperty) {
+    if (-not $addToLast -and $movingProperty)
+    {
         Write-Verbose "Adding property as the last property"
         $newObj.psobject.properties.Add($movingProperty)
     }
 
-    foreach ($p in $obj.psobject.properties) {
-        if ($movingProperty -ne $p) {
-            if ($p.Name.ToLower() -eq $currentProperty.ToLower()) {
+    foreach ($p in $obj.psobject.properties)
+    {
+        if ($movingProperty -ne $p)
+        {
+            if ($p.Name.ToLower() -eq $currentProperty.ToLower())
+            {
                 Write-Verbose "Next property step has been located ($currentProperty)..."
-                if ($p.TypeNameOfValue -ne "System.Management.Automation.PSCustomObject") {
+                if ($p.TypeNameOfValue -ne "System.Management.Automation.PSCustomObject")
+                {
                     throw "'$currentProperty' is not a PSCustomObject"
                 }
 
                 $value = Step-Property ($p.Value) -elements $elements -addToLast $addToLast
                 $newObj | Add-Member -MemberType NoteProperty -Name ($p.Name) -Value $value
             }
-            else {
+            else
+            {
                 $newObj.psobject.properties.Add($p)
             }
         }
     }
 
-    if ($movingProperty -and $addToLast) {
+    if ($movingProperty -and $addToLast)
+    {
         Write-Verbose "Adding property as the last property"
         $newObj.psobject.properties.Add($movingProperty)
     }
@@ -1273,7 +1548,8 @@ function Step-Property([PSCustomObject] $obj, [System.Collections.Queue] $elemen
    # Get Powershell based Json Object from a string via pipeline
    PS > "{ `"aProperty`": true }" | Switch-JsonToObject
 #>
-function Switch-JsonToObject {
+function Switch-JsonToObject
+{
     [CmdletBinding()]
     param
     (
@@ -1285,19 +1561,23 @@ function Switch-JsonToObject {
         [string] $Content = $null
     )
 
-    if ($Path) {
+    if ($Path)
+    {
         # Resolve relative paths, ~, etc.
-        try {
+        try
+        {
             $resolvedPath = Resolve-Path -Path $Path -ErrorAction Stop
         }
-        catch {
+        catch
+        {
             Throw "The path '$Path' could not be resolved. $_"
         }
 
         # Convert from PathInfo to plain string
         $resolvedPath = $resolvedPath.ProviderPath
         # Optionally verify it's a file (not directory)
-        if (-not (Test-Path $resolvedPath -PathType Leaf)) {
+        if (-not (Test-Path $resolvedPath -PathType Leaf))
+        {
             Throw "The path '$resolvedPath' does not point to a validfile."
         }
     }
@@ -1345,7 +1625,8 @@ function Switch-JsonToObject {
        "aProperty": true
    }
 #>
-function Switch-ObjectToJson {
+function Switch-ObjectToJson
+{
     [CmdletBinding()]
     param
     (
@@ -1356,7 +1637,8 @@ function Switch-ObjectToJson {
         [int] $Indent = 2
     )
 
-    if (-not $PSObject) {
+    if (-not $PSObject)
+    {
         throw "Cannot call function without a PSObject to export to JSON text"
     }
 
@@ -1420,7 +1702,8 @@ function Switch-ObjectToJson {
      }
    }
 #>
-function Move-PropertyToFirst {
+function Move-PropertyToFirst
+{
     [CmdletBinding()]
     param
     (
@@ -1432,11 +1715,13 @@ function Move-PropertyToFirst {
         [string]
         $Path
     )
-    if (-not $PSObject) {
+    if (-not $PSObject)
+    {
         throw "Cannot call function without a PSObject to perform move action to"
     }
 
-    if (-not $Path) {
+    if (-not $Path)
+    {
         throw "Cannot call function without a Path to a target property"
     }
 
@@ -1503,7 +1788,8 @@ function Move-PropertyToFirst {
      }
    }
 #>
-function Move-PropertyToLast {
+function Move-PropertyToLast
+{
     [CmdletBinding()]
     param 
     (
@@ -1515,11 +1801,13 @@ function Move-PropertyToLast {
         [string]
         $Path
     )
-    if (-not $PSObject) {
+    if (-not $PSObject)
+    {
         throw "Cannot call function without a PSObject to perform move action to"
     }
 
-    if (-not $Path) {
+    if (-not $Path)
+    {
         throw "Cannot call function without a Path to a target property"
     }
     
