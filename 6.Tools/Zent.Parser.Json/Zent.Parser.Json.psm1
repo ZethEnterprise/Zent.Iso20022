@@ -1,4 +1,17 @@
-﻿Write-Host "Loading Zent.Parser.Json module..." -NoNewline
+﻿function Get-ModuleName
+{
+    $module = $MyInvocation.MyCommand.Module
+    if ($module)
+    {
+        return $module.Name
+    }
+    else
+    {
+        return $null
+    }
+}
+
+Write-Host "Loading $(Get-ModuleName) module..." -NoNewline
 #region basic classes
 enum TokenType
 {

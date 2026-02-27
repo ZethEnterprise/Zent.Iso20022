@@ -1,7 +1,19 @@
+function Get-ModuleName
+{
+    $module = $MyInvocation.MyCommand.Module
+    if ($module)
+    {
+        return $module.Name
+    }
+    else
+    {
+        return $null
+    }
+}
+Write-Host "Loading $(Get-ModuleName) module..." -NoNewline
 
-
-
-
+$script:appDataPath = Join-Path $env:LOCALAPPDATA (Get-ModuleName)
+$script:ibanDataFile = Join-Path $script:appDataPath "IbanData.json"
 
 function ConvertFrom-Table
 {
@@ -63,7 +75,7 @@ function ConvertFrom-Table
     }
 }
 
-function Get-encoding
+function Get-Encoding
 {
     [CmdletBinding()]
     param
@@ -290,7 +302,7 @@ function New-DummyPayload
     }
 }
 
-function Nano
+function Start-ShNano
 {
     [CmdletBinding()]
     param
@@ -328,8 +340,9 @@ function Nano
 
     sh -c "nano '$resolvedPath'"
 }
+Set-Alias -Name Nano -Value Start-ShNano
 
-function Vim
+function Start-ShVim
 {
     [CmdletBinding()]
     param
@@ -367,6 +380,7 @@ function Vim
 
     sh -c "vim '$resolvedPath'"
 }
+Set-Alias -Name Vim -Value Start-ShVim
 
 function ConvertFrom-Base36Int
 {
@@ -505,22 +519,6 @@ function ConvertFrom-LEInt
     return [System.Text.Encoding]::ASCII.GetString($bytes)
 }
 
-function Get-ModuleName
-{
-    $module = $MyInvocation.MyCommand.Module
-    if ($module)
-    {
-        return $module.Name
-    }
-    else
-    {
-        return $null
-    }
-}
-
-$script:appDataPath = Join-Path $env:LOCALAPPDATA (Get-ModuleName)
-$script:ibanDataFile = Join-Path $script:appDataPath "IbanData.json"
-
 function Update-IbanData
 {
     [CmdletBinding()]
@@ -622,7 +620,7 @@ function Test-Iban
         {
             return [PSCustomObject]@{
                 Success          = $false
-                ErrorDescription = "No likelyhood for this to be intended as an IBAN"
+                ErrorDescription = "There is no likelyhood for this to be intended as an IBAN"
             }
         }
         
@@ -816,3 +814,4 @@ function Search-AhoCorasick
         }
     }
 }
+Write-Host "Loaded!" -ForegroundColor Green 
