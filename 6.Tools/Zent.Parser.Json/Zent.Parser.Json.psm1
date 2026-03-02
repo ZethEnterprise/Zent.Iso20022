@@ -744,7 +744,7 @@ class Scanner
             }
             default
             {
-                Write-Debut "We are at an end '$($this.currentChar)'."
+                Write-Debug "We are at an end '$($this.currentChar)'."
 
                 if ($this.currentChar -eq ([SourceFile]::EOT))
                 {
@@ -1200,7 +1200,7 @@ class Parser
 
             Write-Debug "This should be the last of the content"
             $this.Accept([TokenType]::EOT)
-            Write-Debug "We have accepted teh end"
+            Write-Debug "We have accepted the end"
         }
         catch
         {

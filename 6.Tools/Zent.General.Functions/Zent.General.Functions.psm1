@@ -569,7 +569,7 @@ function Update-IbanData
     Write-Host "Storing IBAN data in module..." -ForegroundColor Cyan
     $script:IbanData = [PSCustomObject]@{
         DataUpdatedOn  = $lastUpdated.ToString('O')
-        DataFecthedOn  = [datetime]::UtcNow.ToString('O')
+        DataFetchedOn  = [datetime]::UtcNow.ToString('O')
         IbanStructures = $ibanList
     } | Switch-ObjectToJson
 
