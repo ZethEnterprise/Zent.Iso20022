@@ -62,7 +62,10 @@ function Switch-ObjectToJsonFast
                 $first = $true
                 foreach ($k in $value.Keys)
                 {
-                    if (-not $first) { Write(',') }
+                    if (-not $first)
+                    { 
+                        Write(',') 
+                    }
                     $first = $false
                     Write-String $k
                     Write(':')
@@ -76,7 +79,10 @@ function Switch-ObjectToJsonFast
                 $first = $true
                 foreach ($item in $value)
                 {
-                    if (-not $first) { Write(',') }
+                    if (-not $first)
+                    { 
+                        Write(',') 
+                    }
                     $first = $false
                     Write-Value $item
                 }
@@ -88,7 +94,10 @@ function Switch-ObjectToJsonFast
                 $first = $true
                 foreach ($item in $value)
                 {
-                    if (-not $first) { Write(',') }
+                    if (-not $first)
+                    { 
+                        Write(',') 
+                    }
                     $first = $false
                     Write-Value $item
                 }
@@ -112,8 +121,14 @@ function Switch-ObjectToJsonFast
             'Decimal' { Write($value.ToString([System.Globalization.CultureInfo]::InvariantCulture)) }
             default
             {
-                if ($value -eq $null) { Write('null') }
-                else { Write-String ($value.ToString()) }
+                if ($null -eq $value)
+                { 
+                    Write('null') 
+                }
+                else
+                { 
+                    Write-String ($value.ToString()) 
+                }
             }
         }
     }
@@ -137,12 +152,21 @@ function Switch-ObjectToJsonFast
     try
     {
         Write-Value $InputObject
-        if ($closeWriter) { $script:writer.Flush() }
-        else { return $script:sb.ToString() }
+        if ($closeWriter)
+        { 
+            $script:writer.Flush() 
+        }
+        else
+        { 
+            return $script:sb.ToString() 
+        }
     }
     finally
     {
-        if ($closeWriter -and $script:writer) { $script:writer.Close() }
+        if ($closeWriter -and $script:writer)
+        { 
+            $script:writer.Close() 
+        }
     }
 }
 
@@ -155,19 +179,27 @@ function Switch-JsonToObjectFast
     )
 
     # ----------------------------
-    # Character Source Abstraction
+    # Parser scope variables
     # ----------------------------
+    $script:ReadChar = $null
+    $script:PeekChar = $null
+    $script:current = $null
+    $script:reader = $null
+    $script:buffer = $null
+    $script:index = -1
+    $script:length = 0
 
+    # ----------------------------
+    # Initialize Source
+    # ----------------------------
     function Initialize-StringSource($text)
     {
-
         $script:buffer = $text
         $script:index = -1
         $script:length = $text.Length
         $script:current = $null
 
-        function Read-Char
-        {
+        $script:ReadChar = {
             $script:index++
             if ($script:index -ge $script:length)
             { 
@@ -179,8 +211,7 @@ function Switch-JsonToObjectFast
             }
         }
 
-        function Peek-Char
-        {
+        $script:PeekChar = {
             if ($script:index + 1 -ge $script:length)
             { 
                 return $null 
@@ -191,20 +222,17 @@ function Switch-JsonToObjectFast
 
     function Initialize-StreamSource($path)
     {
-
         $script:reader = [System.IO.StreamReader]::new(
             $path,
             [System.Text.Encoding]::UTF8,
             $true
         )
-
         $script:current = $null
 
-        function Read-Char
-        {
+        $script:ReadChar = {
             $v = $script:reader.Read()
             if ($v -lt 0)
-            {
+            { 
                 $script:current = $null 
             }
             else
@@ -213,8 +241,7 @@ function Switch-JsonToObjectFast
             }
         }
 
-        function Peek-Char
-        {
+        $script:PeekChar = {
             $v = $script:reader.Peek()
             if ($v -lt 0)
             {
@@ -227,16 +254,19 @@ function Switch-JsonToObjectFast
     # ----------------------------
     # Core Helpers
     # ----------------------------
-
     function Skip-Whitespace
     {
-        while ($null -ne $script:current)
+        while ($script:current -ne $null)
         {
             switch ($script:current)
             {
-                ' ' {} "`t" {} "`n" {} "`r" {} default { return }
+                ' ' {} 
+                "`t" {} 
+                "`n" {} 
+                "`r" {}
+                default { return }
             }
-            Read-Char
+            & $script:ReadChar
         }
     }
 
@@ -245,17 +275,16 @@ function Switch-JsonToObjectFast
         foreach ($c in $expected.ToCharArray())
         {
             if ($script:current -ne $c)
-            {
+            { 
                 throw "Invalid JSON literal" 
             }
-            Read-Char
+            & $script:ReadChar
         }
     }
 
     # ----------------------------
     # Parser
     # ----------------------------
-
     function Parse-Value
     {
         Skip-Whitespace
@@ -273,12 +302,12 @@ function Switch-JsonToObjectFast
 
     function Parse-Object
     {
-        Read-Char   # skip {
+        & $script:ReadChar  # skip {
         $obj = @{}
         Skip-Whitespace
         if ($script:current -eq '}')
-        {
-            Read-Char
+        { 
+            & $script:ReadChar 
             return $obj 
         }
         while ($true)
@@ -291,35 +320,35 @@ function Switch-JsonToObjectFast
             $key = Parse-String
             Skip-Whitespace
             if ($script:current -ne ':')
-            { 
+            {
                 throw "Expected ':' after property name" 
             }
-            Read-Char
+            & $script:ReadChar
             $value = Parse-Value
             $obj[$key] = $value
             Skip-Whitespace
             if ($script:current -eq '}')
-            { 
-                Read-Char
-                break
+            {
+                & $script:ReadChar
+                break 
             }
             if ($script:current -ne ',')
             { 
                 throw "Expected ',' or '}'" 
             }
-            Read-Char
+            & $script:ReadChar
         }
         return $obj
     }
 
     function Parse-Array
     {
-        Read-Char   # skip [
+        & $script:ReadChar  # skip [
         $list = [System.Collections.Generic.List[object]]::new()
         Skip-Whitespace
-        if ($script:current -eq ']') 
+        if ($script:current -eq ']')
         { 
-            Read-Char
+            & $script:ReadChar 
             return $list 
         }
         while ($true)
@@ -327,35 +356,43 @@ function Switch-JsonToObjectFast
             $value = Parse-Value
             $list.Add($value)
             Skip-Whitespace
-            if ($script:current -eq ']') { Read-Char; break }
-            if ($script:current -ne ',') { throw "Expected ',' or ']'" }
-            Read-Char
+            if ($script:current -eq ']')
+            { 
+                & $script:ReadChar
+                break 
+            }
+            if ($script:current -ne ',')
+            { 
+                throw "Expected ',' or ']'" 
+            }
+            & $script:ReadChar
         }
         return $list
     }
 
     function Parse-String
     {
-        Read-Char   # skip opening quote
+        & $script:ReadChar  # skip opening quote
         $sb = [System.Text.StringBuilder]::new()
         while ($null -ne $script:current)
         {
             if ($script:current -eq '"')
             {
-                Read-Char
+                & $script:ReadChar
                 $str = $sb.ToString()
-                # ------------------------
-                # Attempt DateTime conversion
-                # ------------------------
-                if ([datetime]::TryParse($str, [ref]$dt))
+                # Attempt DateTime conversion safely
+                try
                 {
-                    return $dt
+                    return [datetime]::Parse($str)
                 }
-                return $str
+                catch
+                {
+                    return $str
+                }
             }
             if ($script:current -eq '\')
             {
-                Read-Char
+                & $script:ReadChar
                 switch ($script:current)
                 {
                     '"' { $sb.Append('"') | Out-Null }
@@ -368,11 +405,11 @@ function Switch-JsonToObjectFast
                     'f' { $sb.Append([char]12) | Out-Null }
                     default { throw "Invalid escape sequence" }
                 }
-                Read-Char
+                & $script:ReadChar
                 continue
             }
             $sb.Append($script:current) | Out-Null
-            Read-Char
+            & $script:ReadChar
         }
         throw "Unterminated string"
     }
@@ -384,23 +421,23 @@ function Switch-JsonToObjectFast
         {
             if ("0123456789+-.eE".IndexOf($script:current) -eq -1) { break }
             $sb.Append($script:current) | Out-Null
-            Read-Char
+            & $script:ReadChar
         }
         return [double]::Parse($sb.ToString(), [System.Globalization.CultureInfo]::InvariantCulture)
     }
 
     # ----------------------------
-    # Initialize Source and Parse
+    # Fail-safe initialization and parse
     # ----------------------------
-
     try
     {
-        if ($Json) 
+        if ($Json)
         { 
-            Initialize-StringSource $Json
+            Initialize-StringSource $Json 
         }
-        elseif ($Path) 
-        {
+        elseif ($Path)
+        { 
+    
             # Resolve relative paths, ~, etc.
             try
             {
@@ -420,24 +457,20 @@ function Switch-JsonToObjectFast
             }
 
             Initialize-StreamSource $resolvedPath 
+            Initialize-StreamSource $resolvedPath 
         }
-        else 
-        {
-            throw "Provide either -Json or -Path"
-        }
+        else { throw "Provide either -Json or -Path" }
 
-        Read-Char
+        & $script:ReadChar
         $result = Parse-Value
     }
     finally
     {
-        if ($script:reader) 
+        if ($script:reader)
         { 
-            $script:reader.Close()
+            $script:reader.Close() 
         }
     }
-
-    return $result
 }
 
 <#
